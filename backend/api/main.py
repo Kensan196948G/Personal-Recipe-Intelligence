@@ -6,12 +6,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.routers import (
-  ocr_router,
-  recipes_router,
-  scraper_router,
-  search_router,
-  tags_router,
-  translation_router,
+    ocr_router,
+    recipes_router,
+    scraper_router,
+    search_router,
+    tags_router,
+    translation_router,
 )
 
 app = FastAPI(

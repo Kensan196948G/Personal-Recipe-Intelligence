@@ -19,280 +19,286 @@ from typing import Dict, List, Optional, Set
 
 
 class AutoTagger:
-  """
-  Auto-tagging service for recipe analysis.
-
-  Analyzes recipe titles, descriptions, and ingredients to suggest
-  relevant tags based on keyword matching rules.
-  """
-
-  def __init__(self, rules_path: Optional[str] = None):
     """
-    Initialize the AutoTagger with tag rules.
+    Auto-tagging service for recipe analysis.
 
-    Args:
-      rules_path: Path to tag_rules.json file. If None, uses default path.
+    Analyzes recipe titles, descriptions, and ingredients to suggest
+    relevant tags based on keyword matching rules.
     """
-    if rules_path is None:
-      # Default path relative to project root
-      project_root = Path(__file__).parent.parent.parent
-      rules_path = project_root / "config" / "tag_rules.json"
 
-    self.rules_path = Path(rules_path)
-    self.rules: Dict[str, Dict[str, List[str]]] = {}
-    self._load_rules()
+    def __init__(self, rules_path: Optional[str] = None):
+        """
+        Initialize the AutoTagger with tag rules.
 
-  def _load_rules(self) -> None:
-    """Load tag rules from JSON configuration file."""
-    try:
-      with open(self.rules_path, "r", encoding="utf-8") as f:
-        self.rules = json.load(f)
-    except FileNotFoundError:
-      raise FileNotFoundError(
-        f"Tag rules file not found at {self.rules_path}. "
-        "Please ensure config/tag_rules.json exists."
-      )
-    except json.JSONDecodeError as e:
-      raise ValueError(f"Invalid JSON in tag rules file: {e}")
+        Args:
+          rules_path: Path to tag_rules.json file. If None, uses default path.
+        """
+        if rules_path is None:
+            # Default path relative to project root
+            project_root = Path(__file__).parent.parent.parent
+            rules_path = project_root / "config" / "tag_rules.json"
 
-  def _normalize_text(self, text: str) -> str:
-    """
-    Normalize text for keyword matching.
+        self.rules_path = Path(rules_path)
+        self.rules: Dict[str, Dict[str, List[str]]] = {}
+        self._load_rules()
 
-    Args:
-      text: Input text to normalize
+    def _load_rules(self) -> None:
+        """Load tag rules from JSON configuration file."""
+        try:
+            with open(self.rules_path, "r", encoding="utf-8") as f:
+                self.rules = json.load(f)
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                f"Tag rules file not found at {self.rules_path}. "
+                "Please ensure config/tag_rules.json exists."
+            )
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON in tag rules file: {e}")
 
-    Returns:
-      Normalized text (lowercase, whitespace normalized)
-    """
-    if not text:
-      return ""
+    def _normalize_text(self, text: str) -> str:
+        """
+        Normalize text for keyword matching.
 
-    # Convert to lowercase (for English)
-    text = text.lower()
+        Args:
+          text: Input text to normalize
 
-    # Normalize whitespace
-    text = re.sub(r"\s+", " ", text).strip()
+        Returns:
+          Normalized text (lowercase, whitespace normalized)
+        """
+        if not text:
+            return ""
 
-    return text
+        # Convert to lowercase (for English)
+        text = text.lower()
 
-  def _match_keywords(
-    self,
-    text: str,
-    keywords: List[str],
-    case_sensitive: bool = False
-  ) -> bool:
-    """
-    Check if any keyword matches in the text.
+        # Normalize whitespace
+        text = re.sub(r"\s+", " ", text).strip()
 
-    Args:
-      text: Text to search in
-      keywords: List of keywords to match
-      case_sensitive: Whether to perform case-sensitive matching
+        return text
 
-    Returns:
-      True if any keyword found, False otherwise
-    """
-    if not text or not keywords:
-      return False
+    def _match_keywords(
+        self, text: str, keywords: List[str], case_sensitive: bool = False
+    ) -> bool:
+        """
+        Check if any keyword matches in the text.
 
-    search_text = text if case_sensitive else self._normalize_text(text)
+        Args:
+          text: Text to search in
+          keywords: List of keywords to match
+          case_sensitive: Whether to perform case-sensitive matching
 
-    for keyword in keywords:
-      search_keyword = keyword if case_sensitive else self._normalize_text(keyword)
-      if search_keyword in search_text:
-        return True
+        Returns:
+          True if any keyword found, False otherwise
+        """
+        if not text or not keywords:
+            return False
 
-    return False
+        search_text = text if case_sensitive else self._normalize_text(text)
 
-  def suggest_tags(
-    self,
-    title: str = "",
-    description: str = "",
-    ingredients: Optional[List[str]] = None,
-    instructions: Optional[List[str]] = None,
-    max_tags: Optional[int] = None
-  ) -> List[str]:
-    """
-    Suggest tags for a recipe based on its content.
+        for keyword in keywords:
+            search_keyword = (
+                keyword if case_sensitive else self._normalize_text(keyword)
+            )
+            if search_keyword in search_text:
+                return True
 
-    Args:
-      title: Recipe title
-      description: Recipe description
-      ingredients: List of ingredient names or full ingredient strings
-      instructions: List of cooking instructions
-      max_tags: Maximum number of tags to return (None = no limit)
+        return False
 
-    Returns:
-      List of suggested tag names, sorted by relevance
-    """
-    suggested_tags: Set[str] = set()
+    def suggest_tags(
+        self,
+        title: str = "",
+        description: str = "",
+        ingredients: Optional[List[str]] = None,
+        instructions: Optional[List[str]] = None,
+        max_tags: Optional[int] = None,
+    ) -> List[str]:
+        """
+        Suggest tags for a recipe based on its content.
 
-    # Combine all text for analysis
-    all_text = " ".join(filter(None, [
-      title,
-      description,
-      " ".join(ingredients or []),
-      " ".join(instructions or [])
-    ]))
+        Args:
+          title: Recipe title
+          description: Recipe description
+          ingredients: List of ingredient names or full ingredient strings
+          instructions: List of cooking instructions
+          max_tags: Maximum number of tags to return (None = no limit)
 
-    if not all_text.strip():
-      return []
+        Returns:
+          List of suggested tag names, sorted by relevance
+        """
+        suggested_tags: Set[str] = set()
 
-    # Analyze each category in the rules
-    for category, tag_mapping in self.rules.items():
-      for tag_name, keywords in tag_mapping.items():
-        if self._match_keywords(all_text, keywords):
-          suggested_tags.add(tag_name)
+        # Combine all text for analysis
+        all_text = " ".join(
+            filter(
+                None,
+                [
+                    title,
+                    description,
+                    " ".join(ingredients or []),
+                    " ".join(instructions or []),
+                ],
+            )
+        )
 
-    # Convert to sorted list for consistent output
-    result = sorted(suggested_tags)
+        if not all_text.strip():
+            return []
 
-    # Apply max_tags limit if specified
-    if max_tags is not None and max_tags > 0:
-      result = result[:max_tags]
+        # Analyze each category in the rules
+        for category, tag_mapping in self.rules.items():
+            for tag_name, keywords in tag_mapping.items():
+                if self._match_keywords(all_text, keywords):
+                    suggested_tags.add(tag_name)
 
-    return result
+        # Convert to sorted list for consistent output
+        result = sorted(suggested_tags)
 
-  def suggest_tags_by_category(
-    self,
-    title: str = "",
-    description: str = "",
-    ingredients: Optional[List[str]] = None,
-    instructions: Optional[List[str]] = None
-  ) -> Dict[str, List[str]]:
-    """
-    Suggest tags grouped by category.
+        # Apply max_tags limit if specified
+        if max_tags is not None and max_tags > 0:
+            result = result[:max_tags]
 
-    Args:
-      title: Recipe title
-      description: Recipe description
-      ingredients: List of ingredient names or full ingredient strings
-      instructions: List of cooking instructions
+        return result
 
-    Returns:
-      Dictionary mapping category names to lists of suggested tags
-    """
-    categorized_tags: Dict[str, List[str]] = {}
+    def suggest_tags_by_category(
+        self,
+        title: str = "",
+        description: str = "",
+        ingredients: Optional[List[str]] = None,
+        instructions: Optional[List[str]] = None,
+    ) -> Dict[str, List[str]]:
+        """
+        Suggest tags grouped by category.
 
-    # Combine all text for analysis
-    all_text = " ".join(filter(None, [
-      title,
-      description,
-      " ".join(ingredients or []),
-      " ".join(instructions or [])
-    ]))
+        Args:
+          title: Recipe title
+          description: Recipe description
+          ingredients: List of ingredient names or full ingredient strings
+          instructions: List of cooking instructions
 
-    if not all_text.strip():
-      return categorized_tags
+        Returns:
+          Dictionary mapping category names to lists of suggested tags
+        """
+        categorized_tags: Dict[str, List[str]] = {}
 
-    # Analyze each category
-    for category, tag_mapping in self.rules.items():
-      category_tags = []
+        # Combine all text for analysis
+        all_text = " ".join(
+            filter(
+                None,
+                [
+                    title,
+                    description,
+                    " ".join(ingredients or []),
+                    " ".join(instructions or []),
+                ],
+            )
+        )
 
-      for tag_name, keywords in tag_mapping.items():
-        if self._match_keywords(all_text, keywords):
-          category_tags.append(tag_name)
+        if not all_text.strip():
+            return categorized_tags
 
-      if category_tags:
-        categorized_tags[category] = sorted(category_tags)
+        # Analyze each category
+        for category, tag_mapping in self.rules.items():
+            category_tags = []
 
-    return categorized_tags
+            for tag_name, keywords in tag_mapping.items():
+                if self._match_keywords(all_text, keywords):
+                    category_tags.append(tag_name)
 
-  def get_all_tags(self) -> List[str]:
-    """
-    Get all possible tags defined in the rules.
+            if category_tags:
+                categorized_tags[category] = sorted(category_tags)
 
-    Returns:
-      Sorted list of all tag names
-    """
-    all_tags = set()
+        return categorized_tags
 
-    for tag_mapping in self.rules.values():
-      all_tags.update(tag_mapping.keys())
+    def get_all_tags(self) -> List[str]:
+        """
+        Get all possible tags defined in the rules.
 
-    return sorted(all_tags)
+        Returns:
+          Sorted list of all tag names
+        """
+        all_tags = set()
 
-  def get_tags_by_category(self, category: str) -> List[str]:
-    """
-    Get all tags for a specific category.
+        for tag_mapping in self.rules.values():
+            all_tags.update(tag_mapping.keys())
 
-    Args:
-      category: Category name (e.g., 'cuisine_type', 'meal_type')
+        return sorted(all_tags)
 
-    Returns:
-      List of tag names in the category
-    """
-    if category not in self.rules:
-      return []
+    def get_tags_by_category(self, category: str) -> List[str]:
+        """
+        Get all tags for a specific category.
 
-    return sorted(self.rules[category].keys())
+        Args:
+          category: Category name (e.g., 'cuisine_type', 'meal_type')
 
-  def get_categories(self) -> List[str]:
-    """
-    Get all available tag categories.
+        Returns:
+          List of tag names in the category
+        """
+        if category not in self.rules:
+            return []
 
-    Returns:
-      List of category names
-    """
-    return sorted(self.rules.keys())
+        return sorted(self.rules[category].keys())
 
-  def add_custom_rule(
-    self,
-    category: str,
-    tag_name: str,
-    keywords: List[str]
-  ) -> None:
-    """
-    Add a custom tagging rule at runtime.
+    def get_categories(self) -> List[str]:
+        """
+        Get all available tag categories.
 
-    Args:
-      category: Category name
-      tag_name: Tag name to assign
-      keywords: List of keywords that trigger this tag
-    """
-    if category not in self.rules:
-      self.rules[category] = {}
+        Returns:
+          List of category names
+        """
+        return sorted(self.rules.keys())
 
-    self.rules[category][tag_name] = keywords
+    def add_custom_rule(
+        self, category: str, tag_name: str, keywords: List[str]
+    ) -> None:
+        """
+        Add a custom tagging rule at runtime.
 
-  def reload_rules(self) -> None:
-    """
-    Reload tag rules from the configuration file.
+        Args:
+          category: Category name
+          tag_name: Tag name to assign
+          keywords: List of keywords that trigger this tag
+        """
+        if category not in self.rules:
+            self.rules[category] = {}
 
-    Useful if the rules file has been updated externally.
-    """
-    self._load_rules()
+        self.rules[category][tag_name] = keywords
+
+    def reload_rules(self) -> None:
+        """
+        Reload tag rules from the configuration file.
+
+        Useful if the rules file has been updated externally.
+        """
+        self._load_rules()
 
 
 # Convenience function for quick tag suggestion
 def suggest_recipe_tags(
-  title: str = "",
-  description: str = "",
-  ingredients: Optional[List[str]] = None,
-  instructions: Optional[List[str]] = None,
-  max_tags: Optional[int] = None,
-  rules_path: Optional[str] = None
+    title: str = "",
+    description: str = "",
+    ingredients: Optional[List[str]] = None,
+    instructions: Optional[List[str]] = None,
+    max_tags: Optional[int] = None,
+    rules_path: Optional[str] = None,
 ) -> List[str]:
-  """
-  Quick function to suggest tags for a recipe.
+    """
+    Quick function to suggest tags for a recipe.
 
-  Args:
-    title: Recipe title
-    description: Recipe description
-    ingredients: List of ingredient names
-    instructions: List of cooking instructions
-    max_tags: Maximum number of tags to return
-    rules_path: Custom path to tag rules file
+    Args:
+      title: Recipe title
+      description: Recipe description
+      ingredients: List of ingredient names
+      instructions: List of cooking instructions
+      max_tags: Maximum number of tags to return
+      rules_path: Custom path to tag rules file
 
-  Returns:
-    List of suggested tag names
-  """
-  tagger = AutoTagger(rules_path=rules_path)
-  return tagger.suggest_tags(
-    title=title,
-    description=description,
-    ingredients=ingredients,
-    instructions=instructions,
-    max_tags=max_tags
-  )
+    Returns:
+      List of suggested tag names
+    """
+    tagger = AutoTagger(rules_path=rules_path)
+    return tagger.suggest_tags(
+        title=title,
+        description=description,
+        ingredients=ingredients,
+        instructions=instructions,
+        max_tags=max_tags,
+    )

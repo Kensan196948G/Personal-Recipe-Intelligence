@@ -12,7 +12,7 @@ from backend.ocr.parser import RecipeParser
 from backend.ocr.service import OCRService
 
 __all__ = [
-  "OCRExtractor",
-  "RecipeParser",
-  "OCRService",
+    "OCRExtractor",
+    "RecipeParser",
+    "OCRService",
 ]

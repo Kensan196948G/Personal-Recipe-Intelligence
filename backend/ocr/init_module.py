@@ -14,7 +14,7 @@ from .parser import RecipeParser
 from .service import OCRService
 
 __all__ = [
-  "OCRExtractor",
-  "RecipeParser",
-  "OCRService",
+    "OCRExtractor",
+    "RecipeParser",
+    "OCRService",
 ]
