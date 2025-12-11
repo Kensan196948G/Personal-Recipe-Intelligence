@@ -1,0 +1,155 @@
+# Google Actions Configuration
+# Actions on Google Conversational Actions 設定
+
+name: レシピアシスタント
+description: 料理レシピを音声で検索・操作できるアシスタント
+locale: ja-JP
+
+actions:
+  - name: actions.intent.MAIN
+    description: アプリ起動時のアクション
+    fulfillment:
+      conversationName: レシピアシスタント
+    queryPatterns:
+      - レシピアシスタント
+      - レシピを教えて
+      - 料理を作りたい
+
+conversations:
+  レシピアシスタント:
+    scenes:
+      - name: Start
+        intentEvents:
+          - handler:
+              webhookHandler: MainHandler
+            intent: actions.intent.MAIN
+
+        slots:
+          - name: query
+            required: false
+            type:
+              name: AMAZON.SearchQuery
+
+      - name: RecipeSearch
+        intentEvents:
+          - handler:
+              webhookHandler: SearchRecipeHandler
+            intent: SearchRecipe
+
+      - name: RecipeSteps
+        intentEvents:
+          - handler:
+              webhookHandler: GetStepsHandler
+            intent: GetRecipeSteps
+          - handler:
+              webhookHandler: NextStepHandler
+            intent: NextStep
+          - handler:
+              webhookHandler: PreviousStepHandler
+            intent: PreviousStep
+          - handler:
+              webhookHandler: RepeatStepHandler
+            intent: RepeatStep
+
+      - name: Ingredients
+        intentEvents:
+          - handler:
+              webhookHandler: GetIngredientsHandler
+            intent: GetIngredients
+
+      - name: Timer
+        intentEvents:
+          - handler:
+              webhookHandler: SetTimerHandler
+            intent: SetTimer
+
+types:
+  - name: Recipe
+    entities:
+      - display: カレー
+        synonyms:
+          - カレーライス
+          - チキンカレー
+          - ビーフカレー
+      - display: パスタ
+        synonyms:
+          - スパゲッティ
+          - パスタ料理
+      - display: ハンバーグ
+        synonyms:
+          - ハンバーグステーキ
+
+intents:
+  - name: SearchRecipe
+    trainingPhrases:
+      - $query のレシピ
+      - $query の作り方
+      - $query を作りたい
+      - $query のレシピを教えて
+    parameters:
+      - name: query
+        type: AMAZON.SearchQuery
+
+  - name: GetRecipeSteps
+    trainingPhrases:
+      - レシピを開始
+      - 作り方を教えて
+      - 手順を教えて
+
+  - name: NextStep
+    trainingPhrases:
+      - 次
+      - 次の手順
+      - 次へ
+
+  - name: PreviousStep
+    trainingPhrases:
+      - 前
+      - 前の手順
+      - 戻る
+
+  - name: RepeatStep
+    trainingPhrases:
+      - もう一度
+      - 繰り返して
+      - もう一回
+
+  - name: GetIngredients
+    trainingPhrases:
+      - 材料
+      - 材料は何
+      - 何が必要
+
+  - name: SetTimer
+    trainingPhrases:
+      - タイマー $duration 分
+      - $duration 分タイマー
+    parameters:
+      - name: duration
+        type: number
+
+webhooks:
+  - name: MainHandler
+    url: https://your-domain.com/api/v1/voice/google
+    httpMethod: POST
+  - name: SearchRecipeHandler
+    url: https://your-domain.com/api/v1/voice/google
+    httpMethod: POST
+  - name: GetStepsHandler
+    url: https://your-domain.com/api/v1/voice/google
+    httpMethod: POST
+  - name: NextStepHandler
+    url: https://your-domain.com/api/v1/voice/google
+    httpMethod: POST
+  - name: PreviousStepHandler
+    url: https://your-domain.com/api/v1/voice/google
+    httpMethod: POST
+  - name: RepeatStepHandler
+    url: https://your-domain.com/api/v1/voice/google
+    httpMethod: POST
+  - name: GetIngredientsHandler
+    url: https://your-domain.com/api/v1/voice/google
+    httpMethod: POST
+  - name: SetTimerHandler
+    url: https://your-domain.com/api/v1/voice/google
+    httpMethod: POST

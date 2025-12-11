@@ -1,0 +1,299 @@
+/**
+ * VoiceDemo Page Styles
+ */
+
+.voice-demo {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px 20px;
+}
+
+.voice-demo__container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.voice-demo__header {
+  text-align: center;
+  margin-bottom: 40px;
+  color: white;
+}
+
+.voice-demo__title {
+  font-size: 48px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.voice-demo__subtitle {
+  font-size: 20px;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.voice-demo__main {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Info Section */
+.voice-demo__info {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.voice-demo__info-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 24px 0;
+  text-align: center;
+}
+
+.voice-demo__devices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.voice-demo__device-card {
+  text-align: center;
+  padding: 24px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.voice-demo__device-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.voice-demo__device-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  color: #667eea;
+}
+
+.voice-demo__device-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.voice-demo__device-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.voice-demo__device-card p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Features Section */
+.voice-demo__features {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.voice-demo__features-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 24px 0;
+  text-align: center;
+}
+
+.voice-demo__features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+.voice-demo__feature {
+  text-align: center;
+  padding: 20px;
+}
+
+.voice-demo__feature-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.voice-demo__feature h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.voice-demo__feature p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Tips Section */
+.voice-demo__tips {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.voice-demo__tips-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 24px 0;
+  text-align: center;
+}
+
+.voice-demo__tips-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.voice-demo__tips-list li {
+  padding: 16px;
+  margin-bottom: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  font-size: 15px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.voice-demo__tips-list strong {
+  color: #667eea;
+  font-weight: 600;
+}
+
+/* Examples Section */
+.voice-demo__examples {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.voice-demo__examples-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 24px 0;
+  text-align: center;
+}
+
+.voice-demo__examples-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+.voice-demo__example-category {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.voice-demo__example-category h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #667eea;
+  margin: 0 0 12px 0;
+}
+
+.voice-demo__example-category ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.voice-demo__example-category li {
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  background: white;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333;
+  border: 1px solid #e0e0e0;
+}
+
+/* Footer */
+.voice-demo__footer {
+  margin-top: 32px;
+  text-align: center;
+}
+
+.voice-demo__footer-note {
+  color: white;
+  font-size: 14px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .voice-demo {
+    padding: 20px 16px;
+  }
+
+  .voice-demo__title {
+    font-size: 36px;
+  }
+
+  .voice-demo__subtitle {
+    font-size: 16px;
+  }
+
+  .voice-demo__info,
+  .voice-demo__features,
+  .voice-demo__tips,
+  .voice-demo__examples {
+    padding: 24px 16px;
+  }
+
+  .voice-demo__info-title,
+  .voice-demo__features-title,
+  .voice-demo__tips-title,
+  .voice-demo__examples-title {
+    font-size: 24px;
+  }
+
+  .voice-demo__devices,
+  .voice-demo__features-grid,
+  .voice-demo__examples-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .voice-demo__title {
+    font-size: 28px;
+  }
+
+  .voice-demo__subtitle {
+    font-size: 14px;
+  }
+
+  .voice-demo__feature-icon {
+    font-size: 36px;
+  }
+}

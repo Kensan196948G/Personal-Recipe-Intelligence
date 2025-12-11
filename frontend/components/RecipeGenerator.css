@@ -1,0 +1,463 @@
+/**
+ * レシピ自動生成コンポーネント スタイル
+ */
+
+.recipe-generator {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.recipe-generator h2 {
+  font-size: 28px;
+  margin-bottom: 24px;
+  color: #333;
+}
+
+.recipe-generator h3 {
+  font-size: 20px;
+  margin-bottom: 16px;
+  color: #555;
+}
+
+.recipe-generator h4 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #666;
+}
+
+/* フォームセクション */
+.generator-form {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+  margin-bottom: 32px;
+}
+
+.form-section:last-child {
+  margin-bottom: 0;
+}
+
+/* 食材入力 */
+.ingredient-input {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ingredient-input input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.ingredient-input input:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.btn-add {
+  padding: 10px 24px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.btn-add:hover {
+  background: #45a049;
+}
+
+/* 食材タグ */
+.ingredient-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  min-height: 40px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #e3f2fd;
+  color: #1976d2;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+.tag button {
+  background: none;
+  border: none;
+  color: #1976d2;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tag button:hover {
+  color: #d32f2f;
+}
+
+/* 食材カテゴリ */
+.ingredient-categories {
+  display: grid;
+  gap: 16px;
+}
+
+.category-group h4 {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+  text-transform: capitalize;
+}
+
+.category-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn-ingredient {
+  padding: 6px 12px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.btn-ingredient:hover {
+  background: #e0e0e0;
+}
+
+.btn-ingredient.selected {
+  background: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+}
+
+/* 提案 */
+.suggestions {
+  margin-top: 16px;
+  padding: 16px;
+  background: #fff3e0;
+  border-radius: 4px;
+}
+
+.suggestions h4 {
+  color: #e65100;
+  margin-bottom: 12px;
+}
+
+.suggestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suggestion-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #ffcc80;
+}
+
+.suggestion-text {
+  font-size: 14px;
+  color: #333;
+}
+
+.badge-seasonal {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: #4CAF50;
+  color: white;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+.btn-small {
+  padding: 4px 12px;
+  background: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-small:hover {
+  background: #f57c00;
+}
+
+/* フォームグループ */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+}
+
+.form-group input[type="number"],
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-group input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+/* エラーメッセージ */
+.error-message {
+  padding: 12px 16px;
+  background: #ffebee;
+  color: #c62828;
+  border-radius: 4px;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
+/* アクション */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-primary {
+  padding: 12px 32px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  padding: 12px 32px;
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+}
+
+/* レシピ結果 */
+.recipe-result {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f5f5f5;
+}
+
+.recipe-header h3 {
+  font-size: 24px;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.recipe-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #e3f2fd;
+  color: #1976d2;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.time {
+  color: #666;
+  font-size: 14px;
+}
+
+/* レシピセクション */
+.recipe-section {
+  margin-bottom: 24px;
+}
+
+.ingredient-list {
+  list-style: none;
+  padding: 0;
+}
+
+.ingredient-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 14px;
+}
+
+.ingredient-list li:last-child {
+  border-bottom: none;
+}
+
+.steps-list {
+  padding-left: 20px;
+}
+
+.steps-list li {
+  padding: 8px 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* 栄養情報 */
+.nutrition-info {
+  padding: 16px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.nutrition-badges {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.badge-nutrition {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #4CAF50;
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.balance-score {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.recommendation {
+  font-size: 14px;
+  color: #666;
+}
+
+/* レシピアクション */
+.recipe-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-top: 16px;
+  border-top: 2px solid #f5f5f5;
+}
+
+/* 改善セクション */
+.improvement-section {
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.improvement-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn-improve {
+  padding: 8px 16px;
+  background: white;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-improve:hover {
+  background: #f5f5f5;
+  border-color: #4CAF50;
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .recipe-generator {
+    padding: 12px;
+  }
+
+  .recipe-generator h2 {
+    font-size: 24px;
+  }
+
+  .form-actions,
+  .recipe-actions {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+
+  .category-items {
+    gap: 6px;
+  }
+
+  .btn-ingredient {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+}

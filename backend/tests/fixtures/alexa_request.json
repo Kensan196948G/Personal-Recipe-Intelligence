@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "session": {
+    "new": false,
+    "sessionId": "amzn1.echo-api.session.test-session-id",
+    "application": {
+      "applicationId": "amzn1.ask.skill.test-application-id"
+    },
+    "attributes": {},
+    "user": {
+      "userId": "amzn1.ask.account.test-user-id"
+    }
+  },
+  "context": {
+    "System": {
+      "application": {
+        "applicationId": "amzn1.ask.skill.test-application-id"
+      },
+      "user": {
+        "userId": "amzn1.ask.account.test-user-id"
+      },
+      "device": {
+        "deviceId": "amzn1.ask.device.test-device-id",
+        "supportedInterfaces": {
+          "AudioPlayer": {}
+        }
+      },
+      "apiEndpoint": "https://api.amazonalexa.com",
+      "apiAccessToken": "test-access-token"
+    }
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "amzn1.echo-api.request.test-request-id",
+    "timestamp": "2025-12-11T10:00:00Z",
+    "locale": "ja-JP",
+    "intent": {
+      "name": "SearchRecipe",
+      "confirmationStatus": "NONE",
+      "slots": {
+        "query": {
+          "name": "query",
+          "value": "カレー",
+          "confirmationStatus": "NONE",
+          "source": "USER"
+        }
+      }
+    }
+  }
+}
