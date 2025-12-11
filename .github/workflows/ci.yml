@@ -1,5 +1,5 @@
-# CI/CD Pipeline for Personal Recipe Intelligence
-name: CI/CD Pipeline
+# CI/CD パイプライン - Personal Recipe Intelligence
+name: CI/CD パイプライン
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       run_full_test:
-        description: 'Run full test suite'
+        description: '完全テストスイートを実行'
         required: false
         default: 'true'
 
@@ -19,131 +19,131 @@ env:
 
 jobs:
   # ============================================
-  # Backend Tests and Lint
+  # バックエンドテストとリント
   # ============================================
   backend:
-    name: Backend CI
+    name: バックエンド CI
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Python をセットアップ
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
-      - name: Install dependencies
+      - name: 依存関係をインストール
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Run Ruff linter
+      - name: Ruff リンターを実行
         run: |
           ruff check backend/ --output-format=github
         continue-on-error: true
 
-      - name: Run Black formatter check
+      - name: Black フォーマッターをチェック
         run: |
           black --check backend/
         continue-on-error: true
 
-      - name: Run type checking with mypy
+      - name: mypy で型チェックを実行
         run: |
           pip install mypy types-requests
           mypy backend/ --ignore-missing-imports || true
         continue-on-error: true
 
-      - name: Run pytest
+      - name: pytest を実行
         run: |
           pytest backend/tests/ -v --tb=short || true
         continue-on-error: true
 
-      - name: Check Alembic migrations
+      - name: Alembic マイグレーションをチェック
         run: |
           alembic check || true
         continue-on-error: true
 
   # ============================================
-  # Frontend Tests and Lint
+  # フロントエンドテストとリント
   # ============================================
   frontend:
-    name: Frontend CI
+    name: フロントエンド CI
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Node.js をセットアップ
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: 依存関係をインストール
         working-directory: frontend
         run: npm ci || npm install
 
-      - name: Run ESLint
+      - name: ESLint を実行
         working-directory: frontend
         run: npm run lint || true
         continue-on-error: true
 
-      - name: Run Prettier check
+      - name: Prettier をチェック
         working-directory: frontend
         run: npx prettier --check src/ || true
         continue-on-error: true
 
-      - name: Build frontend
+      - name: フロントエンドをビルド
         working-directory: frontend
         run: npm run build || true
         continue-on-error: true
 
   # ============================================
-  # Security Scan
+  # セキュリティスキャン
   # ============================================
   security:
-    name: Security Scan
+    name: セキュリティスキャン
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Python をセットアップ
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Install safety
+      - name: safety をインストール
         run: pip install safety
 
-      - name: Run safety check
+      - name: safety チェックを実行
         run: |
           safety check -r backend/requirements.txt || true
         continue-on-error: true
 
-      - name: Run npm audit
+      - name: npm audit を実行
         working-directory: frontend
         run: npm audit || true
         continue-on-error: true
 
   # ============================================
-  # Create Summary Report
+  # サマリーレポート作成
   # ============================================
   report:
-    name: Generate Report
+    name: レポート生成
     runs-on: ubuntu-latest
     needs: [backend, frontend, security]
     if: always()
     steps:
-      - name: Create summary
+      - name: サマリーを作成
         run: |
-          echo "## CI/CD Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## CI/CD パイプライン サマリー" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Backend | ${{ needs.backend.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Frontend | ${{ needs.frontend.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Security | ${{ needs.security.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ジョブ | ステータス |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| バックエンド | ${{ needs.backend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| フロントエンド | ${{ needs.frontend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| セキュリティ | ${{ needs.security.result }} |" >> $GITHUB_STEP_SUMMARY

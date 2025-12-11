@@ -1,19 +1,19 @@
-# Auto Error Detection and Fix Workflow
-# Runs every 30 minutes with max 15 retry loops
-name: Auto Error Detection & Fix
+# 自動エラー検知・修復ワークフロー
+# 30分ごとに実行、最大15回リトライ
+name: 自動エラー検知・修復
 
 on:
   schedule:
-    # Run every 30 minutes
+    # 30分ごとに実行
     - cron: '*/30 * * * *'
   workflow_dispatch:
     inputs:
       max_retries:
-        description: 'Maximum retry attempts'
+        description: '最大リトライ回数'
         required: false
         default: '15'
       force_run:
-        description: 'Force run even if no errors'
+        description: 'エラーがなくても強制実行'
         required: false
         default: 'false'
 
@@ -24,67 +24,67 @@ env:
 
 jobs:
   # ============================================
-  # Error Detection Phase
+  # エラー検知フェーズ
   # ============================================
   detect-errors:
-    name: Detect Errors
+    name: エラー検知
     runs-on: ubuntu-latest
     outputs:
       has_errors: ${{ steps.check.outputs.has_errors }}
       error_types: ${{ steps.check.outputs.error_types }}
     steps:
-      - name: Checkout repository
+      - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Python をセットアップ
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
-      - name: Set up Node.js
+      - name: Node.js をセットアップ
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
+      - name: 依存関係をインストール
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
           cd frontend && npm ci || npm install
 
-      - name: Check for errors
+      - name: エラーをチェック
         id: check
         run: |
           ERRORS=""
           HAS_ERRORS="false"
 
-          # Python lint errors
+          # Python リントエラー
           if ! ruff check backend/ --quiet 2>/dev/null; then
             ERRORS="${ERRORS}python_lint,"
             HAS_ERRORS="true"
           fi
 
-          # Python format errors
+          # Python フォーマットエラー
           if ! black --check backend/ --quiet 2>/dev/null; then
             ERRORS="${ERRORS}python_format,"
             HAS_ERRORS="true"
           fi
 
-          # Python test errors
+          # Python テストエラー
           if ! pytest backend/tests/ -q 2>/dev/null; then
             ERRORS="${ERRORS}python_test,"
             HAS_ERRORS="true"
           fi
 
-          # Frontend lint errors
+          # フロントエンドリントエラー
           cd frontend
           if ! npm run lint --silent 2>/dev/null; then
             ERRORS="${ERRORS}frontend_lint,"
             HAS_ERRORS="true"
           fi
 
-          # Frontend build errors
+          # フロントエンドビルドエラー
           if ! npm run build --silent 2>/dev/null; then
             ERRORS="${ERRORS}frontend_build,"
             HAS_ERRORS="true"
@@ -93,15 +93,15 @@ jobs:
           echo "has_errors=${HAS_ERRORS}" >> $GITHUB_OUTPUT
           echo "error_types=${ERRORS}" >> $GITHUB_OUTPUT
 
-          echo "## Error Detection Results" >> $GITHUB_STEP_SUMMARY
-          echo "Has Errors: ${HAS_ERRORS}" >> $GITHUB_STEP_SUMMARY
-          echo "Error Types: ${ERRORS:-none}" >> $GITHUB_STEP_SUMMARY
+          echo "## エラー検知結果" >> $GITHUB_STEP_SUMMARY
+          echo "エラー検出: ${HAS_ERRORS}" >> $GITHUB_STEP_SUMMARY
+          echo "エラー種類: ${ERRORS:-なし}" >> $GITHUB_STEP_SUMMARY
 
   # ============================================
-  # Auto Fix Phase (with retry loop)
+  # 自動修復フェーズ（リトライループ）
   # ============================================
   auto-fix:
-    name: Auto Fix (Retry ${{ matrix.attempt }})
+    name: 自動修復 (リトライ ${{ matrix.attempt }})
     runs-on: ubuntu-latest
     needs: detect-errors
     if: needs.detect-errors.outputs.has_errors == 'true' || github.event.inputs.force_run == 'true'
@@ -111,7 +111,7 @@ jobs:
       matrix:
         attempt: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     steps:
-      - name: Check if should continue
+      - name: 続行すべきかチェック
         id: should_run
         run: |
           if [ ${{ matrix.attempt }} -le ${{ env.MAX_RETRIES }} ]; then
@@ -120,60 +120,60 @@ jobs:
             echo "should_run=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Checkout repository
+      - name: リポジトリをチェックアウト
         if: steps.should_run.outputs.should_run == 'true'
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Python
+      - name: Python をセットアップ
         if: steps.should_run.outputs.should_run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
-      - name: Set up Node.js
+      - name: Node.js をセットアップ
         if: steps.should_run.outputs.should_run == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
+      - name: 依存関係をインストール
         if: steps.should_run.outputs.should_run == 'true'
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
           cd frontend && npm ci || npm install
 
-      - name: Auto-fix Python lint errors
+      - name: Python リントエラーを自動修復
         if: steps.should_run.outputs.should_run == 'true'
         run: |
-          echo "Attempt ${{ matrix.attempt }}: Fixing Python lint errors..."
+          echo "試行 ${{ matrix.attempt }}: Python リントエラーを修復中..."
           ruff check backend/ --fix --unsafe-fixes || true
           ruff format backend/ || true
 
-      - name: Auto-fix Python format errors
+      - name: Python フォーマットエラーを自動修復
         if: steps.should_run.outputs.should_run == 'true'
         run: |
-          echo "Attempt ${{ matrix.attempt }}: Fixing Python format errors..."
+          echo "試行 ${{ matrix.attempt }}: Python フォーマットエラーを修復中..."
           black backend/ || true
 
-      - name: Auto-fix Frontend lint errors
+      - name: フロントエンドリントエラーを自動修復
         if: steps.should_run.outputs.should_run == 'true'
         working-directory: frontend
         run: |
-          echo "Attempt ${{ matrix.attempt }}: Fixing Frontend lint errors..."
+          echo "試行 ${{ matrix.attempt }}: フロントエンドリントエラーを修復中..."
           npx eslint src/ --fix || true
           npx prettier --write src/ || true
 
-      - name: Verify fixes
+      - name: 修復を検証
         if: steps.should_run.outputs.should_run == 'true'
         id: verify
         run: |
           ALL_FIXED="true"
 
-          # Check Python
+          # Python をチェック
           if ! ruff check backend/ --quiet 2>/dev/null; then
             ALL_FIXED="false"
           fi
@@ -181,7 +181,7 @@ jobs:
             ALL_FIXED="false"
           fi
 
-          # Check Frontend
+          # フロントエンドをチェック
           cd frontend
           if ! npm run lint --silent 2>/dev/null; then
             ALL_FIXED="false"
@@ -190,69 +190,69 @@ jobs:
           echo "all_fixed=${ALL_FIXED}" >> $GITHUB_OUTPUT
 
           if [ "${ALL_FIXED}" == "true" ]; then
-            echo "## Attempt ${{ matrix.attempt }}: All errors fixed!" >> $GITHUB_STEP_SUMMARY
+            echo "## 試行 ${{ matrix.attempt }}: すべてのエラーを修復しました！" >> $GITHUB_STEP_SUMMARY
           else
-            echo "## Attempt ${{ matrix.attempt }}: Some errors remain" >> $GITHUB_STEP_SUMMARY
+            echo "## 試行 ${{ matrix.attempt }}: 一部のエラーが残っています" >> $GITHUB_STEP_SUMMARY
           fi
 
-      - name: Commit fixes
+      - name: 修復をコミット
         if: steps.should_run.outputs.should_run == 'true' && steps.verify.outputs.all_fixed == 'true'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add -A
-          git diff --staged --quiet || git commit -m "fix: auto-fix errors (attempt ${{ matrix.attempt }})
+          git diff --staged --quiet || git commit -m "fix: 自動エラー修復 (試行 ${{ matrix.attempt }})
 
-          Automated fixes applied by GitHub Actions workflow.
+          GitHub Actions ワークフローによる自動修復。
 
           Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
           git push || true
 
   # ============================================
-  # Final Report
+  # 最終レポート
   # ============================================
   final-report:
-    name: Final Report
+    name: 最終レポート
     runs-on: ubuntu-latest
     needs: [detect-errors, auto-fix]
     if: always()
     steps:
-      - name: Generate final report
+      - name: 最終レポートを生成
         run: |
-          echo "## Auto-Fix Workflow Final Report" >> $GITHUB_STEP_SUMMARY
+          echo "## 自動修復ワークフロー 最終レポート" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "**タイムスタンプ:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Phase | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Error Detection | ${{ needs.detect-errors.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Auto Fix | ${{ needs.auto-fix.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| フェーズ | ステータス |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| エラー検知 | ${{ needs.detect-errors.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 自動修復 | ${{ needs.auto-fix.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Next run:** In 30 minutes" >> $GITHUB_STEP_SUMMARY
+          echo "**次回実行:** 30分後" >> $GITHUB_STEP_SUMMARY
 
-      - name: Create issue if fixes failed
+      - name: 修復失敗時にイシューを作成
         if: needs.auto-fix.result == 'failure'
         uses: actions/github-script@v7
         with:
           script: |
-            const title = `[Auto-Fix] Errors detected at ${new Date().toISOString()}`;
+            const title = `[自動修復] ${new Date().toISOString()} にエラーを検出`;
             const body = `
-            ## Auto-Fix Workflow Failed
+            ## 自動修復ワークフロー失敗
 
-            The automated error detection and fix workflow has detected errors that could not be automatically resolved.
+            自動エラー検知・修復ワークフローが、自動的に解決できないエラーを検出しました。
 
-            **Error Types:** ${{ needs.detect-errors.outputs.error_types }}
+            **エラー種類:** ${{ needs.detect-errors.outputs.error_types }}
 
-            **Timestamp:** ${new Date().toISOString()}
+            **タイムスタンプ:** ${new Date().toISOString()}
 
-            ### Action Required
-            Please review and manually fix the remaining errors.
+            ### 対応が必要です
+            残りのエラーを確認し、手動で修正してください。
 
-            ### Workflow Run
-            [View Workflow Run](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})
+            ### ワークフロー実行
+            [ワークフローを表示](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})
             `;
 
-            // Check for existing open issues
+            // 既存のオープンイシューをチェック
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,

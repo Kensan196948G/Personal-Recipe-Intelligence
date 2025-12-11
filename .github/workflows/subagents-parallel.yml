@@ -1,12 +1,12 @@
-# SubAgents Parallel Development Workflow
-# Simulates ClaudeCode SubAgents working in parallel
-name: SubAgents Parallel Development
+# SubAgents 並列開発ワークフロー
+# ClaudeCode SubAgents の並列動作をシミュレート
+name: SubAgents 並列開発
 
 on:
   workflow_dispatch:
     inputs:
       task_type:
-        description: 'Task type to process'
+        description: '処理するタスクタイプ'
         required: true
         default: 'all'
         type: choice
@@ -36,19 +36,19 @@ env:
 
 jobs:
   # ============================================
-  # Planner Agent - Task Orchestration
+  # プランナーエージェント - タスク調整
   # ============================================
   planner-agent:
-    name: "[Agent] Planner"
+    name: "[エージェント] プランナー"
     runs-on: ubuntu-latest
     outputs:
       tasks: ${{ steps.plan.outputs.tasks }}
       task_count: ${{ steps.plan.outputs.task_count }}
     steps:
-      - name: Checkout
+      - name: チェックアウト
         uses: actions/checkout@v4
 
-      - name: Analyze and Plan Tasks
+      - name: タスクを分析・計画
         id: plan
         run: |
           TASK_TYPE="${{ github.event.inputs.task_type || 'all' }}"
@@ -64,172 +64,172 @@ jobs:
           echo "tasks=${TASKS}" >> $GITHUB_OUTPUT
           echo "task_count=${TASK_COUNT}" >> $GITHUB_OUTPUT
 
-          echo "## Planner Agent Report" >> $GITHUB_STEP_SUMMARY
-          echo "Tasks to execute: ${TASKS}" >> $GITHUB_STEP_SUMMARY
+          echo "## プランナーエージェント レポート" >> $GITHUB_STEP_SUMMARY
+          echo "実行タスク: ${TASKS}" >> $GITHUB_STEP_SUMMARY
 
   # ============================================
-  # DevAPI Agent - Backend Development
+  # DevAPI エージェント - バックエンド開発
   # ============================================
   devapi-agent:
-    name: "[Agent] DevAPI"
+    name: "[エージェント] DevAPI"
     runs-on: ubuntu-latest
     needs: planner-agent
     if: contains(needs.planner-agent.outputs.tasks, 'backend') || contains(needs.planner-agent.outputs.tasks, 'all')
     steps:
-      - name: Checkout
+      - name: チェックアウト
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Python をセットアップ
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
-      - name: Install dependencies
+      - name: 依存関係をインストール
         run: |
           pip install -r backend/requirements.txt
 
-      - name: DevAPI Agent - Code Quality
+      - name: DevAPI エージェント - コード品質
         run: |
-          echo "=== DevAPI Agent: Running Code Quality Checks ==="
+          echo "=== DevAPI エージェント: コード品質チェックを実行 ==="
 
-          # Lint and format
+          # リントとフォーマット
           ruff check backend/ --fix --unsafe-fixes || true
           ruff format backend/ || true
           black backend/ || true
 
-          # Type checking
+          # 型チェック
           pip install mypy types-requests
           mypy backend/ --ignore-missing-imports || true
 
-          echo "## DevAPI Agent Report" >> $GITHUB_STEP_SUMMARY
-          echo "- Code quality checks completed" >> $GITHUB_STEP_SUMMARY
-          echo "- Auto-fixes applied" >> $GITHUB_STEP_SUMMARY
+          echo "## DevAPI エージェント レポート" >> $GITHUB_STEP_SUMMARY
+          echo "- コード品質チェック完了" >> $GITHUB_STEP_SUMMARY
+          echo "- 自動修正を適用" >> $GITHUB_STEP_SUMMARY
 
-      - name: Commit changes
+      - name: 変更をコミット
         run: |
           git config --local user.email "devapi-agent@pri.local"
-          git config --local user.name "DevAPI Agent"
+          git config --local user.name "DevAPI エージェント"
           git add -A
-          git diff --staged --quiet || git commit -m "refactor(backend): DevAPI agent improvements
+          git diff --staged --quiet || git commit -m "refactor(backend): DevAPI エージェントによる改善
 
-          Automated code quality improvements by DevAPI Agent.
+          DevAPI エージェントによる自動コード品質改善。
 
-          Co-Authored-By: DevAPI Agent <devapi-agent@pri.local>"
+          Co-Authored-By: DevAPI エージェント <devapi-agent@pri.local>"
 
   # ============================================
-  # DevUI Agent - Frontend Development
+  # DevUI エージェント - フロントエンド開発
   # ============================================
   devui-agent:
-    name: "[Agent] DevUI"
+    name: "[エージェント] DevUI"
     runs-on: ubuntu-latest
     needs: planner-agent
     if: contains(needs.planner-agent.outputs.tasks, 'frontend') || contains(needs.planner-agent.outputs.tasks, 'all')
     steps:
-      - name: Checkout
+      - name: チェックアウト
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Node.js をセットアップ
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
+      - name: 依存関係をインストール
         working-directory: frontend
         run: npm ci || npm install
 
-      - name: DevUI Agent - Code Quality
+      - name: DevUI エージェント - コード品質
         working-directory: frontend
         run: |
-          echo "=== DevUI Agent: Running Code Quality Checks ==="
+          echo "=== DevUI エージェント: コード品質チェックを実行 ==="
 
-          # Lint and format
+          # リントとフォーマット
           npx eslint src/ --fix || true
           npx prettier --write src/ || true
 
-          # Build check
+          # ビルドチェック
           npm run build || true
 
-          echo "## DevUI Agent Report" >> $GITHUB_STEP_SUMMARY
-          echo "- Frontend lint completed" >> $GITHUB_STEP_SUMMARY
-          echo "- Prettier formatting applied" >> $GITHUB_STEP_SUMMARY
+          echo "## DevUI エージェント レポート" >> $GITHUB_STEP_SUMMARY
+          echo "- フロントエンドリント完了" >> $GITHUB_STEP_SUMMARY
+          echo "- Prettier フォーマット適用" >> $GITHUB_STEP_SUMMARY
 
-      - name: Commit changes
+      - name: 変更をコミット
         run: |
           git config --local user.email "devui-agent@pri.local"
-          git config --local user.name "DevUI Agent"
+          git config --local user.name "DevUI エージェント"
           git add -A
-          git diff --staged --quiet || git commit -m "refactor(frontend): DevUI agent improvements
+          git diff --staged --quiet || git commit -m "refactor(frontend): DevUI エージェントによる改善
 
-          Automated code quality improvements by DevUI Agent.
+          DevUI エージェントによる自動コード品質改善。
 
-          Co-Authored-By: DevUI Agent <devui-agent@pri.local>"
+          Co-Authored-By: DevUI エージェント <devui-agent@pri.local>"
 
   # ============================================
-  # QA Agent - Quality Assurance
+  # QA エージェント - 品質保証
   # ============================================
   qa-agent:
-    name: "[Agent] QA"
+    name: "[エージェント] QA"
     runs-on: ubuntu-latest
     needs: [planner-agent, devapi-agent, devui-agent]
     if: always() && (contains(needs.planner-agent.outputs.tasks, 'qa') || contains(needs.planner-agent.outputs.tasks, 'all'))
     steps:
-      - name: Checkout
+      - name: チェックアウト
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
 
-      - name: Set up Python
+      - name: Python をセットアップ
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Set up Node.js
+      - name: Node.js をセットアップ
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install all dependencies
+      - name: すべての依存関係をインストール
         run: |
           pip install -r backend/requirements.txt
           cd frontend && npm ci || npm install
 
-      - name: QA Agent - Run Tests
+      - name: QA エージェント - テスト実行
         run: |
-          echo "=== QA Agent: Running All Tests ==="
+          echo "=== QA エージェント: すべてのテストを実行 ==="
 
-          # Backend tests
+          # バックエンドテスト
           pytest backend/tests/ -v --tb=short || true
 
-          # Frontend tests (if configured)
+          # フロントエンドテスト（設定済みの場合）
           cd frontend
-          npm test 2>/dev/null || echo "No frontend tests configured"
+          npm test 2>/dev/null || echo "フロントエンドテストは設定されていません"
 
-          echo "## QA Agent Report" >> $GITHUB_STEP_SUMMARY
-          echo "- Backend tests executed" >> $GITHUB_STEP_SUMMARY
-          echo "- Frontend tests executed" >> $GITHUB_STEP_SUMMARY
+          echo "## QA エージェント レポート" >> $GITHUB_STEP_SUMMARY
+          echo "- バックエンドテスト実行" >> $GITHUB_STEP_SUMMARY
+          echo "- フロントエンドテスト実行" >> $GITHUB_STEP_SUMMARY
 
-      - name: QA Agent - Final Verification
+      - name: QA エージェント - 最終検証
         id: verify
         run: |
           PASS_COUNT=0
           FAIL_COUNT=0
 
-          # Check lint
+          # リントチェック
           if ruff check backend/ --quiet 2>/dev/null; then
             ((PASS_COUNT++))
           else
             ((FAIL_COUNT++))
           fi
 
-          # Check format
+          # フォーマットチェック
           if black --check backend/ --quiet 2>/dev/null; then
             ((PASS_COUNT++))
           else
             ((FAIL_COUNT++))
           fi
 
-          # Check frontend lint
+          # フロントエンドリントチェック
           cd frontend
           if npm run lint --silent 2>/dev/null; then
             ((PASS_COUNT++))
@@ -241,45 +241,45 @@ jobs:
           echo "fail_count=${FAIL_COUNT}" >> $GITHUB_OUTPUT
 
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Final Results" >> $GITHUB_STEP_SUMMARY
-          echo "- Passed: ${PASS_COUNT}" >> $GITHUB_STEP_SUMMARY
-          echo "- Failed: ${FAIL_COUNT}" >> $GITHUB_STEP_SUMMARY
+          echo "### 最終結果" >> $GITHUB_STEP_SUMMARY
+          echo "- 成功: ${PASS_COUNT}" >> $GITHUB_STEP_SUMMARY
+          echo "- 失敗: ${FAIL_COUNT}" >> $GITHUB_STEP_SUMMARY
 
   # ============================================
-  # Coordinator - Merge All Changes
+  # コーディネーター - 全変更をマージ
   # ============================================
   coordinator:
-    name: "[Coordinator] Merge Changes"
+    name: "[コーディネーター] 変更をマージ"
     runs-on: ubuntu-latest
     needs: [devapi-agent, devui-agent, qa-agent]
     if: always()
     steps:
-      - name: Checkout
+      - name: チェックアウト
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Merge all agent changes
+      - name: すべてのエージェントの変更をマージ
         run: |
           git config --local user.email "coordinator@pri.local"
-          git config --local user.name "SubAgent Coordinator"
+          git config --local user.name "SubAgent コーディネーター"
 
-          # Pull any changes
+          # 変更を取得
           git pull --rebase origin ${{ github.ref_name }} || true
 
-          # Push if there are changes
+          # 変更があればプッシュ
           git push || true
 
-      - name: Generate final report
+      - name: 最終レポートを生成
         run: |
-          echo "## SubAgents Parallel Development - Final Report" >> $GITHUB_STEP_SUMMARY
+          echo "## SubAgents 並列開発 - 最終レポート" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Completed:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "**完了:** $(date -u)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Agent | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Planner | ${{ needs.planner-agent.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| エージェント | ステータス |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------------|----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| プランナー | ${{ needs.planner-agent.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| DevAPI | ${{ needs.devapi-agent.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| DevUI | ${{ needs.devui-agent.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| QA | ${{ needs.qa-agent.result }} |" >> $GITHUB_STEP_SUMMARY

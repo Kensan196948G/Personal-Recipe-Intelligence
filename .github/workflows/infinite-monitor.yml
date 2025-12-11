@@ -1,15 +1,15 @@
-# Infinite Loop Monitoring Workflow
-# Continuously monitors and fixes errors every 30 minutes
-name: Infinite Loop Monitor
+# 無限ループ監視ワークフロー
+# 30分ごとにエラーを監視・修復
+name: 無限ループ監視
 
 on:
   schedule:
-    # Run every 30 minutes
+    # 30分ごとに実行
     - cron: '0,30 * * * *'
   workflow_dispatch:
     inputs:
       debug_mode:
-        description: 'Enable debug mode'
+        description: 'デバッグモードを有効化'
         required: false
         default: 'false'
 
@@ -25,10 +25,10 @@ env:
 
 jobs:
   # ============================================
-  # Phase 1: Health Check
+  # フェーズ1: ヘルスチェック
   # ============================================
   health-check:
-    name: System Health Check
+    name: システムヘルスチェック
     runs-on: ubuntu-latest
     outputs:
       backend_health: ${{ steps.check.outputs.backend_health }}
@@ -36,37 +36,37 @@ jobs:
       db_health: ${{ steps.check.outputs.db_health }}
       overall_health: ${{ steps.check.outputs.overall_health }}
     steps:
-      - name: Checkout
+      - name: チェックアウト
         uses: actions/checkout@v4
 
-      - name: Set up environments
+      - name: 環境をセットアップ
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Check system health
+      - name: システムヘルスをチェック
         id: check
         run: |
           BACKEND_HEALTH="healthy"
           FRONTEND_HEALTH="healthy"
           DB_HEALTH="healthy"
 
-          # Check backend files exist
+          # バックエンドファイルの存在確認
           if [ ! -f "backend/api/main.py" ]; then
             BACKEND_HEALTH="unhealthy"
           fi
 
-          # Check frontend files exist
+          # フロントエンドファイルの存在確認
           if [ ! -f "frontend/package.json" ]; then
             FRONTEND_HEALTH="unhealthy"
           fi
 
-          # Check alembic config
+          # alembic 設定の確認
           if [ ! -f "alembic.ini" ]; then
             DB_HEALTH="unhealthy"
           fi
 
-          # Determine overall health
+          # 総合ヘルス判定
           if [ "$BACKEND_HEALTH" == "healthy" ] && [ "$FRONTEND_HEALTH" == "healthy" ] && [ "$DB_HEALTH" == "healthy" ]; then
             OVERALL_HEALTH="healthy"
           else
@@ -79,88 +79,88 @@ jobs:
           echo "overall_health=${OVERALL_HEALTH}" >> $GITHUB_OUTPUT
 
   # ============================================
-  # Phase 2: Error Detection Loop
+  # フェーズ2: エラー検知ループ
   # ============================================
   error-detection-loop:
-    name: Error Detection Loop
+    name: エラー検知ループ
     runs-on: ubuntu-latest
     needs: health-check
     outputs:
       errors_found: ${{ steps.detect.outputs.errors_found }}
       error_log: ${{ steps.detect.outputs.error_log }}
     steps:
-      - name: Checkout
+      - name: チェックアウト
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Python をセットアップ
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
-      - name: Set up Node.js
+      - name: Node.js をセットアップ
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install all dependencies
+      - name: すべての依存関係をインストール
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
           cd frontend && npm ci || npm install
 
-      - name: Run comprehensive error detection
+      - name: 包括的エラー検知を実行
         id: detect
         run: |
           ERROR_LOG=""
           ERRORS_FOUND="false"
 
-          echo "=== Starting Error Detection ===" >> error_log.txt
-          echo "Timestamp: $(date -u)" >> error_log.txt
+          echo "=== エラー検知開始 ===" >> error_log.txt
+          echo "タイムスタンプ: $(date -u)" >> error_log.txt
           echo "" >> error_log.txt
 
-          # 1. Python Syntax Errors
-          echo "Checking Python syntax..." >> error_log.txt
+          # 1. Python 構文エラー
+          echo "Python 構文をチェック中..." >> error_log.txt
           python -m py_compile backend/api/main.py 2>> error_log.txt || { ERRORS_FOUND="true"; echo "PYTHON_SYNTAX_ERROR" >> error_log.txt; }
 
-          # 2. Python Lint Errors
-          echo "Checking Python lint..." >> error_log.txt
+          # 2. Python リントエラー
+          echo "Python リントをチェック中..." >> error_log.txt
           ruff check backend/ 2>> error_log.txt || { ERRORS_FOUND="true"; echo "PYTHON_LINT_ERROR" >> error_log.txt; }
 
-          # 3. Python Format Errors
-          echo "Checking Python format..." >> error_log.txt
+          # 3. Python フォーマットエラー
+          echo "Python フォーマットをチェック中..." >> error_log.txt
           black --check backend/ 2>> error_log.txt || { ERRORS_FOUND="true"; echo "PYTHON_FORMAT_ERROR" >> error_log.txt; }
 
-          # 4. Python Import Errors
-          echo "Checking Python imports..." >> error_log.txt
+          # 4. Python インポートエラー
+          echo "Python インポートをチェック中..." >> error_log.txt
           python -c "from backend.api.main import app" 2>> error_log.txt || { ERRORS_FOUND="true"; echo "PYTHON_IMPORT_ERROR" >> error_log.txt; }
 
-          # 5. Frontend Lint Errors
-          echo "Checking Frontend lint..." >> error_log.txt
+          # 5. フロントエンドリントエラー
+          echo "フロントエンドリントをチェック中..." >> error_log.txt
           cd frontend
           npm run lint 2>> ../error_log.txt || { ERRORS_FOUND="true"; echo "FRONTEND_LINT_ERROR" >> ../error_log.txt; }
 
-          # 6. Frontend Build Errors
-          echo "Checking Frontend build..." >> ../error_log.txt
+          # 6. フロントエンドビルドエラー
+          echo "フロントエンドビルドをチェック中..." >> ../error_log.txt
           npm run build 2>> ../error_log.txt || { ERRORS_FOUND="true"; echo "FRONTEND_BUILD_ERROR" >> ../error_log.txt; }
 
           cd ..
 
-          # 7. Test Errors
-          echo "Running tests..." >> error_log.txt
+          # 7. テストエラー
+          echo "テストを実行中..." >> error_log.txt
           pytest backend/tests/ -v 2>> error_log.txt || { ERRORS_FOUND="true"; echo "TEST_ERROR" >> error_log.txt; }
 
           echo "errors_found=${ERRORS_FOUND}" >> $GITHUB_OUTPUT
 
-          # Save error log
+          # エラーログを保存
           ERROR_LOG=$(cat error_log.txt | base64 -w0)
           echo "error_log=${ERROR_LOG}" >> $GITHUB_OUTPUT
 
   # ============================================
-  # Phase 3: Auto Fix Loop (15 iterations)
+  # フェーズ3: 自動修復ループ（15回反復）
   # ============================================
   auto-fix-loop:
-    name: Auto Fix Attempt
+    name: 自動修復試行
     runs-on: ubuntu-latest
     needs: error-detection-loop
     if: needs.error-detection-loop.outputs.errors_found == 'true'
@@ -170,48 +170,48 @@ jobs:
       matrix:
         iteration: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     steps:
-      - name: Checkout
+      - name: チェックアウト
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - name: Set up environments
+      - name: 環境をセットアップ
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
-      - name: Set up Node.js
+      - name: Node.js をセットアップ
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install dependencies
+      - name: 依存関係をインストール
         run: |
           pip install -r backend/requirements.txt
           cd frontend && npm ci || npm install
 
-      - name: Fix Attempt ${{ matrix.iteration }}
+      - name: 修復試行 ${{ matrix.iteration }}
         id: fix
         run: |
-          echo "=== Fix Attempt ${{ matrix.iteration }} of ${{ env.MAX_FIX_ATTEMPTS }} ==="
+          echo "=== 修復試行 ${{ matrix.iteration }} / ${{ env.MAX_FIX_ATTEMPTS }} ==="
           FIXED="false"
 
-          # Auto-fix Python
-          echo "Fixing Python code..."
+          # Python を自動修復
+          echo "Python コードを修復中..."
           ruff check backend/ --fix --unsafe-fixes 2>/dev/null || true
           ruff format backend/ 2>/dev/null || true
           black backend/ 2>/dev/null || true
 
-          # Auto-fix Frontend
-          echo "Fixing Frontend code..."
+          # フロントエンドを自動修復
+          echo "フロントエンドコードを修復中..."
           cd frontend
           npx eslint src/ --fix 2>/dev/null || true
           npx prettier --write src/ 2>/dev/null || true
           cd ..
 
-          # Verify fixes
+          # 修復を検証
           STILL_HAS_ERRORS="false"
 
           ruff check backend/ --quiet 2>/dev/null || STILL_HAS_ERRORS="true"
@@ -225,9 +225,9 @@ jobs:
           fi
 
           echo "fixed=${FIXED}" >> $GITHUB_OUTPUT
-          echo "Iteration ${{ matrix.iteration }} result: fixed=${FIXED}"
+          echo "反復 ${{ matrix.iteration }} 結果: fixed=${FIXED}"
 
-      - name: Commit if fixed
+      - name: 修復完了時にコミット
         if: steps.fix.outputs.fixed == 'true'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
@@ -235,40 +235,40 @@ jobs:
 
           git add -A
           if ! git diff --staged --quiet; then
-            git commit -m "fix: auto-fix iteration ${{ matrix.iteration }}
+            git commit -m "fix: 自動修復 反復 ${{ matrix.iteration }}
 
-            Automated error fixes applied by Infinite Loop Monitor.
-            Iteration: ${{ matrix.iteration }}/${{ env.MAX_FIX_ATTEMPTS }}
+            無限ループ監視による自動エラー修復。
+            反復: ${{ matrix.iteration }}/${{ env.MAX_FIX_ATTEMPTS }}
 
             Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
             git push
           fi
 
   # ============================================
-  # Phase 4: Verification
+  # フェーズ4: 検証
   # ============================================
   verification:
-    name: Final Verification
+    name: 最終検証
     runs-on: ubuntu-latest
     needs: [error-detection-loop, auto-fix-loop]
     if: always()
     steps:
-      - name: Checkout
+      - name: チェックアウト
         uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
 
-      - name: Set up environments
+      - name: 環境をセットアップ
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Set up Node.js
+      - name: Node.js をセットアップ
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install and verify
+      - name: インストールと検証
         id: final_check
         run: |
           pip install -r backend/requirements.txt
@@ -283,41 +283,41 @@ jobs:
 
           echo "status=${FINAL_STATUS}" >> $GITHUB_OUTPUT
 
-      - name: Generate report
+      - name: レポートを生成
         run: |
-          echo "## Infinite Loop Monitor Report" >> $GITHUB_STEP_SUMMARY
+          echo "## 無限ループ監視レポート" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Run Time:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
-          echo "**Final Status:** ${{ steps.final_check.outputs.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "**実行時刻:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "**最終ステータス:** ${{ steps.final_check.outputs.status }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Phase Results" >> $GITHUB_STEP_SUMMARY
-          echo "| Phase | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Error Detection | ${{ needs.error-detection-loop.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Auto Fix Loop | ${{ needs.auto-fix-loop.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "### フェーズ結果" >> $GITHUB_STEP_SUMMARY
+          echo "| フェーズ | ステータス |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| エラー検知 | ${{ needs.error-detection-loop.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 自動修復ループ | ${{ needs.auto-fix-loop.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Next scheduled run:** In 30 minutes" >> $GITHUB_STEP_SUMMARY
+          echo "**次回スケジュール実行:** 30分後" >> $GITHUB_STEP_SUMMARY
 
   # ============================================
-  # Phase 5: Issue Management
+  # フェーズ5: イシュー管理
   # ============================================
   issue-management:
-    name: Issue Management
+    name: イシュー管理
     runs-on: ubuntu-latest
     needs: verification
     if: always()
     steps:
-      - name: Checkout
+      - name: チェックアウト
         uses: actions/checkout@v4
 
-      - name: Create or update tracking issue
+      - name: トラッキングイシューを作成または更新
         uses: actions/github-script@v7
         with:
           script: |
             const timestamp = new Date().toISOString();
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
 
-            // Search for existing monitoring issue
+            // 既存の監視イシューを検索
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -326,40 +326,40 @@ jobs:
             });
 
             const body = `
-            ## Infinite Loop Monitor Status
+            ## 無限ループ監視ステータス
 
-            **Last Updated:** ${timestamp}
+            **最終更新:** ${timestamp}
 
-            ### Latest Run
-            - **Status:** ${{ needs.verification.result }}
-            - **Run URL:** [View Run](${runUrl})
+            ### 最新実行
+            - **ステータス:** ${{ needs.verification.result }}
+            - **実行URL:** [実行を表示](${runUrl})
 
-            ### Configuration
-            - **Schedule:** Every 30 minutes
-            - **Max Fix Attempts:** 15 per cycle
-            - **Auto-commit:** Enabled
+            ### 設定
+            - **スケジュール:** 30分ごと
+            - **最大修復試行回数:** 15回/サイクル
+            - **自動コミット:** 有効
 
-            ### History
-            This issue is automatically updated by the monitoring workflow.
+            ### 履歴
+            このイシューは監視ワークフローによって自動更新されます。
             `;
 
             if (issues.data.length > 0) {
-              // Update existing issue
+              // 既存のイシューを更新
               await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issues.data[0].number,
                 body: body
               });
-              console.log(`Updated issue #${issues.data[0].number}`);
+              console.log(`イシュー #${issues.data[0].number} を更新しました`);
             } else {
-              // Create new issue
+              // 新しいイシューを作成
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: '[Monitor] Infinite Loop Error Detection Status',
+                title: '[監視] 無限ループエラー検知ステータス',
                 body: body,
                 labels: ['monitoring', 'automated']
               });
-              console.log('Created new monitoring issue');
+              console.log('新しい監視イシューを作成しました');
             }
