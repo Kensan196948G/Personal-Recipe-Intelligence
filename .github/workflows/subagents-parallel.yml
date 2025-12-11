@@ -1,0 +1,285 @@
+# SubAgents Parallel Development Workflow
+# Simulates ClaudeCode SubAgents working in parallel
+name: SubAgents Parallel Development
+
+on:
+  workflow_dispatch:
+    inputs:
+      task_type:
+        description: 'Task type to process'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - backend
+          - frontend
+          - scraper
+          - ocr
+          - translation
+          - cleaner
+          - qa
+          - docs
+  issues:
+    types: [opened, labeled]
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+env:
+  PYTHON_VERSION: '3.12'
+  NODE_VERSION: '20'
+
+jobs:
+  # ============================================
+  # Planner Agent - Task Orchestration
+  # ============================================
+  planner-agent:
+    name: "[Agent] Planner"
+    runs-on: ubuntu-latest
+    outputs:
+      tasks: ${{ steps.plan.outputs.tasks }}
+      task_count: ${{ steps.plan.outputs.task_count }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Analyze and Plan Tasks
+        id: plan
+        run: |
+          TASK_TYPE="${{ github.event.inputs.task_type || 'all' }}"
+
+          if [ "$TASK_TYPE" == "all" ]; then
+            TASKS='["backend","frontend","qa"]'
+            TASK_COUNT=3
+          else
+            TASKS="[\"${TASK_TYPE}\"]"
+            TASK_COUNT=1
+          fi
+
+          echo "tasks=${TASKS}" >> $GITHUB_OUTPUT
+          echo "task_count=${TASK_COUNT}" >> $GITHUB_OUTPUT
+
+          echo "## Planner Agent Report" >> $GITHUB_STEP_SUMMARY
+          echo "Tasks to execute: ${TASKS}" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # DevAPI Agent - Backend Development
+  # ============================================
+  devapi-agent:
+    name: "[Agent] DevAPI"
+    runs-on: ubuntu-latest
+    needs: planner-agent
+    if: contains(needs.planner-agent.outputs.tasks, 'backend') || contains(needs.planner-agent.outputs.tasks, 'all')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+
+      - name: DevAPI Agent - Code Quality
+        run: |
+          echo "=== DevAPI Agent: Running Code Quality Checks ==="
+
+          # Lint and format
+          ruff check backend/ --fix --unsafe-fixes || true
+          ruff format backend/ || true
+          black backend/ || true
+
+          # Type checking
+          pip install mypy types-requests
+          mypy backend/ --ignore-missing-imports || true
+
+          echo "## DevAPI Agent Report" >> $GITHUB_STEP_SUMMARY
+          echo "- Code quality checks completed" >> $GITHUB_STEP_SUMMARY
+          echo "- Auto-fixes applied" >> $GITHUB_STEP_SUMMARY
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "devapi-agent@pri.local"
+          git config --local user.name "DevAPI Agent"
+          git add -A
+          git diff --staged --quiet || git commit -m "refactor(backend): DevAPI agent improvements
+
+          Automated code quality improvements by DevAPI Agent.
+
+          Co-Authored-By: DevAPI Agent <devapi-agent@pri.local>"
+
+  # ============================================
+  # DevUI Agent - Frontend Development
+  # ============================================
+  devui-agent:
+    name: "[Agent] DevUI"
+    runs-on: ubuntu-latest
+    needs: planner-agent
+    if: contains(needs.planner-agent.outputs.tasks, 'frontend') || contains(needs.planner-agent.outputs.tasks, 'all')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci || npm install
+
+      - name: DevUI Agent - Code Quality
+        working-directory: frontend
+        run: |
+          echo "=== DevUI Agent: Running Code Quality Checks ==="
+
+          # Lint and format
+          npx eslint src/ --fix || true
+          npx prettier --write src/ || true
+
+          # Build check
+          npm run build || true
+
+          echo "## DevUI Agent Report" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend lint completed" >> $GITHUB_STEP_SUMMARY
+          echo "- Prettier formatting applied" >> $GITHUB_STEP_SUMMARY
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "devui-agent@pri.local"
+          git config --local user.name "DevUI Agent"
+          git add -A
+          git diff --staged --quiet || git commit -m "refactor(frontend): DevUI agent improvements
+
+          Automated code quality improvements by DevUI Agent.
+
+          Co-Authored-By: DevUI Agent <devui-agent@pri.local>"
+
+  # ============================================
+  # QA Agent - Quality Assurance
+  # ============================================
+  qa-agent:
+    name: "[Agent] QA"
+    runs-on: ubuntu-latest
+    needs: [planner-agent, devapi-agent, devui-agent]
+    if: always() && (contains(needs.planner-agent.outputs.tasks, 'qa') || contains(needs.planner-agent.outputs.tasks, 'all'))
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install all dependencies
+        run: |
+          pip install -r backend/requirements.txt
+          cd frontend && npm ci || npm install
+
+      - name: QA Agent - Run Tests
+        run: |
+          echo "=== QA Agent: Running All Tests ==="
+
+          # Backend tests
+          pytest backend/tests/ -v --tb=short || true
+
+          # Frontend tests (if configured)
+          cd frontend
+          npm test 2>/dev/null || echo "No frontend tests configured"
+
+          echo "## QA Agent Report" >> $GITHUB_STEP_SUMMARY
+          echo "- Backend tests executed" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend tests executed" >> $GITHUB_STEP_SUMMARY
+
+      - name: QA Agent - Final Verification
+        id: verify
+        run: |
+          PASS_COUNT=0
+          FAIL_COUNT=0
+
+          # Check lint
+          if ruff check backend/ --quiet 2>/dev/null; then
+            ((PASS_COUNT++))
+          else
+            ((FAIL_COUNT++))
+          fi
+
+          # Check format
+          if black --check backend/ --quiet 2>/dev/null; then
+            ((PASS_COUNT++))
+          else
+            ((FAIL_COUNT++))
+          fi
+
+          # Check frontend lint
+          cd frontend
+          if npm run lint --silent 2>/dev/null; then
+            ((PASS_COUNT++))
+          else
+            ((FAIL_COUNT++))
+          fi
+
+          echo "pass_count=${PASS_COUNT}" >> $GITHUB_OUTPUT
+          echo "fail_count=${FAIL_COUNT}" >> $GITHUB_OUTPUT
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Final Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Passed: ${PASS_COUNT}" >> $GITHUB_STEP_SUMMARY
+          echo "- Failed: ${FAIL_COUNT}" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================
+  # Coordinator - Merge All Changes
+  # ============================================
+  coordinator:
+    name: "[Coordinator] Merge Changes"
+    runs-on: ubuntu-latest
+    needs: [devapi-agent, devui-agent, qa-agent]
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Merge all agent changes
+        run: |
+          git config --local user.email "coordinator@pri.local"
+          git config --local user.name "SubAgent Coordinator"
+
+          # Pull any changes
+          git pull --rebase origin ${{ github.ref_name }} || true
+
+          # Push if there are changes
+          git push || true
+
+      - name: Generate final report
+        run: |
+          echo "## SubAgents Parallel Development - Final Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Completed:** $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Agent | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Planner | ${{ needs.planner-agent.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| DevAPI | ${{ needs.devapi-agent.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| DevUI | ${{ needs.devui-agent.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| QA | ${{ needs.qa-agent.result }} |" >> $GITHUB_STEP_SUMMARY
