@@ -1,0 +1,14 @@
+# Video Module Requirements
+# YouTube動画からレシピを抽出するための依存パッケージ
+
+# YouTube字幕・トランスクリプト取得
+youtube-transcript-api==0.6.1
+
+# YouTube動画メタデータ取得（yt-dlpは高機能かつ軽量）
+yt-dlp==2023.11.16
+
+# データバリデーション（FastAPIと共通）
+pydantic==2.5.0
+
+# HTTPクライアント（必要に応じて）
+httpx==0.25.1

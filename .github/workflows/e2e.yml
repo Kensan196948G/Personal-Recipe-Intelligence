@@ -1,0 +1,246 @@
+name: E2E Tests
+
+on:
+  push:
+    branches:
+      - main
+      - feature/**
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  e2e-tests:
+    name: E2E Tests - ${{ matrix.browser }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+
+    steps:
+      # チェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Node.js セットアップ
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Bun セットアップ
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      # Python セットアップ（バックエンド用）
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # キャッシュ: フロントエンド依存関係
+      - name: Cache frontend dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            frontend/node_modules
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-frontend-${{ hashFiles('frontend/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-frontend-
+
+      # キャッシュ: バックエンド依存関係
+      - name: Cache backend dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            backend/.venv
+          key: ${{ runner.os }}-backend-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-backend-
+
+      # フロントエンド依存関係インストール
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: bun install
+
+      # Playwright ブラウザインストール
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: bunx playwright install --with-deps ${{ matrix.browser }}
+
+      # バックエンド依存関係インストール
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # バックエンド起動
+      - name: Start backend server
+        working-directory: backend
+        run: |
+          source .venv/bin/activate
+          python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
+          echo "Waiting for backend to start..."
+          timeout 30 bash -c 'until curl -f http://localhost:8000/health; do sleep 1; done'
+        env:
+          PYTHONUNBUFFERED: 1
+          DATABASE_URL: sqlite:///./test.db
+
+      # E2E テスト実行
+      - name: Run Playwright tests
+        working-directory: frontend
+        run: bun run e2e --project=${{ matrix.browser }}
+        env:
+          CI: true
+          BASE_URL: http://localhost:5173
+
+      # テストレポート保存
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: frontend/playwright-report/
+          retention-days: 7
+
+      # スクリーンショット保存
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-screenshots-${{ matrix.browser }}
+          path: frontend/test-results/
+          retention-days: 7
+
+      # 動画保存
+      - name: Upload videos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-videos-${{ matrix.browser }}
+          path: frontend/test-results/**/*.webm
+          retention-days: 7
+
+  # モバイルテスト
+  e2e-mobile-tests:
+    name: E2E Tests - Mobile
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache frontend dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            frontend/node_modules
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-frontend-${{ hashFiles('frontend/bun.lockb') }}
+
+      - name: Cache backend dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            backend/.venv
+          key: ${{ runner.os }}-backend-${{ hashFiles('backend/requirements.txt') }}
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: bun install
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: bunx playwright install --with-deps chromium webkit
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start backend server
+        working-directory: backend
+        run: |
+          source .venv/bin/activate
+          python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
+          timeout 30 bash -c 'until curl -f http://localhost:8000/health; do sleep 1; done'
+        env:
+          PYTHONUNBUFFERED: 1
+          DATABASE_URL: sqlite:///./test.db
+
+      - name: Run mobile tests
+        working-directory: frontend
+        run: bun run e2e:mobile
+        env:
+          CI: true
+          BASE_URL: http://localhost:5173
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-mobile
+          path: frontend/playwright-report/
+          retention-days: 7
+
+  # テスト結果集約
+  e2e-results:
+    name: E2E Test Results
+    runs-on: ubuntu-latest
+    needs: [e2e-tests, e2e-mobile-tests]
+    if: always()
+
+    steps:
+      - name: Download all reports
+        uses: actions/download-artifact@v4
+        with:
+          path: reports
+
+      - name: Display test results
+        run: |
+          echo "E2E Test Results Summary"
+          echo "========================"
+          ls -R reports/
+
+      - name: Check test status
+        run: |
+          if [ "${{ needs.e2e-tests.result }}" != "success" ]; then
+            echo "Desktop E2E tests failed"
+            exit 1
+          fi
+          if [ "${{ needs.e2e-mobile-tests.result }}" != "success" ]; then
+            echo "Mobile E2E tests failed"
+            exit 1
+          fi
+          echo "All E2E tests passed!"
