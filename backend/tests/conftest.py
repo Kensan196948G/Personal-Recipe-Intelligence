@@ -28,6 +28,10 @@ def setup_test_env():
             "DATABASE_URL": "sqlite:///:memory:",
             "DEBUG": "true",
             "LOG_LEVEL": "DEBUG",
+            "TESTING": "true",
+            "OPENAI_API_KEY": "test_openai_key",
+            "DEEPL_API_KEY": "test_deepl_key",
+            "APP_ENV": "testing",
         },
     ):
         yield

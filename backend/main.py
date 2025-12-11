@@ -6,15 +6,26 @@ CLAUDE.md に準拠した API 設計・認証・エラーハンドリングを�
 """
 
 import os
+import logging
+import uuid
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from middleware.auth_middleware import AuthMiddleware
+from core.config import settings
 
 # 環境変数読み込み
 load_dotenv()
+
+# ロギング設定（CLAUDE.md Section 6.2準拠）
+logging.basicConfig(
+    level=logging.INFO,
+    format='{"timestamp": "%(asctime)s", "level": "%(levelname)s", "module": "%(name)s", "message": "%(message)s"}',
+    datefmt="%Y-%m-%dT%H:%M:%S%z"
+)
+logger = logging.getLogger(__name__)
 
 # アプリケーション設定
 APP_VERSION = "1.0.0"
@@ -29,10 +40,8 @@ async def lifespan(app: FastAPI):
 
     起動時・終了時の処理を定義。
     """
-    # 起動時処理
-    print("[STARTUP] Personal Recipe Intelligence API starting...")
-    print(f"[STARTUP] Version: {APP_VERSION}")
-    print(f"[STARTUP] Environment: {os.getenv('DEBUG', 'false')}")
+    # 起動時処理（JSON形式ログ）
+    logger.info(f"Personal Recipe Intelligence API starting - Version: {APP_VERSION}, Environment: {settings.app_env}")
 
     # データディレクトリ確認
     os.makedirs("./data", exist_ok=True)
@@ -41,7 +50,7 @@ async def lifespan(app: FastAPI):
     yield
 
     # 終了時処理
-    print("[SHUTDOWN] Personal Recipe Intelligence API shutting down...")
+    logger.info("Personal Recipe Intelligence API shutting down")
 
 
 # FastAPI アプリケーション
@@ -55,13 +64,14 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-# CORS ミドルウェア
+# CORS ミドルウェア（CLAUDE.md Section 5準拠 - セキュリティ強化）
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 本番環境では制限推奨
+    allow_origins=settings.cors_origins,  # 設定ファイルから取得
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-API-Key"],
+    max_age=3600,  # プリフライトキャッシュ
 )
 
 # 認証ミドルウェア追加
@@ -224,10 +234,26 @@ async def global_exception_handler(request: Request, exc: Exception):
     Returns:
       JSONResponse: エラーレスポンス
     """
-    # セキュリティ: 本番環境では詳細なエラーメッセージを隠す
-    debug_mode = os.getenv("DEBUG", "false").lower() == "true"
+    # エラーID生成（追跡用）
+    error_id = uuid.uuid4().hex[:12]
 
-    error_detail = str(exc) if debug_mode else "Internal server error"
+    # 内部ログに詳細を記録（CLAUDE.md Section 6準拠）
+    logger.error(
+        f"Error ID {error_id}: {str(exc)}",
+        exc_info=True,
+        extra={
+            "error_id": error_id,
+            "path": str(request.url.path),
+            "method": request.method,
+            "client_ip": request.client.host if request.client else "unknown"
+        }
+    )
+
+    # セキュリティ: 本番環境では詳細なエラーメッセージを隠す
+    if settings.debug:
+        error_detail = str(exc)
+    else:
+        error_detail = f"Internal server error. Error ID: {error_id}"
 
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -235,6 +261,7 @@ async def global_exception_handler(request: Request, exc: Exception):
             "status": "error",
             "data": None,
             "error": error_detail,
+            "error_id": error_id,
         },
     )
 
