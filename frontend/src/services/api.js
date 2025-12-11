@@ -2,7 +2,7 @@
  * API Service - Backend API communication
  */
 
-const API_BASE = '/api/v1';
+const API_BASE = "/api/v1";
 
 /**
  * APIリクエスト共通処理
@@ -11,7 +11,7 @@ async function request(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
   const config = {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     ...options,
   };
@@ -20,7 +20,7 @@ async function request(endpoint, options = {}) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.detail || 'API Error');
+    throw new Error(data.detail || "API Error");
   }
 
   return data;
@@ -33,13 +33,13 @@ export const recipeApi = {
   // レシピ一覧取得
   async list(params = {}) {
     const query = new URLSearchParams();
-    if (params.page) query.set('page', params.page);
-    if (params.per_page) query.set('per_page', params.per_page);
-    if (params.search) query.set('search', params.search);
-    if (params.tag_id) query.set('tag_id', params.tag_id);
+    if (params.page) query.set("page", params.page);
+    if (params.per_page) query.set("per_page", params.per_page);
+    if (params.search) query.set("search", params.search);
+    if (params.tag_id) query.set("tag_id", params.tag_id);
 
     const queryString = query.toString();
-    const endpoint = queryString ? `/recipes?${queryString}` : '/recipes';
+    const endpoint = queryString ? `/recipes?${queryString}` : "/recipes";
     return request(endpoint);
   },
 
@@ -50,8 +50,8 @@ export const recipeApi = {
 
   // レシピ作成
   async create(recipe) {
-    return request('/recipes', {
-      method: 'POST',
+    return request("/recipes", {
+      method: "POST",
       body: JSON.stringify(recipe),
     });
   },
@@ -59,7 +59,7 @@ export const recipeApi = {
   // レシピ更新
   async update(id, recipe) {
     return request(`/recipes/${id}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(recipe),
     });
   },
@@ -67,14 +67,14 @@ export const recipeApi = {
   // レシピ削除
   async delete(id) {
     return request(`/recipes/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 
   // 材料追加
   async addIngredient(recipeId, ingredient) {
     return request(`/recipes/${recipeId}/ingredients`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(ingredient),
     });
   },
@@ -82,7 +82,7 @@ export const recipeApi = {
   // 材料更新
   async updateIngredient(recipeId, ingredientId, ingredient) {
     return request(`/recipes/${recipeId}/ingredients/${ingredientId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(ingredient),
     });
   },
@@ -90,14 +90,14 @@ export const recipeApi = {
   // 材料削除
   async deleteIngredient(recipeId, ingredientId) {
     return request(`/recipes/${recipeId}/ingredients/${ingredientId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 
   // 手順追加
   async addStep(recipeId, step) {
     return request(`/recipes/${recipeId}/steps`, {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify(step),
     });
   },
@@ -105,7 +105,7 @@ export const recipeApi = {
   // 手順更新
   async updateStep(recipeId, stepId, step) {
     return request(`/recipes/${recipeId}/steps/${stepId}`, {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(step),
     });
   },
@@ -113,7 +113,7 @@ export const recipeApi = {
   // 手順削除
   async deleteStep(recipeId, stepId) {
     return request(`/recipes/${recipeId}/steps/${stepId}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 };
@@ -124,7 +124,7 @@ export const recipeApi = {
 export const tagApi = {
   // タグ一覧取得
   async list() {
-    return request('/tags');
+    return request("/tags");
   },
 
   // タグ取得
@@ -134,8 +134,8 @@ export const tagApi = {
 
   // タグ作成
   async create(tag) {
-    return request('/tags', {
-      method: 'POST',
+    return request("/tags", {
+      method: "POST",
       body: JSON.stringify(tag),
     });
   },
@@ -143,7 +143,7 @@ export const tagApi = {
   // タグ削除
   async delete(id) {
     return request(`/tags/${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 };

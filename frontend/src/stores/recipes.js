@@ -1,8 +1,8 @@
 /**
  * Recipe Store - Svelte reactive store for recipes
  */
-import { writable, derived } from 'svelte/store';
-import { recipeApi } from '../services/api.js';
+import { writable, derived } from "svelte/store";
+import { recipeApi } from "../services/api.js";
 
 // Store definitions
 export const recipes = writable([]);
@@ -15,7 +15,7 @@ export const pagination = writable({
   total: 0,
   total_pages: 0,
 });
-export const searchQuery = writable('');
+export const searchQuery = writable("");
 export const selectedTagId = writable(null);
 
 // Derived stores
@@ -30,7 +30,7 @@ export async function fetchRecipes(params = {}) {
 
   try {
     const response = await recipeApi.list(params);
-    if (response.status === 'ok') {
+    if (response.status === "ok") {
       recipes.set(response.data.items);
       pagination.set({
         page: response.data.page,
@@ -56,7 +56,7 @@ export async function fetchRecipe(id) {
 
   try {
     const response = await recipeApi.get(id);
-    if (response.status === 'ok') {
+    if (response.status === "ok") {
       currentRecipe.set(response.data);
       return response.data;
     }
@@ -77,7 +77,7 @@ export async function createRecipe(recipe) {
 
   try {
     const response = await recipeApi.create(recipe);
-    if (response.status === 'ok') {
+    if (response.status === "ok") {
       await fetchRecipes();
       return response.data;
     }
@@ -98,7 +98,7 @@ export async function updateRecipe(id, recipe) {
 
   try {
     const response = await recipeApi.update(id, recipe);
-    if (response.status === 'ok') {
+    if (response.status === "ok") {
       await fetchRecipes();
       return response.data;
     }
@@ -119,7 +119,7 @@ export async function deleteRecipe(id) {
 
   try {
     const response = await recipeApi.delete(id);
-    if (response.status === 'ok') {
+    if (response.status === "ok") {
       await fetchRecipes();
       return true;
     }
