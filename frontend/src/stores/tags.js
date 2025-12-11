@@ -1,8 +1,8 @@
 /**
  * Tag Store - Svelte reactive store for tags
  */
-import { writable } from 'svelte/store';
-import { tagApi } from '../services/api.js';
+import { writable } from "svelte/store";
+import { tagApi } from "../services/api.js";
 
 // Store definitions
 export const tags = writable([]);
@@ -18,7 +18,7 @@ export async function fetchTags() {
 
   try {
     const response = await tagApi.list();
-    if (response.status === 'ok') {
+    if (response.status === "ok") {
       tags.set(response.data);
     }
   } catch (e) {
@@ -38,7 +38,7 @@ export async function createTag(name) {
 
   try {
     const response = await tagApi.create({ name });
-    if (response.status === 'ok') {
+    if (response.status === "ok") {
       await fetchTags();
       return response.data;
     }
@@ -59,7 +59,7 @@ export async function deleteTag(id) {
 
   try {
     const response = await tagApi.delete(id);
-    if (response.status === 'ok') {
+    if (response.status === "ok") {
       await fetchTags();
       return true;
     }
