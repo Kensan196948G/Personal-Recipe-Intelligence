@@ -1,14 +1,17 @@
 name: E2E Tests
 
+# E2E tests are currently disabled until frontend is fully set up
+# TODO: Re-enable when frontend/package.json has e2e scripts
 on:
-  push:
-    branches:
-      - main
-      - feature/**
-  pull_request:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
+  #     - feature/**
+  # pull_request:
+  #   branches:
+  #     - main
   workflow_dispatch:
+    # Manual trigger only until frontend is ready
 
 jobs:
   e2e-tests:
