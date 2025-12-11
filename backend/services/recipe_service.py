@@ -1,10 +1,13 @@
 """
 Recipe Service - Business logic for recipe operations
+
+N+1クエリ問題を解決するために selectinload を使用
 """
 
 from datetime import datetime
 from typing import Optional
 
+from sqlalchemy.orm import selectinload
 from sqlmodel import Session, func, select
 
 from backend.models.recipe import Ingredient, Recipe, RecipeTag, Step, Tag
@@ -26,7 +29,7 @@ class RecipeService:
         search: Optional[str] = None,
         tag_id: Optional[int] = None,
     ) -> tuple[list[Recipe], int]:
-        """レシピ一覧取得"""
+        """レシピ一覧取得（N+1クエリ問題を解決）"""
         query = select(Recipe)
 
         # 検索フィルタ
@@ -41,16 +44,35 @@ class RecipeService:
         count_query = select(func.count()).select_from(query.subquery())
         total = self.session.exec(count_query).one()
 
-        # ページネーション
+        # ページネーション + 関連データの事前読み込み（N+1クエリ問題を解決）
         offset = (page - 1) * per_page
-        query = query.offset(offset).limit(per_page).order_by(Recipe.updated_at.desc())
+        query = (
+            query
+            .options(
+                selectinload(Recipe.ingredients),
+                selectinload(Recipe.steps),
+                selectinload(Recipe.tags),
+            )
+            .offset(offset)
+            .limit(per_page)
+            .order_by(Recipe.updated_at.desc())
+        )
 
         recipes = self.session.exec(query).all()
         return list(recipes), total
 
     def get_recipe(self, recipe_id: int) -> Optional[Recipe]:
-        """レシピ詳細取得"""
-        return self.session.get(Recipe, recipe_id)
+        """レシピ詳細取得（N+1クエリ問題を解決）"""
+        query = (
+            select(Recipe)
+            .where(Recipe.id == recipe_id)
+            .options(
+                selectinload(Recipe.ingredients),
+                selectinload(Recipe.steps),
+                selectinload(Recipe.tags),
+            )
+        )
+        return self.session.exec(query).first()
 
     def create_recipe(
         self,

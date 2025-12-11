@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from difflib import SequenceMatcher
 from typing import Dict, List, Optional
 
+from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 from backend.models.recipe import Ingredient, Recipe
@@ -71,8 +72,12 @@ class SearchService:
         query_normalized = self._normalize_text(query)
         results: List[SearchResult] = []
 
-        # Fetch all recipes
-        statement = select(Recipe)
+        # Fetch all recipes with eager loading (N+1クエリ問題を解決)
+        statement = select(Recipe).options(
+            selectinload(Recipe.ingredients),
+            selectinload(Recipe.steps),
+            selectinload(Recipe.tags),
+        )
         recipes = self.session.exec(statement).all()
 
         for recipe in recipes:
