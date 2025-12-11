@@ -318,7 +318,7 @@ A: 以下を確認してください:
 /mnt/Linux-ExHDD/Personal-Recipe-Intelligence/docs/search-api-usage.md
 /mnt/Linux-ExHDD/Personal-Recipe-Intelligence/tests/backend/test_search_service.py
 /mnt/Linux-ExHDD/Personal-Recipe-Intelligence/examples/search_demo.py
-/mnt/Linux-ExHDD/Personal-Recipe-Intelligence/SEARCH_IMPLEMENTATION_SUMMARY.md
+docs/implementation/検索実装サマリー(search-implementation-summary).md
 ```
 
 ## まとめ

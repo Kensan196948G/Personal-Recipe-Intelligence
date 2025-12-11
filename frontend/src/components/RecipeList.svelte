@@ -45,6 +45,10 @@
     dispatch('import');
   }
 
+  function handleCollector() {
+    dispatch('collector');
+  }
+
   function formatTime(minutes) {
     if (!minutes) return '-';
     if (minutes < 60) return `${minutes}分`;
@@ -66,6 +70,13 @@
       <button on:click={handleSearch}>検索</button>
     </div>
     <div class="toolbar-actions">
+      <button class="btn-collector" on:click={handleCollector}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+        </svg>
+        海外レシピ収集
+      </button>
       <button class="btn-secondary" on:click={handleImport}>CSVインポート</button>
       <button class="btn-primary" on:click={handleCreate}>新規作成</button>
     </div>
@@ -268,6 +279,19 @@
 
   .btn-secondary:hover {
     background: #e8e8e8;
+  }
+
+  .btn-collector {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+  }
+
+  .btn-collector:hover {
+    background: #218838;
   }
 
   .toolbar-actions {

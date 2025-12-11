@@ -36,6 +36,13 @@ class Settings(BaseSettings):
     # DeepL API
     deepl_api_key: str = ""
 
+    # Spoonacular API
+    spoonacular_api_key: str = ""
+
+    # Recipe Collector Settings
+    collector_daily_count: int = 5
+    collector_hour: int = 3
+
     # Paths
     base_dir: Path = Path(__file__).resolve().parent.parent.parent
     data_dir: Path = base_dir / "data"

@@ -10,6 +10,18 @@ export default defineConfig({
         target: 'http://192.168.0.29:8000',
         changeOrigin: true,
       },
+      '/collector': {
+        target: 'http://192.168.0.29:8000',
+        changeOrigin: true,
+      },
+      '/recipes': {
+        target: 'http://192.168.0.29:8000',
+        changeOrigin: true,
+      },
+      '/health': {
+        target: 'http://192.168.0.29:8000',
+        changeOrigin: true,
+      },
     },
   },
 });
