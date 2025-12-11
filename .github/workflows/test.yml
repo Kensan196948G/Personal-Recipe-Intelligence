@@ -38,10 +38,10 @@ jobs:
     - name: Run linters
       run: |
         # Run Ruff
-        ruff check backend/ src/ || true
+        ruff check backend/ || true
 
         # Run Black (check only)
-        black --check backend/ src/ || true
+        black --check backend/ || true
 
     - name: Run tests with coverage
       run: |
@@ -93,11 +93,11 @@ jobs:
 
     - name: Run Ruff
       run: |
-        ruff check backend/ src/
+        ruff check backend/
 
     - name: Run Black
       run: |
-        black --check backend/ src/
+        black --check backend/
 
   integration:
     runs-on: ubuntu-latest

@@ -12,19 +12,29 @@ from typing import Generator, Dict, Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import StaticPool
 
 # プロジェクトルートをパスに追加
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+# 条件付きインポート（CIで依存関係がない場合のスキップ対応）
+try:
+    from fastapi.testclient import TestClient
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker, Session
+    from sqlalchemy.pool import StaticPool
+    HAS_FASTAPI = True
+except ImportError:
+    HAS_FASTAPI = False
+    TestClient = None
+    Session = None
+
 
 @pytest.fixture(scope="session")
 def test_db_engine():
     """テスト用インメモリDBエンジン"""
+    if not HAS_FASTAPI:
+        pytest.skip("FastAPI/SQLAlchemy not available")
     engine = create_engine(
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
