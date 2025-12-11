@@ -1,0 +1,16 @@
+# OCR Module Requirements
+# Install with: pip install -r backend/ocr/requirements.txt
+
+# Image Processing
+Pillow>=10.0.0
+opencv-python>=4.8.0
+
+# OCR
+pytesseract>=0.3.10
+
+# Utilities
+numpy>=1.24.0
+
+# Note: Tesseract OCR must be installed on the system
+# Ubuntu: sudo apt-get install tesseract-ocr tesseract-ocr-jpn
+# For Japanese language support, install: tesseract-ocr-jpn

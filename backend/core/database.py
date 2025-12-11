@@ -1,7 +1,8 @@
 """
 Personal Recipe Intelligence - Database Configuration
 """
-from sqlmodel import SQLModel, create_engine, Session
+from sqlmodel import Session, SQLModel, create_engine
+
 from backend.core.config import settings
 
 # Create engine
