@@ -5,9 +5,9 @@ Recipe Service - Business logic for recipe operations
 from datetime import datetime
 from typing import Optional
 
-from sqlmodel import Session, select, func
+from sqlmodel import Session, func, select
 
-from backend.models.recipe import Recipe, Ingredient, Step, Tag, RecipeTag
+from backend.models.recipe import Ingredient, Recipe, RecipeTag, Step, Tag
 
 
 class RecipeService:

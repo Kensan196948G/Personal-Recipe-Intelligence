@@ -5,7 +5,14 @@ Personal Recipe Intelligence - FastAPI Main Application
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api.routers import recipes_router, tags_router
+from backend.api.routers import (
+  ocr_router,
+  recipes_router,
+  scraper_router,
+  search_router,
+  tags_router,
+  translation_router,
+)
 
 app = FastAPI(
     title="Personal Recipe Intelligence API",
@@ -25,6 +32,10 @@ app.add_middleware(
 # ルーター登録
 app.include_router(recipes_router)
 app.include_router(tags_router)
+app.include_router(scraper_router)
+app.include_router(ocr_router)
+app.include_router(translation_router)
+app.include_router(search_router)
 
 
 @app.get("/")
