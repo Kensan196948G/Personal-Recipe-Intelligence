@@ -1,0 +1,54 @@
+{
+  "agent_type": "subagent",
+  "name": "ScraperAgent",
+  "async": true,
+  "model": "claude-3-5-sonnet-20241022",
+  "autonomy_level": "medium",
+  "purpose": "Webレシピ抽出の中心。Browser MCP / Puppeteer MCP を用いてDOM/HTMLを取得し、材料・手順・タイトルを抽出する。",
+  "capabilities": [
+    "web_scraping",
+    "dom_parsing",
+    "recipe_extraction",
+    "mcp_usage"
+  ],
+  "uses_mcp": ["browser", "puppeteer"],
+  "mcp_constraints": {
+    "max_concurrent": 1,
+    "timeout_seconds": 30
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "url": {
+        "type": "string",
+        "description": "スクレイピング対象のURL"
+      },
+      "source_type": {
+        "type": "string",
+        "enum": ["domestic", "foreign"],
+        "description": "国内サイトか海外サイトか"
+      }
+    },
+    "required": ["url"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "title": {"type": "string"},
+      "ingredients": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "steps": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "description": {"type": "string"},
+      "source_url": {"type": "string"},
+      "language": {"type": "string"}
+    }
+  },
+  "allowed_paths": ["backend/scraper/", "data/"],
+  "forbidden_actions": ["rm -rf", "systemctl", "reboot"],
+  "forbidden_paths": ["/etc", "/var", "/boot", "/root"]
+}

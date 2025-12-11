@@ -1,0 +1,51 @@
+{
+  "agent_type": "subagent",
+  "name": "OcrAgent",
+  "async": true,
+  "model": "claude-3-5-sonnet-20241022",
+  "autonomy_level": "medium",
+  "purpose": "画像レシピからテキスト抽出。Filesystem MCPで画像読み込み、Claude Visionを使用してテキストを抽出する。",
+  "capabilities": [
+    "image_parsing",
+    "text_extraction",
+    "mcp_filesystem",
+    "handwriting_recognition"
+  ],
+  "uses_mcp": ["filesystem"],
+  "mcp_constraints": {
+    "max_concurrent": 1
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "image_path": {
+        "type": "string",
+        "description": "画像ファイルのパス"
+      },
+      "image_type": {
+        "type": "string",
+        "enum": ["handwritten", "printed", "package", "screenshot"],
+        "description": "画像の種類"
+      }
+    },
+    "required": ["image_path"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "title": {"type": "string"},
+      "ingredients": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "steps": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "raw_text": {"type": "string"}
+    }
+  },
+  "allowed_paths": ["data/images/", "backend/ocr/"],
+  "forbidden_actions": ["rm -rf", "systemctl", "reboot"],
+  "forbidden_paths": ["/etc", "/var", "/boot", "/root"]
+}

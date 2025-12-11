@@ -1,0 +1,53 @@
+{
+  "agent_type": "subagent",
+  "name": "QaAgent",
+  "async": true,
+  "model": "claude-3-5-sonnet-20241022",
+  "autonomy_level": "medium",
+  "purpose": "テスト自動生成と検証。pytest/bun testのテストコードを自動生成し、API仕様・UI仕様からテストケースを作成する。",
+  "capabilities": [
+    "test_generation",
+    "schema_validation",
+    "coverage_analysis",
+    "edge_case_detection"
+  ],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "target": {
+        "type": "string",
+        "enum": ["api", "ui", "integration"],
+        "description": "テスト対象"
+      },
+      "source_files": {
+        "type": "array",
+        "items": {"type": "string"},
+        "description": "テスト対象のソースファイル"
+      },
+      "api_schema": {
+        "type": "object",
+        "description": "APIスキーマ情報"
+      }
+    },
+    "required": ["target"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "test_files": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "path": {"type": "string"},
+            "content": {"type": "string"}
+          }
+        }
+      },
+      "coverage_estimate": {"type": "number"}
+    }
+  },
+  "allowed_paths": ["tests/", "backend/tests/", "frontend/tests/"],
+  "forbidden_actions": ["rm -rf", "systemctl", "reboot"],
+  "forbidden_paths": ["/etc", "/var", "/boot", "/root"]
+}

@@ -1,0 +1,74 @@
+{
+  "agent_type": "subagent",
+  "name": "CleanerAgent",
+  "async": true,
+  "model": "claude-3-5-sonnet-20241022",
+  "autonomy_level": "medium",
+  "purpose": "材料・手順の正規化。Scraper/OCRが生成したレシピデータを正規化し、材料名の統一と分量の数値化を行う。",
+  "capabilities": [
+    "data_cleaning",
+    "normalization",
+    "unit_conversion",
+    "ingredient_standardization"
+  ],
+  "normalization_rules": {
+    "ingredient_aliases": {
+      "玉ねぎ": "たまねぎ",
+      "玉葱": "たまねぎ",
+      "人参": "にんじん",
+      "ニンジン": "にんじん"
+    },
+    "unit_conversions": {
+      "cup": {"ml": 240},
+      "tbsp": {"ml": 15},
+      "tsp": {"ml": 5},
+      "oz": {"g": 28.35}
+    }
+  },
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "title": {"type": "string"},
+      "ingredients": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "steps": {
+        "type": "array",
+        "items": {"type": "string"}
+      }
+    },
+    "required": ["title", "ingredients", "steps"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "title": {"type": "string"},
+      "ingredients": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {"type": "string"},
+            "name_normalized": {"type": "string"},
+            "amount": {"type": "number"},
+            "unit": {"type": "string"},
+            "note": {"type": "string"}
+          }
+        }
+      },
+      "steps": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "order": {"type": "integer"},
+            "description": {"type": "string"}
+          }
+        }
+      }
+    }
+  },
+  "forbidden_actions": ["rm -rf", "systemctl", "reboot"],
+  "forbidden_paths": ["/etc", "/var", "/boot", "/root"]
+}

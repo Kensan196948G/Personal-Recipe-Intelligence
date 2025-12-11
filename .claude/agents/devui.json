@@ -1,0 +1,52 @@
+{
+  "agent_type": "subagent",
+  "name": "DevUIAgent",
+  "async": true,
+  "model": "claude-3-5-sonnet-20241022",
+  "autonomy_level": "medium",
+  "purpose": "軽量WebUIの自動生成。Svelteを使った軽量WebUIを構築し、レシピ一覧/詳細/タグ/検索UIを提供する。",
+  "capabilities": [
+    "component_generation",
+    "api_integration",
+    "state_management",
+    "responsive_design"
+  ],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "task": {
+        "type": "string",
+        "description": "UI開発タスクの内容"
+      },
+      "api_schema": {
+        "type": "object",
+        "description": "バックエンドAPIのスキーマ情報"
+      }
+    },
+    "required": ["task"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "files": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "path": {"type": "string"},
+            "content": {"type": "string"},
+            "action": {"type": "string", "enum": ["create", "update", "delete"]}
+          }
+        }
+      }
+    }
+  },
+  "allowed_paths": ["frontend/"],
+  "forbidden_actions": ["rm -rf", "systemctl", "reboot"],
+  "forbidden_paths": ["/etc", "/var", "/boot", "/root"],
+  "required_style_rules": {
+    "formatter": "prettier",
+    "naming": "camelCase",
+    "framework": "svelte"
+  }
+}

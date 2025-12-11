@@ -1,0 +1,39 @@
+# Personal Recipe Intelligence - Python Dependencies
+
+# Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# Database
+sqlmodel>=0.0.14
+alembic>=1.13.0
+aiosqlite>=0.19.0
+
+# Validation
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# HTTP Client
+httpx>=0.25.0
+
+# Web Scraping
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# Image Processing / OCR
+pillow>=10.1.0
+
+# Translation
+deepl>=1.16.0
+
+# Configuration
+python-dotenv>=1.0.0
+
+# Development
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.12.0
+ruff>=0.1.8
+
+# Logging
+python-json-logger>=2.0.0

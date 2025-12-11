@@ -1,0 +1,54 @@
+{
+  "agent_type": "subagent",
+  "name": "DevAPIAgent",
+  "async": true,
+  "model": "claude-3-5-sonnet-20241022",
+  "autonomy_level": "medium",
+  "purpose": "FastAPI/Flask の API 自動生成。Python3.11 + FastAPI コードを生成し、SQLite + SQLModel を使用した CRUD を構築する。",
+  "capabilities": [
+    "code_generation",
+    "refactoring",
+    "db_schema_design",
+    "api_endpoint_creation",
+    "pydantic_validation"
+  ],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "task": {
+        "type": "string",
+        "description": "API開発タスクの内容"
+      },
+      "schema": {
+        "type": "object",
+        "description": "データスキーマ情報"
+      }
+    },
+    "required": ["task"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "files": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "path": {"type": "string"},
+            "content": {"type": "string"},
+            "action": {"type": "string", "enum": ["create", "update", "delete"]}
+          }
+        }
+      }
+    }
+  },
+  "allowed_paths": ["backend/"],
+  "forbidden_actions": ["rm -rf", "systemctl", "reboot"],
+  "forbidden_paths": ["/etc", "/var", "/boot", "/root"],
+  "required_style_rules": {
+    "formatter": "black",
+    "linter": "ruff",
+    "naming": "snake_case",
+    "max_line_length": 120
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "agent_type": "subagent",
+  "name": "PlannerAgent",
+  "async": true,
+  "model": "claude-3-5-sonnet-20241022",
+  "autonomy_level": "medium",
+  "purpose": "タスク分解と自動割当の司令塔。仕様書やタスク要求を受け取り、5〜12個のタスクに分解し、適切なSubAgentへ振り分ける。",
+  "capabilities": [
+    "task_planning",
+    "dependency_analysis",
+    "task_decomposition",
+    "priority_assignment"
+  ],
+  "task_types": ["api", "ui", "scrape", "clean", "ocr", "translate", "test", "docs"],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "requirement": {
+        "type": "string",
+        "description": "タスク要求や仕様書の内容"
+      },
+      "context": {
+        "type": "object",
+        "description": "追加のコンテキスト情報"
+      }
+    },
+    "required": ["requirement"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "tasks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "string"},
+            "type": {"type": "string"},
+            "description": {"type": "string"},
+            "priority": {"type": "integer"},
+            "dependencies": {"type": "array", "items": {"type": "string"}}
+          }
+        }
+      }
+    }
+  },
+  "forbidden_actions": ["rm -rf", "systemctl", "reboot", "shutdown"],
+  "forbidden_paths": ["/etc", "/var", "/boot", "/root"]
+}

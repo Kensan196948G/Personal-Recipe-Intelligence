@@ -1,0 +1,47 @@
+{
+  "agent_type": "subagent",
+  "name": "WriterAgent",
+  "async": true,
+  "model": "claude-3-5-sonnet-20241022",
+  "autonomy_level": "medium",
+  "purpose": "ドキュメント自動生成。README.md/API仕様書/ER図説明/ADRを生成し、CLAUDE.mdとの整合性を保つ。",
+  "capabilities": [
+    "documentation",
+    "api_spec_generation",
+    "adr_creation",
+    "changelog_update"
+  ],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "doc_type": {
+        "type": "string",
+        "enum": ["readme", "api_spec", "adr", "changelog", "er_diagram"],
+        "description": "生成するドキュメントの種類"
+      },
+      "context": {
+        "type": "object",
+        "description": "ドキュメント生成に必要なコンテキスト"
+      }
+    },
+    "required": ["doc_type"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "files": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "path": {"type": "string"},
+            "content": {"type": "string"}
+          }
+        }
+      }
+    }
+  },
+  "allowed_paths": ["docs/", "README.md", "CHANGELOG.md"],
+  "forbidden_actions": ["rm -rf", "systemctl", "reboot"],
+  "forbidden_paths": ["/etc", "/var", "/boot", "/root"]
+}

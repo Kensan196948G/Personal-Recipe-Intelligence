@@ -1,0 +1,53 @@
+{
+  "agent_type": "subagent",
+  "name": "TranslationAgent",
+  "async": true,
+  "model": "claude-3-5-sonnet-20241022",
+  "autonomy_level": "medium",
+  "purpose": "DeepL APIを使用して海外レシピを日本語化する。英語→日本語の翻訳を行い、材料名・手順を日本語に変換する。",
+  "capabilities": [
+    "translation",
+    "json_transformation",
+    "api_integration",
+    "language_detection"
+  ],
+  "required_env": ["DEEPL_API_KEY"],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "title": {"type": "string"},
+      "ingredients": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "steps": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "description": {"type": "string"},
+      "source_language": {
+        "type": "string",
+        "default": "EN"
+      }
+    },
+    "required": ["title", "ingredients", "steps"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "title_ja": {"type": "string"},
+      "ingredients_ja": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "steps_ja": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "description_ja": {"type": "string"}
+    }
+  },
+  "allowed_paths": ["backend/translation/"],
+  "forbidden_actions": ["rm -rf", "systemctl", "reboot"],
+  "forbidden_paths": ["/etc", "/var", "/boot", "/root"]
+}
