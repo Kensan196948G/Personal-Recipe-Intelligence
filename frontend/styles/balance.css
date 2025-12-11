@@ -1,0 +1,425 @@
+/**
+ * 食事バランス可視化スタイル
+ */
+
+/* 共通スタイル */
+.balance-dashboard,
+.daily-balance-dashboard {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.balance-dashboard h2,
+.daily-balance-dashboard h2 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #1f2937;
+}
+
+.target-date {
+  color: #6b7280;
+  margin-bottom: 20px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.dashboard-item {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.no-data,
+.loading,
+.error {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+}
+
+.error {
+  color: #ef4444;
+}
+
+/* バランススコア */
+.balance-score {
+  text-align: center;
+}
+
+.score-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.score-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 6px solid;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #f9fafb;
+}
+
+.score-value {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.score-max {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.score-evaluation {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.recommendations {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.recommendations h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #1f2937;
+}
+
+.recommendations ul {
+  list-style: none;
+  padding: 0;
+}
+
+.recommendations li {
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  background: #f3f4f6;
+  border-left: 3px solid #3b82f6;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #374151;
+}
+
+/* PFC円グラフ */
+.pfc-pie-chart h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #1f2937;
+}
+
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.pie-svg {
+  width: 100%;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+}
+
+.legend-label {
+  color: #374151;
+}
+
+/* 栄養充足率棒グラフ */
+.nutrition-bar-chart h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #1f2937;
+}
+
+.bar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.bar-label {
+  min-width: 80px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.bar-graph {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-wrapper {
+  flex: 1;
+  position: relative;
+  height: 30px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar-actual {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.bar-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.bar-reference {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 2px;
+  z-index: 10;
+}
+
+.reference-line {
+  display: block;
+  width: 2px;
+  height: 100%;
+  background: #ef4444;
+  border-left: 2px dashed #ef4444;
+}
+
+.bar-fulfillment {
+  min-width: 50px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.chart-note {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.note-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.color-box {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* レーダーチャート */
+.balance-radar-chart h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #1f2937;
+}
+
+.radar-svg {
+  width: 100%;
+  max-width: 250px;
+  margin: 0 auto;
+  display: block;
+}
+
+/* 1日の基準値比較 */
+.daily-reference h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #1f2937;
+}
+
+.reference-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.reference-item {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.ref-label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.ref-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .balance-dashboard,
+  .daily-balance-dashboard {
+    padding: 15px;
+  }
+
+  .bar-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .bar-label {
+    min-width: auto;
+  }
+
+  .bar-graph {
+    width: 100%;
+  }
+
+  .reference-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .balance-dashboard h2,
+  .daily-balance-dashboard h2 {
+    font-size: 20px;
+  }
+
+  .score-circle {
+    width: 100px;
+    height: 100px;
+    border-width: 5px;
+  }
+
+  .score-value {
+    font-size: 28px;
+  }
+
+  .reference-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-note {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* ダークモード対応（オプション） */
+@media (prefers-color-scheme: dark) {
+  .balance-dashboard,
+  .daily-balance-dashboard {
+    background: #111827;
+  }
+
+  .balance-dashboard h2,
+  .daily-balance-dashboard h2,
+  .pfc-pie-chart h3,
+  .nutrition-bar-chart h3,
+  .balance-radar-chart h3,
+  .daily-reference h3,
+  .score-evaluation {
+    color: #f9fafb;
+  }
+
+  .dashboard-item {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .score-circle {
+    background: #111827;
+  }
+
+  .recommendations li {
+    background: #374151;
+    color: #e5e7eb;
+  }
+
+  .bar-wrapper {
+    background: #374151;
+  }
+
+  .reference-item {
+    background: #374151;
+    border-color: #4b5563;
+  }
+
+  .ref-label {
+    color: #9ca3af;
+  }
+
+  .ref-value {
+    color: #f9fafb;
+  }
+
+  .legend-label,
+  .bar-label,
+  .bar-fulfillment {
+    color: #e5e7eb;
+  }
+}
