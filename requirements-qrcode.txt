@@ -1,0 +1,14 @@
+# QRコード生成機能の依存関係
+# Personal Recipe Intelligence - QRCode Module
+
+# QRコード生成ライブラリ
+qrcode[pil]==7.4.2
+
+# 画像処理ライブラリ
+Pillow==10.4.0
+
+# QRコードスタイリング用（qrcode[pil]に含まれる）
+# - StyledPilImage
+# - RoundedModuleDrawer
+# - CircleModuleDrawer
+# - SolidFillColorMask
