@@ -184,11 +184,16 @@
       </div>
 
       <div class="template-section">
-        <button class="btn-template" on:click={downloadTemplate}>
-          CSVテンプレートをダウンロード
+        <button class="btn-template-download" on:click={downloadTemplate}>
+          <svg class="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-width="2" stroke-linecap="round"/>
+            <polyline points="7 10 12 15 17 10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="15" x2="12" y2="3" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          サンプルCSVをダウンロード（10件のレシピ例）
         </button>
         <p class="template-hint">
-          フォーマットが分からない場合はテンプレートをご利用ください
+          カレーライス、肉じゃが、親子丼など10種類のサンプルレシピが含まれています
         </p>
       </div>
 
@@ -429,29 +434,46 @@
   }
 
   .template-section {
-    margin-top: 1rem;
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
     text-align: center;
   }
 
-  .btn-template {
-    background: none;
-    border: 1px solid #ccc;
-    color: #666;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+  .btn-template-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #0284c7;
+    border: none;
+    color: white;
+    padding: 0.875rem 1.5rem;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(2, 132, 199, 0.3);
   }
 
-  .btn-template:hover {
-    background: #f5f5f5;
-    border-color: #999;
+  .btn-template-download:hover {
+    background: #0369a1;
+    box-shadow: 0 4px 8px rgba(2, 132, 199, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .download-icon {
+    width: 20px;
+    height: 20px;
   }
 
   .template-hint {
-    font-size: 0.8rem;
-    color: #999;
-    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #0369a1;
+    margin-top: 0.75rem;
+    margin-bottom: 0;
   }
 
   .file-info {
