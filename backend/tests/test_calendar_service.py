@@ -11,6 +11,7 @@ import shutil
 # icalendarがインストールされていない場合はスキップ
 try:
     from backend.services.calendar_service import CalendarService, MealPlanModel
+
     CALENDAR_SERVICE_AVAILABLE = True
 except ImportError:
     CALENDAR_SERVICE_AVAILABLE = False
