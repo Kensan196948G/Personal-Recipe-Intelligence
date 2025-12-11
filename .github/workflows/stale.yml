@@ -35,8 +35,8 @@ jobs:
             This issue has been automatically closed due to inactivity.
             Feel free to reopen if needed.
           stale-issue-label: 'stale'
-          days-before-issue-stale: 60
-          days-before-issue-close: 30
+          days-before-issue-stale: 60  # Mark as stale after 60 days of inactivity
+          days-before-issue-close: 30  # Close 30 days after marked stale (total: 90 days)
           exempt-issue-labels: 'pinned,security,bug'
           
           # PR settings
