@@ -3,10 +3,11 @@
   import RecipeDetail from './components/RecipeDetail.svelte';
   import RecipeForm from './components/RecipeForm.svelte';
   import CsvImport from './components/CsvImport.svelte';
+  import RecipeCollector from './components/RecipeCollector.svelte';
   import { fetchRecipe, currentRecipe, fetchRecipes } from './stores/recipes.js';
 
   // View state
-  let view = 'list'; // 'list', 'detail', 'create', 'edit', 'import'
+  let view = 'list'; // 'list', 'detail', 'create', 'edit', 'import', 'collector'
   let selectedRecipe = null;
 
   async function handleView(event) {
@@ -46,6 +47,10 @@
     await fetchRecipes();
     view = 'list';
   }
+
+  function handleCollector() {
+    view = 'collector';
+  }
 </script>
 
 <main>
@@ -61,6 +66,7 @@
         on:edit={handleEdit}
         on:create={handleCreate}
         on:import={handleImport}
+        on:collector={handleCollector}
       />
     {:else if view === 'detail' && selectedRecipe}
       <RecipeDetail
@@ -82,6 +88,16 @@
         on:back={handleBack}
         on:imported={handleImported}
       />
+    {:else if view === 'collector'}
+      <div class="collector-view">
+        <button class="back-btn" on:click={handleBack}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          戻る
+        </button>
+        <RecipeCollector />
+      </div>
     {/if}
   </section>
 
@@ -144,5 +160,26 @@
     color: #888;
     font-size: 0.85rem;
     margin: 0;
+  }
+
+  .collector-view {
+    position: relative;
+  }
+
+  .collector-view .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .collector-view .back-btn:hover {
+    background: #f5f5f5;
   }
 </style>

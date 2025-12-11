@@ -9,9 +9,10 @@ Personal Recipe Intelligence (PRI) は、様々なソースからレシピを収
 ### 主な機能
 
 - **Web スクレイピング**: 国内・海外のレシピサイトからレシピを抽出
-- **OCR 解析**: 手書きレシピや雑誌の写真からテキスト抽出
+- **海外レシピ自動収集**: Spoonacular API を使用した定期的な海外レシピ収集
 - **自動翻訳**: DeepL API を使用した海外レシピの日本語化
-- **データ正規化**: 材料名・分量の統一処理
+- **OCR 解析**: 手書きレシピや雑誌の写真からテキスト抽出
+- **データ正規化**: 材料名・分量の統一処理（US単位→メトリック変換）
 - **WebUI**: 軽量な検索・閲覧インターフェース
 
 ### 対応レシピ取得元
@@ -20,6 +21,7 @@ Personal Recipe Intelligence (PRI) は、様々なソースからレシピを収
 |---------|-----------|
 | 国内サイト | クックパッド, クラシル, デリッシュキッチン, Nadia 等 |
 | 海外サイト | Allrecipes, BBC GoodFood, NYTimes Cooking 等 |
+| 海外API | Spoonacular API（自動収集） |
 | 動画 | YouTube, Instagram Reels, TikTok |
 | 画像 | 手書きレシピ, 雑誌, パッケージ裏面 |
 
@@ -48,26 +50,40 @@ cd Personal-Recipe-Intelligence
 # .env.example をコピーして編集
 cp .env.example .env
 
-# DeepL API キーなどを設定
+# 必要なAPIキーを設定
+# - DEEPL_API_KEY: DeepL翻訳用
+# - SPOONACULAR_API_KEY: 海外レシピ収集用
 ```
 
 ## ディレクトリ構成
 
 ```
 personal-recipe-intelligence/
-├── backend/           # Python API (FastAPI)
-│   ├── api/           # エンドポイント
-│   ├── models/        # SQLModel / Pydantic
-│   ├── services/      # ビジネスロジック
-│   ├── scraper/       # Web スクレイピング
-│   ├── ocr/           # OCR 処理
-│   └── translation/   # DeepL 翻訳
-├── frontend/          # WebUI (Svelte)
-├── config/            # 設定ファイル
-├── data/              # SQLite / JSON 保存
-├── docs/              # 仕様書
-├── scripts/           # 自動化スクリプト
-└── tests/             # 統合テスト
+├── backend/              # Python API (FastAPI)
+│   ├── api/              # エンドポイント
+│   ├── models/           # SQLModel / Pydantic
+│   ├── services/         # ビジネスロジック
+│   ├── scraper/          # Web スクレイピング
+│   ├── ocr/              # OCR 処理
+│   └── translation/      # DeepL 翻訳
+├── frontend/             # WebUI (Svelte)
+├── config/               # 設定ファイル
+├── data/                 # SQLite / JSON 保存
+├── docs/                 # ドキュメント
+│   ├── implementation/   # 実装サマリー
+│   ├── performance/      # パフォーマンス関連
+│   ├── testing/          # テスト関連
+│   ├── quickstart/       # クイックスタート
+│   └── features/         # 機能README
+├── scripts/              # 自動化スクリプト
+│   ├── setup/            # セットアップ系
+│   ├── analysis/         # 分析系
+│   ├── testing/          # テスト実行系
+│   └── utils/            # ユーティリティ
+├── tests/                # 統合テスト
+├── dev.sh                # 開発サーバー起動
+├── lint.sh               # Lint チェック
+└── test.sh               # テスト実行
 ```
 
 ## 使用方法
@@ -76,22 +92,24 @@ personal-recipe-intelligence/
 
 ```bash
 # API と UI を同時起動
-./scripts/dev.sh
+./dev.sh
 ```
 
 ### テスト実行
 
 ```bash
-./scripts/test.sh
+./test.sh
 ```
 
 ### Lint チェック
 
 ```bash
-./scripts/lint.sh
+./lint.sh
 ```
 
 ## API エンドポイント
+
+### レシピ管理
 
 | メソッド | パス | 説明 |
 |---------|------|------|
@@ -102,6 +120,15 @@ personal-recipe-intelligence/
 | DELETE | /api/v1/recipes/{id} | レシピ削除 |
 | POST | /api/v1/scrape | URL からレシピ抽出 |
 | POST | /api/v1/ocr | 画像からレシピ抽出 |
+
+### 海外レシピ収集
+
+| メソッド | パス | 説明 |
+|---------|------|------|
+| GET | /collector/status | スケジューラー状態取得 |
+| POST | /collector/collect | 即座にレシピ収集実行 |
+| POST | /collector/start | スケジューラー開始 |
+| POST | /collector/stop | スケジューラー停止 |
 
 ## 技術スタック
 
@@ -116,9 +143,21 @@ personal-recipe-intelligence/
 - Svelte
 - Bun
 
+### 外部API
+- DeepL API (翻訳)
+- Spoonacular API (海外レシピ収集)
+
 ### インフラ
 - SQLite (データベース)
-- DeepL API (翻訳)
+
+## ドキュメント
+
+詳細なドキュメントは `docs/` フォルダを参照してください：
+
+- `docs/quickstart/` - クイックスタートガイド
+- `docs/features/` - 機能別README
+- `docs/implementation/` - 実装サマリー
+- `docs/performance/` - パフォーマンス最適化
 
 ## ライセンス
 

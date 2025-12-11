@@ -398,7 +398,7 @@ curl -X POST "http://localhost:8000/api/v1/nutrition/calculate" \
 ├── docs/
 │   └── nutrition_api.md
 ├── QUICKSTART_NUTRITION.md
-└── NUTRITION_IMPLEMENTATION_SUMMARY.md (このファイル)
+└── docs/implementation/栄養情報実装サマリー(nutrition-implementation-summary).md (このファイル)
 ```
 
 ---

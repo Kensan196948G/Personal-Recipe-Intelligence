@@ -78,16 +78,39 @@ personal-recipe-intelligence/
 │   ├── json-schema/   # JSON スキーマ
 │   └── backups/       # バックアップ
 ├── logs/              # ログ
-├── docs/              # 仕様書 / ER 図 / ADR
+├── docs/              # ドキュメント
+│   ├── 01_プロジェクト概要(project-overview)/
+│   ├── 02_設計書(design)/
+│   ├── 03_API仕様書(api-specification)/
+│   ├── 04_データベース(database)/
+│   ├── 05_フロントエンド(frontend)/
+│   ├── 06_バックエンド(backend)/
+│   ├── 07_テスト(testing)/
+│   ├── 08_セキュリティ(security)/
+│   ├── 09_運用(operations)/
+│   ├── 10_ClaudeCode設定(claudecode)/
+│   ├── implementation/    # 実装サマリー
+│   ├── performance/       # パフォーマンス関連
+│   ├── testing/           # テスト関連
+│   ├── quickstart/        # クイックスタート
+│   ├── features/          # 機能README
+│   └── archive/           # アーカイブ
 ├── tests/             # 統合テスト
 ├── scripts/           # 自動化スクリプト
+│   ├── setup/         # セットアップ系
+│   ├── analysis/      # 分析系
+│   ├── testing/       # テスト実行系
+│   └── utils/         # ユーティリティ
 ├── .claude/           # ClaudeCode 設定
 │   ├── agents/        # SubAgent JSON
 │   └── hooks/         # Hooks JS
 ├── .env.example       # 環境変数テンプレート
 ├── CLAUDE.md          # 本ファイル
 ├── README.md          # プロジェクト説明
-└── CHANGELOG.md       # 変更履歴
+├── CHANGELOG.md       # 変更履歴
+├── dev.sh             # 開発サーバー起動
+├── lint.sh            # Lint チェック
+└── test.sh            # テスト実行
 ```
 
 ### 2.3 環境変数管理

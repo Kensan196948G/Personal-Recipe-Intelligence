@@ -347,7 +347,7 @@ erDiagram
 
 ```bash
 # 起動コマンド
-./scripts/dev.sh
+./dev.sh
 
 # 構成
 # - Backend: http://127.0.0.1:8000

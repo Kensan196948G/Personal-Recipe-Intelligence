@@ -14,6 +14,7 @@ from backend.api.routers import (
     translation_router,
 )
 from backend.api.routers.csv_import import router as csv_import_router
+from backend.api.routers.collector import router as collector_router
 
 app = FastAPI(
     title="Personal Recipe Intelligence API",
@@ -43,6 +44,7 @@ app.include_router(ocr_router)
 app.include_router(translation_router)
 app.include_router(search_router)
 app.include_router(csv_import_router)
+app.include_router(collector_router)
 
 
 @app.get("/")

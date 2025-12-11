@@ -25,7 +25,7 @@ cd ../frontend
 bun run dev &
 
 # または一括起動
-./scripts/dev.sh
+./dev.sh
 ```
 
 ### 2.2 停止手順
@@ -46,8 +46,8 @@ pkill -f vite
 ### 2.3 再起動
 
 ```bash
-# サービス再起動
-./scripts/restart.sh
+# サービス再起動（または手動で stop → start）
+pkill -f uvicorn && pkill -f vite && ./dev.sh
 ```
 
 ## 3. ログ管理
