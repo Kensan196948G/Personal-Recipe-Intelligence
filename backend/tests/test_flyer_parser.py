@@ -188,7 +188,10 @@ class TestFlyerParser:
     def test_extract_store_name_unknown(self, parser):
         """不明な店舗名"""
         # 長すぎる行や商品情報のみのテキストは「不明」を返す
-        assert parser.extract_store_name("これは長すぎる店舗名の例ですので推定できません") == "不明"
+        assert (
+            parser.extract_store_name("これは長すぎる店舗名の例ですので推定できません")
+            == "不明"
+        )
 
     def test_validate_parsed_products(self, parser):
         """パース結果の検証"""

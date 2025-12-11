@@ -300,7 +300,7 @@ async def get_nutrition_balance(
 async def get_weekly_summary(
     target_date: Optional[str] = Query(
         None, description="対象週を含む日付 (YYYY-MM-DD)"
-    )
+    ),
 ):
     """
     週間サマリーを取得（栄養バランス + 買い物リスト）
