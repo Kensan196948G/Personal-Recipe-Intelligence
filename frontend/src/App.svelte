@@ -1,26 +1,41 @@
 <script>
-  let recipes = [];
-  let loading = true;
-  let error = null;
+  import RecipeList from './components/RecipeList.svelte';
+  import RecipeDetail from './components/RecipeDetail.svelte';
+  import RecipeForm from './components/RecipeForm.svelte';
+  import { fetchRecipe, currentRecipe } from './stores/recipes.js';
 
-  async function fetchRecipes() {
-    try {
-      const response = await fetch('/api/v1/recipes');
-      const data = await response.json();
-      if (data.status === 'ok') {
-        recipes = data.data;
-      } else {
-        error = data.error;
-      }
-    } catch (e) {
-      error = e.message;
-    } finally {
-      loading = false;
+  // View state
+  let view = 'list'; // 'list', 'detail', 'create', 'edit'
+  let selectedRecipe = null;
+
+  async function handleView(event) {
+    selectedRecipe = event.detail;
+    await fetchRecipe(selectedRecipe.id);
+    if ($currentRecipe) {
+      selectedRecipe = $currentRecipe;
+      view = 'detail';
     }
   }
 
-  // Fetch recipes on mount
-  fetchRecipes();
+  function handleEdit(event) {
+    selectedRecipe = event.detail;
+    view = 'edit';
+  }
+
+  function handleCreate() {
+    selectedRecipe = null;
+    view = 'create';
+  }
+
+  function handleBack() {
+    view = 'list';
+    selectedRecipe = null;
+  }
+
+  function handleSaved() {
+    view = 'list';
+    selectedRecipe = null;
+  }
 </script>
 
 <main>
@@ -29,38 +44,57 @@
     <p>個人向け料理レシピ収集・管理システム</p>
   </header>
 
-  <section class="recipes">
-    {#if loading}
-      <p>読み込み中...</p>
-    {:else if error}
-      <p class="error">エラー: {error}</p>
-    {:else if recipes.length === 0}
-      <p>レシピがありません。</p>
-    {:else}
-      <ul>
-        {#each recipes as recipe}
-          <li>
-            <h3>{recipe.title}</h3>
-            <p>{recipe.description}</p>
-          </li>
-        {/each}
-      </ul>
+  <section class="content">
+    {#if view === 'list'}
+      <RecipeList
+        on:view={handleView}
+        on:edit={handleEdit}
+        on:create={handleCreate}
+      />
+    {:else if view === 'detail' && selectedRecipe}
+      <RecipeDetail
+        recipe={selectedRecipe}
+        on:back={handleBack}
+        on:edit={handleEdit}
+      />
+    {:else if view === 'create'}
+      <RecipeForm mode="create" on:back={handleBack} on:saved={handleSaved} />
+    {:else if view === 'edit' && selectedRecipe}
+      <RecipeForm
+        recipe={selectedRecipe}
+        mode="edit"
+        on:back={handleBack}
+        on:saved={handleSaved}
+      />
     {/if}
   </section>
+
+  <footer>
+    <p>Personal Recipe Intelligence v0.1.0</p>
+  </footer>
 </main>
 
 <style>
   :global(body) {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+      'Hiragino Sans', 'Noto Sans JP', sans-serif;
     margin: 0;
     padding: 0;
     background: #f5f5f5;
+    min-height: 100vh;
+  }
+
+  :global(*) {
+    box-sizing: border-box;
   }
 
   main {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 2rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
   header {
@@ -71,44 +105,28 @@
   h1 {
     color: #333;
     margin-bottom: 0.5rem;
+    font-size: 1.75rem;
   }
 
   header p {
     color: #666;
-  }
-
-  .recipes {
-    background: white;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .error {
-    color: #c00;
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  li {
-    border-bottom: 1px solid #eee;
-    padding: 1rem 0;
-  }
-
-  li:last-child {
-    border-bottom: none;
-  }
-
-  h3 {
-    margin: 0 0 0.5rem 0;
-    color: #333;
-  }
-
-  li p {
     margin: 0;
-    color: #666;
+  }
+
+  .content {
+    flex: 1;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
+  }
+
+  footer p {
+    color: #888;
+    font-size: 0.85rem;
+    margin: 0;
   }
 </style>

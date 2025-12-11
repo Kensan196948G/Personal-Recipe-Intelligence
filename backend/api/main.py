@@ -4,6 +4,8 @@ Personal Recipe Intelligence - FastAPI Main Application
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.api.routers import recipes_router, tags_router
+
 app = FastAPI(
   title="Personal Recipe Intelligence API",
   description="個人向け料理レシピ収集・解析・管理システム",
@@ -19,6 +21,10 @@ app.add_middleware(
   allow_headers=["*"],
 )
 
+# ルーター登録
+app.include_router(recipes_router)
+app.include_router(tags_router)
+
 
 @app.get("/")
 async def root():
@@ -30,15 +36,3 @@ async def root():
 async def health_check():
   """ヘルスチェック"""
   return {"status": "ok", "data": {"service": "healthy"}, "error": None}
-
-
-@app.get("/api/v1/recipes")
-async def get_recipes():
-  """レシピ一覧取得"""
-  return {"status": "ok", "data": [], "error": None}
-
-
-@app.get("/api/v1/recipes/{recipe_id}")
-async def get_recipe(recipe_id: int):
-  """レシピ詳細取得"""
-  return {"status": "ok", "data": {"id": recipe_id}, "error": None}
