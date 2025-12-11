@@ -4,7 +4,6 @@ Review service for Personal Recipe Intelligence.
 """
 
 import json
-import os
 import html
 from datetime import datetime
 from pathlib import Path

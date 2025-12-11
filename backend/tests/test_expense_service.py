@@ -3,7 +3,6 @@
 """
 
 import pytest
-import json
 import tempfile
 import shutil
 from datetime import datetime, timedelta
@@ -37,7 +36,7 @@ class TestExpenseService:
 
   def test_init_creates_data_files(self, temp_data_dir):
     """初期化時にデータファイルが作成される"""
-    service = ExpenseService(data_dir=temp_data_dir)
+    ExpenseService(data_dir=temp_data_dir)
 
     expenses_file = Path(temp_data_dir) / "expenses.json"
     budgets_file = Path(temp_data_dir) / "budgets.json"
@@ -178,7 +177,7 @@ class TestExpenseService:
     expense_service.set_budget(month=month, total_budget=50000.0)
 
     # 同月の予算を再設定
-    budget = expense_service.set_budget(month=month, total_budget=60000.0)
+    expense_service.set_budget(month=month, total_budget=60000.0)
 
     # 取得して確認
     retrieved_budget = expense_service.get_budget(month)

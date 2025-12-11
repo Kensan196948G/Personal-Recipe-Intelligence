@@ -9,8 +9,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 
 from backend.services.natural_search_service import (
-  NaturalSearchService,
-  ParsedQuery
+  NaturalSearchService
 )
 from backend.services.recipe_service import RecipeService
 

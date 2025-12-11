@@ -2,16 +2,12 @@
 Tests for collection service.
 """
 
-import json
-import os
 import tempfile
 import uuid
-from datetime import datetime
-from pathlib import Path
 
 import pytest
 
-from backend.models.collection import Collection, CollectionVisibility
+from backend.models.collection import CollectionVisibility
 from backend.services.collection_service import CollectionService
 
 

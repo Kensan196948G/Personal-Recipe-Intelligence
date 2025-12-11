@@ -3,10 +3,7 @@ Health Goal Service のテスト
 """
 
 import pytest
-import json
-import os
 from datetime import date, timedelta
-from pathlib import Path
 from backend.services.health_goal_service import (
   HealthGoalService,
   Gender,

@@ -6,11 +6,8 @@ Tests for review service
 import pytest
 import tempfile
 import shutil
-from pathlib import Path
-from datetime import datetime
 
 from backend.services.review_service import ReviewService
-from backend.models.review import Review
 
 
 @pytest.fixture
@@ -243,7 +240,7 @@ class TestReviewService:
 
   def test_get_popular_reviews(self, review_service):
     """人気レビュー取得のテスト"""
-    review1 = review_service.create_review("recipe1", "user1", 5, "Great!")
+    review_service.create_review("recipe1", "user1", 5, "Great!")
     review2 = review_service.create_review("recipe1", "user2", 4, "Good")
     review3 = review_service.create_review("recipe1", "user3", 5, "Excellent!")
 

@@ -9,7 +9,7 @@ import shutil
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 
-from backend.api.routers.review import router, review_service
+from backend.api.routers.review import router
 
 
 @pytest.fixture
@@ -352,7 +352,7 @@ class TestReviewAPI:
   def test_get_popular_reviews(self, client):
     """人気レビュー取得テスト"""
     # レビュー作成
-    r1 = client.post(
+    client.post(
       "/api/v1/review/recipe/recipe1",
       json={"rating": 5, "comment": "Review 1"},
       headers={"Authorization": "Bearer user1"}

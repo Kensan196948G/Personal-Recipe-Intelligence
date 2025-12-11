@@ -12,10 +12,7 @@ from backend.services.iot_service import (
   IoTService,
   DeviceType,
   ProtocolType,
-  AlertType,
-  Device,
-  InventoryItem,
-  Alert
+  AlertType
 )
 
 

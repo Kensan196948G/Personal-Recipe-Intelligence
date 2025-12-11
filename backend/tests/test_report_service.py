@@ -3,21 +3,14 @@
 """
 
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-import json
 import tempfile
 import shutil
 
 from backend.services.report_service import (
-  ReportService,
-  NutritionSummary,
-  ExpenseSummary,
-  GoalSummary,
-  ReportData
+  ReportService
 )
-from backend.services.nutrition_service import NutritionService
-from backend.services.goal_service import GoalService
 
 
 class MockNutritionService:

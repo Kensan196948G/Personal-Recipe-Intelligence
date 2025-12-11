@@ -6,17 +6,12 @@ IoT連携機能のテストケース。
 """
 
 import pytest
-import json
 import tempfile
 import shutil
-from pathlib import Path
 from datetime import datetime, timedelta
 
 from backend.services.iot_service import (
   IoTService,
-  Device,
-  InventoryItem,
-  Alert,
   DeviceType,
   ProtocolType,
   AlertType

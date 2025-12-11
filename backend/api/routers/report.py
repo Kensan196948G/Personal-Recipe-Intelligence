@@ -9,7 +9,7 @@ from fastapi import APIRouter, HTTPException, Query, Response
 from pydantic import BaseModel, Field
 from datetime import datetime
 
-from backend.services.report_service import ReportService, ReportData
+from backend.services.report_service import ReportService
 from backend.services.nutrition_service import NutritionService
 from backend.services.goal_service import GoalService
 

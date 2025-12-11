@@ -2,15 +2,13 @@
 Voice Assistant API Router - 音声アシスタント連携エンドポイント
 """
 
-from fastapi import APIRouter, HTTPException, Header, Request
+from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel, Field
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 import logging
 
 from backend.services.voice_assistant_service import (
-  VoiceAssistantService,
-  VoiceAssistant,
-  IntentType
+  VoiceAssistantService
 )
 
 logger = logging.getLogger(__name__)

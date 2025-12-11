@@ -9,24 +9,21 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import mm
 from reportlab.platypus import (
   SimpleDocTemplate,
   Paragraph,
   Spacer,
   Table,
-  TableStyle,
-  PageBreak,
-  Image as RLImage
+  TableStyle
 )
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.enums import TA_CENTER
 
 from backend.services.nutrition_service import NutritionService
 from backend.services.goal_service import GoalService
@@ -413,7 +410,7 @@ class ReportService:
         fontSize=10,
         leading=14
       )
-    except:
+    except Exception:
       # フォールバック
       title_style = styles['Heading1']
       heading_style = styles['Heading2']
@@ -429,7 +426,7 @@ class ReportService:
       "custom": "カスタムレポート"
     }.get(report_data.report_type, "レポート")
 
-    story.append(Paragraph(f"Personal Recipe Intelligence", title_style))
+    story.append(Paragraph("Personal Recipe Intelligence", title_style))
     story.append(Paragraph(report_type_ja, heading_style))
     story.append(Spacer(1, 12))
 

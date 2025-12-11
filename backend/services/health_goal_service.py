@@ -5,10 +5,9 @@ Harris-Benedict式によるBMR計算と日本人の食事摂取基準に基づ�
 """
 
 import json
-import os
 from datetime import datetime, date, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from enum import Enum
 
 

@@ -4,13 +4,11 @@ Natural Search Service Tests
 """
 
 import pytest
-from pathlib import Path
 import tempfile
 import shutil
 
 from backend.services.natural_search_service import (
-  NaturalSearchService,
-  ParsedQuery
+  NaturalSearchService
 )
 
 

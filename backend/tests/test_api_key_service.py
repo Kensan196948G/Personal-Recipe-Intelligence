@@ -8,13 +8,11 @@ import pytest
 import tempfile
 import shutil
 import time
-from pathlib import Path
 
 from backend.services.api_key_service import (
   APIKeyService,
   APIKeyScope,
   RateLimit,
-  APIKey,
   UsageRecord
 )
 

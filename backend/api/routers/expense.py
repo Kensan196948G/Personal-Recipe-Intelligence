@@ -6,15 +6,12 @@
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, List
+from typing import Optional, Dict
 from datetime import datetime
 
 from backend.services.expense_service import (
   ExpenseService,
-  ExpenseCategory,
-  ExpenseRecord,
-  Budget,
-  ExpenseSummary
+  ExpenseCategory
 )
 
 

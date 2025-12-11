@@ -4,16 +4,13 @@ Recipe Sharing Service Tests
 """
 
 import pytest
-import json
 import tempfile
 import shutil
-from pathlib import Path
 from datetime import datetime, timedelta
 
 from backend.services.recipe_sharing_service import (
   RecipeSharingService,
-  SharePermission,
-  RecipeShare
+  SharePermission
 )
 
 

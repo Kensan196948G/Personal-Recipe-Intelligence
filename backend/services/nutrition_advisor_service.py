@@ -6,7 +6,7 @@
 
 import json
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from uuid import uuid4
@@ -356,7 +356,7 @@ class NutritionAdvisorService:
     self, message: str, user_profile: Dict, context: Optional[Dict]
   ) -> Tuple[str, str, List[str]]:
     """応答を生成"""
-    message_lower = message.lower()
+    message.lower()
 
     # パターンマッチング
     for category, data in self.knowledge_base.items():

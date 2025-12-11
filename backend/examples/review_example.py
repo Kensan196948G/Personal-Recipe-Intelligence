@@ -46,7 +46,7 @@ def main():
   summary = service.get_recipe_rating_summary(recipe_id)
   print(f"  Average Rating: {summary.average_rating} ★")
   print(f"  Total Reviews: {summary.total_reviews}")
-  print(f"  Rating Distribution:")
+  print("  Rating Distribution:")
   for star in range(5, 0, -1):
     count = summary.rating_distribution[star]
     bar = "█" * count
@@ -115,7 +115,7 @@ def main():
     rating=5,
     comment="<script>alert('XSS')</script>美味しい<b>太字</b>"
   )
-  print(f"  Original: <script>alert('XSS')</script>美味しい<b>太字</b>")
+  print("  Original: <script>alert('XSS')</script>美味しい<b>太字</b>")
   print(f"  Sanitized: {xss_review.comment}")
   print()
 

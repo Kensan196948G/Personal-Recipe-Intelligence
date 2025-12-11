@@ -2,7 +2,7 @@
 Health Goal API Router - 健康目標APIエンドポイント
 """
 
-from datetime import date, datetime
+from datetime import datetime
 from typing import Dict, List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field

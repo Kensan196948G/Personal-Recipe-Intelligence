@@ -2,12 +2,9 @@
 Follow Service のテスト
 """
 
-import json
-import os
 import pytest
 import tempfile
 import shutil
-from pathlib import Path
 from backend.services.follow_service import FollowService
 
 

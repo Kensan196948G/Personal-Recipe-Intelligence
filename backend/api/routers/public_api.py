@@ -6,7 +6,7 @@ Public API Router
 
 from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional
 
 from backend.services.api_key_service import (
   APIKeyService,

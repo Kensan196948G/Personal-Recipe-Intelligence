@@ -5,7 +5,7 @@ Natural Language Search Service
 
 import re
 import json
-from typing import Dict, List, Optional, Tuple, Set
+from typing import Dict, List, Tuple
 from pathlib import Path
 from datetime import datetime
 from dataclasses import dataclass, asdict

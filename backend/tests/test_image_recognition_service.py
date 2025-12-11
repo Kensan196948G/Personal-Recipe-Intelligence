@@ -269,7 +269,6 @@ class TestImageRecognitionService:
 
   def test_cache_expiration(self, service, sample_image, tmp_path):
     """キャッシュ有効期限テスト"""
-    import time
     from datetime import datetime, timedelta
 
     # キャッシュ保存

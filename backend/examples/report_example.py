@@ -11,10 +11,10 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from backend.services.report_service import ReportService
-from backend.services.nutrition_service import NutritionService
-from backend.services.goal_service import GoalService
-from datetime import datetime
+from backend.services.report_service import ReportService  # noqa: E402
+from backend.services.nutrition_service import NutritionService  # noqa: E402
+from backend.services.goal_service import GoalService  # noqa: E402
+from datetime import datetime  # noqa: E402
 
 
 def main():
@@ -42,7 +42,7 @@ def main():
     user_id=user_id,
     week_offset=0
   )
-  print(f"✓ 週次レポート生成完了")
+  print("✓ 週次レポート生成完了")
   print(f"  - レポートID: {weekly_report.report_id}")
   print(f"  - 期間: {weekly_report.start_date} 〜 {weekly_report.end_date}")
   print(f"  - 総カロリー: {weekly_report.nutrition_summary.total_calories:.1f} kcal")
@@ -54,7 +54,7 @@ def main():
     user_id=user_id,
     month_offset=0
   )
-  print(f"✓ 月次レポート生成完了")
+  print("✓ 月次レポート生成完了")
   print(f"  - レポートID: {monthly_report.report_id}")
   print(f"  - 期間: {monthly_report.start_date} 〜 {monthly_report.end_date}")
 
@@ -65,7 +65,7 @@ def main():
     start_date="2025-01-01",
     end_date="2025-01-15"
   )
-  print(f"✓ カスタムレポート生成完了")
+  print("✓ カスタムレポート生成完了")
   print(f"  - レポートID: {custom_report.report_id}")
   print(f"  - 期間: {custom_report.start_date} 〜 {custom_report.end_date}")
 
@@ -78,7 +78,7 @@ def main():
     weekly_report,
     output_path=str(pdf_path)
   )
-  print(f"✓ PDF生成完了")
+  print("✓ PDF生成完了")
   print(f"  - ファイルパス: {pdf_path}")
   print(f"  - ファイルサイズ: {len(pdf_bytes) / 1024:.2f} KB")
 
@@ -90,7 +90,7 @@ def main():
   with open(html_path, "w", encoding="utf-8") as f:
     f.write(html_content)
 
-  print(f"✓ HTML生成完了")
+  print("✓ HTML生成完了")
   print(f"  - ファイルパス: {html_path}")
   print(f"  - ファイルサイズ: {len(html_content) / 1024:.2f} KB")
 
@@ -102,14 +102,14 @@ def main():
   with open(markdown_path, "w", encoding="utf-8") as f:
     f.write(markdown_content)
 
-  print(f"✓ Markdown生成完了")
+  print("✓ Markdown生成完了")
   print(f"  - ファイルパス: {markdown_path}")
   print(f"  - ファイルサイズ: {len(markdown_content) / 1024:.2f} KB")
 
   # レポート履歴取得
   print("\n[8] レポート履歴取得...")
   history = report_service.get_report_history(user_id=user_id, limit=10)
-  print(f"✓ レポート履歴取得完了")
+  print("✓ レポート履歴取得完了")
   print(f"  - 履歴件数: {len(history)} 件")
 
   if history:
@@ -122,25 +122,25 @@ def main():
 
   # レポート詳細表示
   print("\n[9] レポート詳細...")
-  print(f"\n  栄養サマリー:")
+  print("\n  栄養サマリー:")
   print(f"    - 総カロリー: {weekly_report.nutrition_summary.total_calories:.1f} kcal")
   print(f"    - 総タンパク質: {weekly_report.nutrition_summary.total_protein:.1f} g")
   print(f"    - 総脂質: {weekly_report.nutrition_summary.total_fat:.1f} g")
   print(f"    - 総炭水化物: {weekly_report.nutrition_summary.total_carbs:.1f} g")
 
-  print(f"\n  支出サマリー:")
+  print("\n  支出サマリー:")
   print(f"    - 総支出: ¥{weekly_report.expense_summary.total_expense:,.0f}")
   print(f"    - 1日平均: ¥{weekly_report.expense_summary.avg_daily_expense:,.0f}")
   print(f"    - 食事回数: {weekly_report.expense_summary.meal_count} 回")
   print(f"    - 1食平均: ¥{weekly_report.expense_summary.avg_expense_per_meal:,.0f}")
 
-  print(f"\n  目標サマリー:")
+  print("\n  目標サマリー:")
   print(f"    - 総目標数: {weekly_report.goal_summary.total_goals} 件")
   print(f"    - 完了: {weekly_report.goal_summary.completed_goals} 件")
   print(f"    - 進行中: {weekly_report.goal_summary.in_progress_goals} 件")
   print(f"    - 達成率: {weekly_report.goal_summary.completion_rate:.1f}%")
 
-  print(f"\n  アドバイス:")
+  print("\n  アドバイス:")
   for i, rec in enumerate(weekly_report.recommendations, 1):
     print(f"    {i}. {rec}")
 
@@ -148,7 +148,7 @@ def main():
   print("\n" + "=" * 80)
   print("レポート生成完了！")
   print("=" * 80)
-  print(f"\n生成されたファイル:")
+  print("\n生成されたファイル:")
   print(f"  - PDF: {pdf_path}")
   print(f"  - HTML: {html_path}")
   print(f"  - Markdown: {markdown_path}")

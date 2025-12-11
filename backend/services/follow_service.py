@@ -3,7 +3,6 @@ Follow Service - ユーザーフォロー関連の処理
 """
 
 import json
-import os
 from datetime import datetime
 from typing import Dict, List, Optional
 from pathlib import Path

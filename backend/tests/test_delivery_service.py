@@ -3,16 +3,13 @@
 """
 
 import pytest
-import json
 import tempfile
-from pathlib import Path
 
 from backend.services.delivery_service import (
   DeliveryService,
   DeliveryServiceType,
   DeliveryProduct,
-  CartItem,
-  DeliveryCart
+  CartItem
 )
 
 

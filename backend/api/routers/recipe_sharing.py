@@ -4,9 +4,8 @@ Recipe Sharing Router
 """
 
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from typing import List, Optional
-from datetime import datetime
 
 from backend.services.recipe_sharing_service import (
   RecipeSharingService,
@@ -287,7 +286,7 @@ async def send_invite(request: InviteRequest):
   current_shared = share.shared_with or []
   new_shared = list(set(current_shared + request.recipients))
 
-  updated_share = sharing_service.update_share(
+  sharing_service.update_share(
     share_id=request.share_id,
     shared_with=new_shared
   )

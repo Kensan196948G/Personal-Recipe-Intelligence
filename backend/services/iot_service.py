@@ -7,7 +7,7 @@ MQTT/HTTP両対応、在庫同期、賞味期限アラート機能を提供。
 
 import json
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
