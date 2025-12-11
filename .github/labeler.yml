@@ -1,0 +1,52 @@
+# Auto-labeler configuration
+# Labels PRs based on modified files
+
+# Documentation
+docs:
+  - '**/*.md'
+  - 'docs/**/*'
+
+# GitHub Actions
+github-actions:
+  - '.github/workflows/**'
+  - '.github/dependabot.yml'
+
+# Dependencies
+dependencies:
+  - 'requirements.txt'
+  - 'package.json'
+  - 'package-lock.json'
+  - 'yarn.lock'
+  - 'Pipfile'
+  - 'poetry.lock'
+  - 'setup.py'
+
+# Python
+python:
+  - '**/*.py'
+
+# JavaScript/TypeScript
+javascript:
+  - '**/*.js'
+  - '**/*.ts'
+  - '**/*.jsx'
+  - '**/*.tsx'
+
+# Configuration
+config:
+  - '**/*.yml'
+  - '**/*.yaml'
+  - '**/*.json'
+  - '**/*.toml'
+  - '**/*.ini'
+  - '**/*.cfg'
+
+# Tests
+tests:
+  - '**/test_*.py'
+  - '**/*_test.py'
+  - '**/tests/**'
+  - '**/*.test.js'
+  - '**/*.spec.js'
+  - '**/*.test.ts'
+  - '**/*.spec.ts'

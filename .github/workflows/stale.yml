@@ -1,0 +1,60 @@
+name: Stale Issue and PR Management
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  stale:
+    name: Mark stale issues and PRs
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Mark stale issues and pull requests
+        uses: actions/stale@v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Issue settings
+          stale-issue-message: |
+            このissueは60日間活動がないため、古い可能性があります。
+            まだ有効な場合は、コメントを追加してください。
+            30日以内に活動がない場合、自動的にクローズされます。
+            
+            This issue has been automatically marked as stale because it has not had activity for 60 days.
+            Please comment if this is still relevant.
+            It will be closed automatically in 30 days if no further activity occurs.
+          close-issue-message: |
+            このissueは長期間活動がなかったため、自動的にクローズされました。
+            必要に応じて再度オープンしてください。
+            
+            This issue has been automatically closed due to inactivity.
+            Feel free to reopen if needed.
+          stale-issue-label: 'stale'
+          days-before-issue-stale: 60  # Mark as stale after 60 days of inactivity
+          days-before-issue-close: 30  # Close 30 days after marked stale (total: 90 days)
+          exempt-issue-labels: 'pinned,security,bug'
+          
+          # PR settings
+          stale-pr-message: |
+            このPRは30日間活動がないため、古い可能性があります。
+            まだ有効な場合は、コメントを追加するか更新してください。
+            14日以内に活動がない場合、自動的にクローズされます。
+            
+            This PR has been automatically marked as stale because it has not had activity for 30 days.
+            Please comment or update if this is still relevant.
+            It will be closed automatically in 14 days if no further activity occurs.
+          close-pr-message: |
+            このPRは長期間活動がなかったため、自動的にクローズされました。
+            必要に応じて再度オープンしてください。
+            
+            This PR has been automatically closed due to inactivity.
+            Feel free to reopen if needed.
+          stale-pr-label: 'stale'
+          days-before-pr-stale: 30
+          days-before-pr-close: 14
+          exempt-pr-labels: 'pinned,security'

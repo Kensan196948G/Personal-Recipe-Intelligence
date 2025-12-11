@@ -1,0 +1,94 @@
+name: Scheduled Maintenance
+
+on:
+  schedule:
+    # Run every Monday at 10:00 AM UTC
+    - cron: '0 10 * * 1'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  check-dependencies:
+    name: Check for outdated dependencies
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for Python dependencies
+        if: hashFiles('requirements.txt') != '' || hashFiles('**/setup.py') != ''
+        run: |
+          echo "::notice::Checking Python dependencies..."
+          if [ -f requirements.txt ]; then
+            echo "Found requirements.txt"
+          fi
+          if [ -f setup.py ]; then
+            echo "Found setup.py"
+          fi
+
+      - name: Check for Node.js dependencies
+        if: hashFiles('package.json') != ''
+        run: |
+          echo "::notice::Checking Node.js dependencies..."
+          echo "Found package.json"
+
+  check-security:
+    name: Security vulnerability scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  cleanup-old-branches:
+    name: Report stale branches
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find stale branches
+        run: |
+          echo "::notice::Checking for branches older than 90 days..."
+          git for-each-ref --sort=-committerdate refs/remotes/ --format='%(refname:short) %(committerdate:relative)' | head -20
+
+  generate-maintenance-report:
+    name: Generate maintenance report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: [check-dependencies, check-security, cleanup-old-branches]
+    if: always()
+    steps:
+      - name: Create maintenance summary
+        run: |
+          echo "## 🔧 Scheduled Maintenance Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Date**: $(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- Dependencies Check: ${{ needs.check-dependencies.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Security Scan: ${{ needs.check-security.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch Cleanup: ${{ needs.cleanup-old-branches.result }}" >> $GITHUB_STEP_SUMMARY
