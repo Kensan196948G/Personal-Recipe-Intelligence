@@ -37,3 +37,19 @@ mypy>=1.5.0
 
 # Coverage visualization
 coverage[toml]>=7.3.0
+
+# Report generation
+reportlab>=4.0.0
+
+# YouTube extraction
+youtube-transcript-api>=0.6.0
+
+# Translation
+deepl>=1.16.0
+
+# Image processing
+pillow>=10.0.0
+qrcode>=7.4.0
+
+# AI/ML services
+openai>=1.0.0
