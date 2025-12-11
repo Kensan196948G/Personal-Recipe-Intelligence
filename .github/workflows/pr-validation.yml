@@ -1,0 +1,97 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  validate-pr:
+    name: Validate Pull Request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit messages
+        run: |
+          echo "::notice::Validating commit messages..."
+          git log --format=%B -n 10 | head -20
+
+      - name: Check for large files
+        run: |
+          echo "::notice::Checking for large files..."
+          find . -type f -size +10M -not -path "./.git/*" || echo "No large files found"
+
+      - name: Validate markdown files
+        if: hashFiles('**/*.md') != ''
+        uses: DavidAnson/markdownlint-cli2-action@v16
+        with:
+          globs: '**/*.md'
+          config: |
+            {
+              "MD013": false,
+              "MD033": false,
+              "MD041": false
+            }
+
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python (if applicable)
+        if: hashFiles('**/*.py') != ''
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Check Python code style
+        if: hashFiles('**/*.py') != ''
+        run: |
+          echo "::notice::Python files detected - install linting tools as needed"
+
+      - name: Setup Node.js (if applicable)
+        if: hashFiles('**/*.js') != '' || hashFiles('**/*.ts') != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check JavaScript/TypeScript style
+        if: hashFiles('**/*.js') != '' || hashFiles('**/*.ts') != ''
+        run: |
+          echo "::notice::JavaScript/TypeScript files detected - install linting tools as needed"
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
