@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Push Notification Example - Personal Recipe Intelligence</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 24px;
+      font-size: 28px;
+    }
+
+    h2 {
+      color: #555;
+      margin: 24px 0 16px 0;
+      font-size: 20px;
+    }
+
+    .status {
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+
+    .status.success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-left: 4px solid #4caf50;
+    }
+
+    .status.error {
+      background: #ffebee;
+      color: #c62828;
+      border-left: 4px solid #f44336;
+    }
+
+    .status.info {
+      background: #e3f2fd;
+      color: #1565c0;
+      border-left: 4px solid #2196f3;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin: 16px 0;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: #2196f3;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #757575;
+      color: white;
+    }
+
+    .btn-success {
+      background: #4caf50;
+      color: white;
+    }
+
+    .btn-danger {
+      background: #f44336;
+      color: white;
+    }
+
+    .schedule-list {
+      list-style: none;
+      margin: 16px 0;
+    }
+
+    .schedule-item {
+      padding: 12px;
+      background: #f9f9f9;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .schedule-item strong {
+      color: #333;
+    }
+
+    .schedule-item span {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .log {
+      background: #263238;
+      color: #aed581;
+      padding: 16px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 16px;
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+    }
+
+    .log-entry .timestamp {
+      color: #78909c;
+    }
+
+    .log-entry .level {
+      color: #ffd54f;
+    }
+
+    .log-entry .message {
+      color: #aed581;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Push Notification Example</h1>
+
+    <div id="status" class="status info">
+      初期化中...
+    </div>
+
+    <!-- 通知制御 -->
+    <h2>通知制御</h2>
+    <div class="button-group">
+      <button id="btnRequestPermission" class="btn-primary">
+        通知許可をリクエスト
+      </button>
+      <button id="btnSubscribe" class="btn-success" disabled>
+        購読する
+      </button>
+      <button id="btnUnsubscribe" class="btn-danger" disabled>
+        購読解除
+      </button>
+      <button id="btnTestNotification" class="btn-secondary" disabled>
+        テスト通知
+      </button>
+    </div>
+
+    <!-- 食事リマインダー設定 -->
+    <h2>食事リマインダー設定</h2>
+    <div class="button-group">
+      <button id="btnSetBreakfast" class="btn-success" disabled>
+        朝食 (07:00)
+      </button>
+      <button id="btnSetLunch" class="btn-success" disabled>
+        昼食 (12:00)
+      </button>
+      <button id="btnSetDinner" class="btn-success" disabled>
+        夕食 (18:00)
+      </button>
+      <button id="btnGetSchedules" class="btn-secondary" disabled>
+        スケジュール取得
+      </button>
+    </div>
+
+    <!-- スケジュール表示 -->
+    <div id="scheduleDisplay" style="display: none;">
+      <h3 style="margin-top: 16px;">設定済みスケジュール:</h3>
+      <ul id="scheduleList" class="schedule-list"></ul>
+    </div>
+
+    <!-- ログ表示 -->
+    <h2>ログ</h2>
+    <div id="log" class="log"></div>
+  </div>
+
+  <!-- Notification Manager -->
+  <script src="../frontend/js/notification-manager.js"></script>
+
+  <script>
+    // ログ表示
+    function log(level, message) {
+      const logDiv = document.getElementById('log');
+      const timestamp = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `<span class="timestamp">[${timestamp}]</span> <span class="level">[${level}]</span> <span class="message">${message}</span>`;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    // ステータス表示
+    function showStatus(message, type = 'info') {
+      const statusDiv = document.getElementById('status');
+      statusDiv.textContent = message;
+      statusDiv.className = `status ${type}`;
+      log(type.toUpperCase(), message);
+    }
+
+    // スケジュール表示
+    function displaySchedules(schedules) {
+      const scheduleDisplay = document.getElementById('scheduleDisplay');
+      const scheduleList = document.getElementById('scheduleList');
+
+      scheduleList.innerHTML = '';
+
+      const mealNames = {
+        breakfast: '朝食',
+        lunch: '昼食',
+        dinner: '夕食',
+      };
+
+      const hasSchedules = Object.keys(schedules).length > 0;
+
+      if (hasSchedules) {
+        scheduleDisplay.style.display = 'block';
+
+        for (const [mealType, config] of Object.entries(schedules)) {
+          const li = document.createElement('li');
+          li.className = 'schedule-item';
+
+          const name = mealNames[mealType] || mealType;
+          const status = config.enabled ? '有効' : '無効';
+          const statusColor = config.enabled ? '#4caf50' : '#9e9e9e';
+
+          li.innerHTML = `
+            <strong>${name}</strong>
+            <span>${config.time} - <span style="color: ${statusColor}">${status}</span></span>
+          `;
+
+          scheduleList.appendChild(li);
+        }
+      } else {
+        scheduleDisplay.style.display = 'none';
+      }
+    }
+
+    // 初期化
+    const manager = new NotificationManager();
+
+    async function initialize() {
+      try {
+        log('INFO', 'Notification Manager initialized');
+        log('INFO', `User ID: ${manager.userId}`);
+
+        const isSupported = manager.isNotificationSupported();
+        log('INFO', `Notification support: ${isSupported}`);
+
+        if (!isSupported) {
+          showStatus('このブラウザはプッシュ通知をサポートしていません', 'error');
+          return;
+        }
+
+        const isSubscribed = await manager.isSubscribed();
+        log('INFO', `Subscription status: ${isSubscribed}`);
+
+        if (isSubscribed) {
+          showStatus('プッシュ通知に購読済みです', 'success');
+          enableSubscriptionButtons();
+          await loadSchedules();
+        } else {
+          showStatus('プッシュ通知の設定を行ってください', 'info');
+          document.getElementById('btnRequestPermission').disabled = false;
+        }
+      } catch (error) {
+        log('ERROR', `Initialization error: ${error.message}`);
+        showStatus(`初期化エラー: ${error.message}`, 'error');
+      }
+    }
+
+    function enableSubscriptionButtons() {
+      document.getElementById('btnSubscribe').disabled = false;
+      document.getElementById('btnUnsubscribe').disabled = false;
+      document.getElementById('btnTestNotification').disabled = false;
+      document.getElementById('btnSetBreakfast').disabled = false;
+      document.getElementById('btnSetLunch').disabled = false;
+      document.getElementById('btnSetDinner').disabled = false;
+      document.getElementById('btnGetSchedules').disabled = false;
+    }
+
+    async function loadSchedules() {
+      try {
+        const schedules = await manager.getMealSchedules();
+        displaySchedules(schedules);
+        log('INFO', `Loaded ${Object.keys(schedules).length} schedules`);
+      } catch (error) {
+        log('ERROR', `Load schedules error: ${error.message}`);
+      }
+    }
+
+    // イベントハンドラ
+    document.getElementById('btnRequestPermission').addEventListener('click', async () => {
+      try {
+        log('INFO', 'Requesting notification permission...');
+        const permission = await manager.requestPermission();
+        log('INFO', `Permission: ${permission}`);
+
+        if (permission === 'granted') {
+          showStatus('通知が許可されました', 'success');
+          document.getElementById('btnSubscribe').disabled = false;
+        } else {
+          showStatus('通知が拒否されました', 'error');
+        }
+      } catch (error) {
+        log('ERROR', `Permission error: ${error.message}`);
+        showStatus(`エラー: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('btnSubscribe').addEventListener('click', async () => {
+      try {
+        log('INFO', 'Subscribing to push notifications...');
+        await manager.subscribe();
+        showStatus('購読に成功しました', 'success');
+        enableSubscriptionButtons();
+      } catch (error) {
+        log('ERROR', `Subscribe error: ${error.message}`);
+        showStatus(`購読エラー: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('btnUnsubscribe').addEventListener('click', async () => {
+      try {
+        log('INFO', 'Unsubscribing from push notifications...');
+        await manager.unsubscribe();
+        showStatus('購読を解除しました', 'info');
+        displaySchedules({});
+      } catch (error) {
+        log('ERROR', `Unsubscribe error: ${error.message}`);
+        showStatus(`購読解除エラー: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('btnTestNotification').addEventListener('click', async () => {
+      try {
+        log('INFO', 'Sending test notification...');
+        await manager.sendTestNotification();
+        showStatus('テスト通知を送信しました', 'success');
+      } catch (error) {
+        log('ERROR', `Test notification error: ${error.message}`);
+        showStatus(`送信エラー: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('btnSetBreakfast').addEventListener('click', async () => {
+      try {
+        log('INFO', 'Setting breakfast reminder...');
+        await manager.setMealReminder('breakfast', '07:00', true, 'おはようございます！朝食の時間です');
+        showStatus('朝食リマインダーを設定しました', 'success');
+        await loadSchedules();
+      } catch (error) {
+        log('ERROR', `Set breakfast error: ${error.message}`);
+        showStatus(`設定エラー: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('btnSetLunch').addEventListener('click', async () => {
+      try {
+        log('INFO', 'Setting lunch reminder...');
+        await manager.setMealReminder('lunch', '12:00', true, '昼食の時間です！');
+        showStatus('昼食リマインダーを設定しました', 'success');
+        await loadSchedules();
+      } catch (error) {
+        log('ERROR', `Set lunch error: ${error.message}`);
+        showStatus(`設定エラー: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('btnSetDinner').addEventListener('click', async () => {
+      try {
+        log('INFO', 'Setting dinner reminder...');
+        await manager.setMealReminder('dinner', '18:00', true, '夕食の時間です！今日は何を作りますか？');
+        showStatus('夕食リマインダーを設定しました', 'success');
+        await loadSchedules();
+      } catch (error) {
+        log('ERROR', `Set dinner error: ${error.message}`);
+        showStatus(`設定エラー: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('btnGetSchedules').addEventListener('click', async () => {
+      try {
+        log('INFO', 'Getting meal schedules...');
+        await loadSchedules();
+        showStatus('スケジュールを取得しました', 'success');
+      } catch (error) {
+        log('ERROR', `Get schedules error: ${error.message}`);
+        showStatus(`取得エラー: ${error.message}`, 'error');
+      }
+    });
+
+    // 初期化実行
+    initialize();
+  </script>
+</body>
+</html>

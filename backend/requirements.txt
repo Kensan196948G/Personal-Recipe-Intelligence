@@ -37,3 +37,10 @@ ruff>=0.1.8
 
 # Logging
 python-json-logger>=2.0.0
+
+# Push Notifications
+pywebpush>=1.14.0
+apscheduler>=3.10.0
+
+# Calendar
+icalendar>=5.0.0

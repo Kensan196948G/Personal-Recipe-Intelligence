@@ -1,0 +1,277 @@
+{
+  "actions": [
+    {
+      "description": "デフォルトのウェルカムインテント",
+      "name": "MAIN",
+      "fulfillment": {
+        "conversationName": "welcome"
+      },
+      "intent": {
+        "name": "actions.intent.MAIN",
+        "trigger": {
+          "queryPatterns": [
+            "パーソナルレシピと話す",
+            "パーソナルレシピを開いて"
+          ]
+        }
+      }
+    },
+    {
+      "description": "レシピを取得",
+      "name": "GET_RECIPE",
+      "fulfillment": {
+        "conversationName": "get_recipe"
+      },
+      "intent": {
+        "name": "com.pri.intent.GET_RECIPE",
+        "parameters": [
+          {
+            "name": "recipeName",
+            "type": "org.schema.type.Text"
+          }
+        ],
+        "trigger": {
+          "queryPatterns": [
+            "$recipeName のレシピ",
+            "$recipeName を開いて",
+            "$recipeName の作り方"
+          ]
+        }
+      }
+    },
+    {
+      "description": "材料を読み上げ",
+      "name": "READ_INGREDIENTS",
+      "fulfillment": {
+        "conversationName": "read_ingredients"
+      },
+      "intent": {
+        "name": "com.pri.intent.READ_INGREDIENTS",
+        "trigger": {
+          "queryPatterns": [
+            "材料を教えて",
+            "材料を読んで",
+            "材料は",
+            "何が必要"
+          ]
+        }
+      }
+    },
+    {
+      "description": "次の手順",
+      "name": "NEXT_STEP",
+      "fulfillment": {
+        "conversationName": "next_step"
+      },
+      "intent": {
+        "name": "com.pri.intent.NEXT_STEP",
+        "trigger": {
+          "queryPatterns": [
+            "次の手順",
+            "次",
+            "つぎ",
+            "続き"
+          ]
+        }
+      }
+    },
+    {
+      "description": "前の手順",
+      "name": "PREVIOUS_STEP",
+      "fulfillment": {
+        "conversationName": "previous_step"
+      },
+      "intent": {
+        "name": "com.pri.intent.PREVIOUS_STEP",
+        "trigger": {
+          "queryPatterns": [
+            "前の手順",
+            "前",
+            "まえ",
+            "戻って"
+          ]
+        }
+      }
+    },
+    {
+      "description": "手順を繰り返し",
+      "name": "REPEAT_STEP",
+      "fulfillment": {
+        "conversationName": "repeat_step"
+      },
+      "intent": {
+        "name": "com.pri.intent.REPEAT_STEP",
+        "trigger": {
+          "queryPatterns": [
+            "もう一度",
+            "もう一回",
+            "繰り返し",
+            "リピート"
+          ]
+        }
+      }
+    },
+    {
+      "description": "最初から開始",
+      "name": "START_FROM_BEGINNING",
+      "fulfillment": {
+        "conversationName": "start_from_beginning"
+      },
+      "intent": {
+        "name": "com.pri.intent.START_FROM_BEGINNING",
+        "trigger": {
+          "queryPatterns": [
+            "最初から",
+            "初めから",
+            "はじめから",
+            "スタート"
+          ]
+        }
+      }
+    },
+    {
+      "description": "タイマー設定",
+      "name": "SET_TIMER",
+      "fulfillment": {
+        "conversationName": "set_timer"
+      },
+      "intent": {
+        "name": "com.pri.intent.SET_TIMER",
+        "parameters": [
+          {
+            "name": "duration",
+            "type": "org.schema.type.Duration"
+          }
+        ],
+        "trigger": {
+          "queryPatterns": [
+            "$duration のタイマー",
+            "タイマー $duration",
+            "$duration 計って"
+          ]
+        }
+      }
+    },
+    {
+      "description": "レシピ検索",
+      "name": "SEARCH_RECIPE",
+      "fulfillment": {
+        "conversationName": "search_recipe"
+      },
+      "intent": {
+        "name": "com.pri.intent.SEARCH_RECIPE",
+        "parameters": [
+          {
+            "name": "keyword",
+            "type": "org.schema.type.Text"
+          }
+        ],
+        "trigger": {
+          "queryPatterns": [
+            "$keyword を検索",
+            "$keyword のレシピを探して",
+            "$keyword を探して"
+          ]
+        }
+      }
+    },
+    {
+      "description": "レシピ全体を読む",
+      "name": "READ_ALL",
+      "fulfillment": {
+        "conversationName": "read_all"
+      },
+      "intent": {
+        "name": "com.pri.intent.READ_ALL",
+        "trigger": {
+          "queryPatterns": [
+            "全部読んで",
+            "全て読んで",
+            "レシピ全体を教えて"
+          ]
+        }
+      }
+    },
+    {
+      "description": "特定の手順に移動",
+      "name": "GO_TO_STEP",
+      "fulfillment": {
+        "conversationName": "go_to_step"
+      },
+      "intent": {
+        "name": "com.pri.intent.GO_TO_STEP",
+        "parameters": [
+          {
+            "name": "stepNumber",
+            "type": "org.schema.type.Number"
+          }
+        ],
+        "trigger": {
+          "queryPatterns": [
+            "手順 $stepNumber",
+            "$stepNumber 番目の手順",
+            "ステップ $stepNumber"
+          ]
+        }
+      }
+    }
+  ],
+  "conversations": {
+    "welcome": {
+      "name": "welcome",
+      "url": "https://example.com/webhook",
+      "fulfillmentApiVersion": 2
+    },
+    "get_recipe": {
+      "name": "get_recipe",
+      "url": "https://example.com/webhook",
+      "fulfillmentApiVersion": 2
+    },
+    "read_ingredients": {
+      "name": "read_ingredients",
+      "url": "https://example.com/webhook",
+      "fulfillmentApiVersion": 2
+    },
+    "next_step": {
+      "name": "next_step",
+      "url": "https://example.com/webhook",
+      "fulfillmentApiVersion": 2
+    },
+    "previous_step": {
+      "name": "previous_step",
+      "url": "https://example.com/webhook",
+      "fulfillmentApiVersion": 2
+    },
+    "repeat_step": {
+      "name": "repeat_step",
+      "url": "https://example.com/webhook",
+      "fulfillmentApiVersion": 2
+    },
+    "start_from_beginning": {
+      "name": "start_from_beginning",
+      "url": "https://example.com/webhook",
+      "fulfillmentApiVersion": 2
+    },
+    "set_timer": {
+      "name": "set_timer",
+      "url": "https://example.com/webhook",
+      "fulfillmentApiVersion": 2
+    },
+    "search_recipe": {
+      "name": "search_recipe",
+      "url": "https://example.com/webhook",
+      "fulfillmentApiVersion": 2
+    },
+    "read_all": {
+      "name": "read_all",
+      "url": "https://example.com/webhook",
+      "fulfillmentApiVersion": 2
+    },
+    "go_to_step": {
+      "name": "go_to_step",
+      "url": "https://example.com/webhook",
+      "fulfillmentApiVersion": 2
+    }
+  },
+  "locale": "ja"
+}
