@@ -2,16 +2,31 @@
 API Key Management Service
 
 APIキーの発行・管理・検証を行うサービス
+Argon2idを使用したセキュアなハッシュ化
 """
 
 import hashlib
 import secrets
 import json
 import time
+import logging
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 from dataclasses import dataclass, asdict
+
+# Argon2をインポート（フォールバック付き）
+try:
+    from argon2 import PasswordHasher
+    from argon2.exceptions import VerifyMismatchError, InvalidHashError
+    ARGON2_AVAILABLE = True
+except ImportError:
+    ARGON2_AVAILABLE = False
+    PasswordHasher = None
+    VerifyMismatchError = Exception
+    InvalidHashError = Exception
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -67,6 +82,7 @@ class APIKeyService:
     - レート制限チェック
     - 使用量トラッキング
     - スコープ検証
+    - Argon2idによるセキュアなハッシュ化
     """
 
     def __init__(self, data_dir: str = "data/api_keys"):
@@ -84,6 +100,20 @@ class APIKeyService:
 
         self.keys: Dict[str, APIKey] = {}
         self.usage: Dict[str, List[UsageRecord]] = {}
+
+        # Argon2ハッシャーを初期化（利用可能な場合）
+        if ARGON2_AVAILABLE:
+            self._hasher = PasswordHasher(
+                time_cost=3,
+                memory_cost=65536,
+                parallelism=4,
+                hash_len=32,
+                salt_len=16
+            )
+            logger.info("API Key Service initialized with Argon2id hashing")
+        else:
+            self._hasher = None
+            logger.warning("Argon2 not available, falling back to SHA-256 (less secure)")
 
         self._load_data()
 
@@ -136,6 +166,73 @@ class APIKeyService:
         with open(self.usage_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
+    def _hash_key(self, raw_key: str) -> str:
+        """
+        APIキーをハッシュ化
+
+        Argon2idが利用可能な場合はそれを使用、そうでなければSHA-256にフォールバック
+
+        Args:
+            raw_key: 生のAPIキー文字列
+
+        Returns:
+            ハッシュ化されたキー
+        """
+        if self._hasher:
+            return self._hasher.hash(raw_key)
+        else:
+            return hashlib.sha256(raw_key.encode()).hexdigest()
+
+    def _verify_key_hash(self, raw_key: str, key_hash: str) -> bool:
+        """
+        APIキーのハッシュを検証
+
+        Argon2形式とSHA-256形式の両方に対応（後方互換性）
+
+        Args:
+            raw_key: 検証する生のAPIキー
+            key_hash: 保存されているハッシュ
+
+        Returns:
+            検証成功の場合True
+        """
+        # Argon2形式のハッシュかチェック（$argon2で始まる）
+        if key_hash.startswith("$argon2") and self._hasher:
+            try:
+                self._hasher.verify(key_hash, raw_key)
+                return True
+            except (VerifyMismatchError, InvalidHashError):
+                return False
+        else:
+            # SHA-256形式（後方互換性）
+            sha256_hash = hashlib.sha256(raw_key.encode()).hexdigest()
+            return sha256_hash == key_hash
+
+    def _needs_rehash(self, key_hash: str) -> bool:
+        """
+        ハッシュの再計算が必要かチェック
+
+        SHA-256からArgon2への移行をサポート
+
+        Args:
+            key_hash: 現在のハッシュ
+
+        Returns:
+            再ハッシュが必要な場合True
+        """
+        if not self._hasher:
+            return False
+
+        # Argon2でない場合は再ハッシュ推奨
+        if not key_hash.startswith("$argon2"):
+            return True
+
+        # Argon2のパラメータ更新チェック
+        try:
+            return self._hasher.check_needs_rehash(key_hash)
+        except Exception:
+            return False
+
     def generate_api_key(
         self,
         name: str,
@@ -156,9 +253,9 @@ class APIKeyService:
         # 32バイトのランダムキー生成
         raw_key = secrets.token_urlsafe(32)
 
-        # キーIDとハッシュ生成
+        # キーIDとハッシュ生成（Argon2idを使用）
         key_id = secrets.token_urlsafe(16)
-        key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
+        key_hash = self._hash_key(raw_key)
 
         # デフォルト値設定
         if scope is None:
@@ -188,16 +285,27 @@ class APIKeyService:
         """
         APIキーを検証
 
+        Argon2id形式とSHA-256形式の両方に対応（後方互換性）
+        SHA-256形式のキーは自動的にArgon2idに移行
+
         Args:
           raw_key: 検証するAPIキー文字列
 
         Returns:
           APIKey情報（無効な場合はNone）
         """
-        key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
-
         for api_key in self.keys.values():
-            if api_key.key_hash == key_hash and api_key.is_active:
+            if not api_key.is_active:
+                continue
+
+            # Argon2id/SHA-256両対応の検証
+            if self._verify_key_hash(raw_key, api_key.key_hash):
+                # SHA-256からArgon2idへの自動移行
+                if self._needs_rehash(api_key.key_hash):
+                    logger.info(f"Rehashing API key {api_key.key_id} from SHA-256 to Argon2id")
+                    api_key.key_hash = self._hash_key(raw_key)
+                    self._save_keys()
+
                 return api_key
 
         return None

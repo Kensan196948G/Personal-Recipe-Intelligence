@@ -351,6 +351,108 @@ class TestScopeManagement:
         assert has_scope is False
 
 
+class TestArgon2idHashing:
+    """Argon2idハッシュ化のテスト"""
+
+    def test_hash_key_produces_argon2_format(self, service):
+        """_hash_keyがArgon2形式を生成"""
+        from backend.services.api_key_service import ARGON2_AVAILABLE
+
+        if not ARGON2_AVAILABLE:
+            pytest.skip("Argon2 not available")
+
+        raw_key = "test_key_12345"
+        hashed = service._hash_key(raw_key)
+
+        assert hashed.startswith("$argon2")
+
+    def test_verify_argon2_hash(self, service):
+        """Argon2ハッシュの検証"""
+        from backend.services.api_key_service import ARGON2_AVAILABLE
+
+        if not ARGON2_AVAILABLE:
+            pytest.skip("Argon2 not available")
+
+        raw_key = "test_key_12345"
+        hashed = service._hash_key(raw_key)
+
+        assert service._verify_key_hash(raw_key, hashed) is True
+        assert service._verify_key_hash("wrong_key", hashed) is False
+
+    def test_backward_compatible_sha256_verification(self, service):
+        """SHA-256後方互換性の検証"""
+        import hashlib
+
+        raw_key = "test_key_12345"
+        sha256_hash = hashlib.sha256(raw_key.encode()).hexdigest()
+
+        # SHA-256形式も検証できる
+        assert service._verify_key_hash(raw_key, sha256_hash) is True
+        assert service._verify_key_hash("wrong_key", sha256_hash) is False
+
+    def test_needs_rehash_for_sha256(self, service):
+        """SHA-256は再ハッシュが必要"""
+        from backend.services.api_key_service import ARGON2_AVAILABLE
+        import hashlib
+
+        if not ARGON2_AVAILABLE:
+            pytest.skip("Argon2 not available")
+
+        raw_key = "test_key_12345"
+        sha256_hash = hashlib.sha256(raw_key.encode()).hexdigest()
+
+        assert service._needs_rehash(sha256_hash) is True
+
+    def test_no_rehash_for_argon2(self, service):
+        """Argon2は再ハッシュ不要"""
+        from backend.services.api_key_service import ARGON2_AVAILABLE
+
+        if not ARGON2_AVAILABLE:
+            pytest.skip("Argon2 not available")
+
+        raw_key = "test_key_12345"
+        argon2_hash = service._hash_key(raw_key)
+
+        assert service._needs_rehash(argon2_hash) is False
+
+    def test_auto_rehash_on_verification(self, temp_dir):
+        """検証時にSHA-256からArgon2へ自動移行"""
+        from backend.services.api_key_service import ARGON2_AVAILABLE
+        import hashlib
+
+        if not ARGON2_AVAILABLE:
+            pytest.skip("Argon2 not available")
+
+        service = APIKeyService(data_dir=temp_dir)
+
+        # キーを生成
+        raw_key, api_key = service.generate_api_key(name="Test Key")
+        key_id = api_key.key_id
+
+        # SHA-256ハッシュに手動で変更（レガシーシミュレート）
+        sha256_hash = hashlib.sha256(raw_key.encode()).hexdigest()
+        service.keys[key_id].key_hash = sha256_hash
+        service._save_keys()
+
+        # 検証時に自動移行
+        verified = service.verify_api_key(raw_key)
+        assert verified is not None
+
+        # ハッシュがArgon2に更新されている
+        assert service.keys[key_id].key_hash.startswith("$argon2")
+
+    def test_generated_key_uses_argon2(self, service):
+        """新規キー生成時にArgon2を使用"""
+        from backend.services.api_key_service import ARGON2_AVAILABLE
+
+        if not ARGON2_AVAILABLE:
+            pytest.skip("Argon2 not available")
+
+        raw_key, api_key = service.generate_api_key(name="New Key")
+
+        assert api_key.key_hash.startswith("$argon2")
+
+
 class TestPersistence:
     """永続化のテスト"""
 
