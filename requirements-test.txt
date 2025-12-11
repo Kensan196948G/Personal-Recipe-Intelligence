@@ -61,3 +61,6 @@ yt-dlp>=2023.7.0
 opencv-python-headless>=4.8.0
 pytesseract>=0.3.10
 numpy>=1.24.0
+
+# Push notifications
+pywebpush>=1.14.0
