@@ -18,289 +18,289 @@ logger = logging.getLogger(__name__)
 
 
 class OCRExtractor:
-  """
-  OCR text extractor with image preprocessing capabilities.
-
-  Supports:
-  - Image preprocessing (resize, enhance contrast, denoise)
-  - Multi-language text extraction (Japanese + English)
-  - Error handling and logging
-  """
-
-  def __init__(
-    self,
-    lang: str = "jpn+eng",
-    max_width: int = 2000,
-    max_height: int = 2000,
-  ):
     """
-    Initialize OCR extractor.
+    OCR text extractor with image preprocessing capabilities.
 
-    Args:
-      lang: Tesseract language codes (e.g., 'jpn+eng')
-      max_width: Maximum image width for processing
-      max_height: Maximum image height for processing
+    Supports:
+    - Image preprocessing (resize, enhance contrast, denoise)
+    - Multi-language text extraction (Japanese + English)
+    - Error handling and logging
     """
-    self.lang = lang
-    self.max_width = max_width
-    self.max_height = max_height
-    logger.info(f"OCRExtractor initialized with lang={lang}")
 
-  def preprocess_image(self, image: Image.Image) -> Image.Image:
-    """
-    Preprocess image for better OCR accuracy.
+    def __init__(
+        self,
+        lang: str = "jpn+eng",
+        max_width: int = 2000,
+        max_height: int = 2000,
+    ):
+        """
+        Initialize OCR extractor.
 
-    Steps:
-    1. Resize if too large
-    2. Convert to grayscale
-    3. Enhance contrast
-    4. Denoise
-    5. Binarization (Otsu's method)
+        Args:
+          lang: Tesseract language codes (e.g., 'jpn+eng')
+          max_width: Maximum image width for processing
+          max_height: Maximum image height for processing
+        """
+        self.lang = lang
+        self.max_width = max_width
+        self.max_height = max_height
+        logger.info(f"OCRExtractor initialized with lang={lang}")
 
-    Args:
-      image: PIL Image object
+    def preprocess_image(self, image: Image.Image) -> Image.Image:
+        """
+        Preprocess image for better OCR accuracy.
 
-    Returns:
-      Preprocessed PIL Image
-    """
-    try:
-      # Resize if necessary
-      image = self._resize_image(image)
+        Steps:
+        1. Resize if too large
+        2. Convert to grayscale
+        3. Enhance contrast
+        4. Denoise
+        5. Binarization (Otsu's method)
 
-      # Convert PIL to OpenCV format
-      img_array = np.array(image)
+        Args:
+          image: PIL Image object
 
-      # Convert to grayscale
-      if len(img_array.shape) == 3:
-        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
-      else:
-        gray = img_array
+        Returns:
+          Preprocessed PIL Image
+        """
+        try:
+            # Resize if necessary
+            image = self._resize_image(image)
 
-      # Denoise
-      denoised = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
+            # Convert PIL to OpenCV format
+            img_array = np.array(image)
 
-      # Enhance contrast using CLAHE
-      clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-      enhanced = clahe.apply(denoised)
+            # Convert to grayscale
+            if len(img_array.shape) == 3:
+                gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+            else:
+                gray = img_array
 
-      # Binarization using Otsu's method
-      _, binary = cv2.threshold(
-        enhanced, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
-      )
+            # Denoise
+            denoised = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
 
-      # Convert back to PIL Image
-      processed_image = Image.fromarray(binary)
+            # Enhance contrast using CLAHE
+            clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+            enhanced = clahe.apply(denoised)
 
-      logger.debug("Image preprocessing completed successfully")
-      return processed_image
+            # Binarization using Otsu's method
+            _, binary = cv2.threshold(
+                enhanced, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
+            )
 
-    except Exception as e:
-      logger.error(f"Image preprocessing failed: {e}", exc_info=True)
-      # Return original image if preprocessing fails
-      return image
+            # Convert back to PIL Image
+            processed_image = Image.fromarray(binary)
 
-  def _resize_image(self, image: Image.Image) -> Image.Image:
-    """
-    Resize image if it exceeds maximum dimensions.
+            logger.debug("Image preprocessing completed successfully")
+            return processed_image
 
-    Args:
-      image: PIL Image object
+        except Exception as e:
+            logger.error(f"Image preprocessing failed: {e}", exc_info=True)
+            # Return original image if preprocessing fails
+            return image
 
-    Returns:
-      Resized PIL Image
-    """
-    width, height = image.size
+    def _resize_image(self, image: Image.Image) -> Image.Image:
+        """
+        Resize image if it exceeds maximum dimensions.
 
-    if width <= self.max_width and height <= self.max_height:
-      return image
+        Args:
+          image: PIL Image object
 
-    # Calculate scaling factor
-    scale = min(self.max_width / width, self.max_height / height)
-    new_width = int(width * scale)
-    new_height = int(height * scale)
+        Returns:
+          Resized PIL Image
+        """
+        width, height = image.size
 
-    resized = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
-    logger.debug(f"Image resized from {width}x{height} to {new_width}x{new_height}")
+        if width <= self.max_width and height <= self.max_height:
+            return image
 
-    return resized
+        # Calculate scaling factor
+        scale = min(self.max_width / width, self.max_height / height)
+        new_width = int(width * scale)
+        new_height = int(height * scale)
 
-  def extract_text(
-    self,
-    image_path: str | Path,
-    preprocess: bool = True,
-  ) -> str:
-    """
-    Extract text from image file using OCR.
+        resized = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        logger.debug(f"Image resized from {width}x{height} to {new_width}x{new_height}")
 
-    Args:
-      image_path: Path to image file
-      preprocess: Whether to preprocess the image
+        return resized
 
-    Returns:
-      Extracted text as string
+    def extract_text(
+        self,
+        image_path: str | Path,
+        preprocess: bool = True,
+    ) -> str:
+        """
+        Extract text from image file using OCR.
 
-    Raises:
-      FileNotFoundError: If image file not found
-      ValueError: If image cannot be processed
-    """
-    try:
-      image_path = Path(image_path)
+        Args:
+          image_path: Path to image file
+          preprocess: Whether to preprocess the image
 
-      if not image_path.exists():
-        raise FileNotFoundError(f"Image file not found: {image_path}")
+        Returns:
+          Extracted text as string
 
-      # Load image
-      image = Image.open(image_path)
-      logger.info(f"Processing image: {image_path.name}")
+        Raises:
+          FileNotFoundError: If image file not found
+          ValueError: If image cannot be processed
+        """
+        try:
+            image_path = Path(image_path)
 
-      return self.extract_text_from_image(image, preprocess=preprocess)
+            if not image_path.exists():
+                raise FileNotFoundError(f"Image file not found: {image_path}")
 
-    except FileNotFoundError:
-      raise
-    except Exception as e:
-      logger.error(f"Failed to extract text from {image_path}: {e}", exc_info=True)
-      raise ValueError(f"Image processing error: {e}") from e
+            # Load image
+            image = Image.open(image_path)
+            logger.info(f"Processing image: {image_path.name}")
 
-  def extract_text_from_image(
-    self,
-    image: Image.Image,
-    preprocess: bool = True,
-  ) -> str:
-    """
-    Extract text from PIL Image object using OCR.
+            return self.extract_text_from_image(image, preprocess=preprocess)
 
-    Args:
-      image: PIL Image object
-      preprocess: Whether to preprocess the image
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            logger.error(
+                f"Failed to extract text from {image_path}: {e}", exc_info=True
+            )
+            raise ValueError(f"Image processing error: {e}") from e
 
-    Returns:
-      Extracted text as string
+    def extract_text_from_image(
+        self,
+        image: Image.Image,
+        preprocess: bool = True,
+    ) -> str:
+        """
+        Extract text from PIL Image object using OCR.
 
-    Raises:
-      ValueError: If OCR extraction fails
-    """
-    try:
-      # Preprocess if requested
-      if preprocess:
-        processed_image = self.preprocess_image(image)
-      else:
-        processed_image = image
+        Args:
+          image: PIL Image object
+          preprocess: Whether to preprocess the image
 
-      # Extract text using pytesseract
-      text = pytesseract.image_to_string(
-        processed_image,
-        lang=self.lang,
-        config="--psm 6",  # Assume uniform block of text
-      )
+        Returns:
+          Extracted text as string
 
-      # Clean up extracted text
-      cleaned_text = self._clean_text(text)
+        Raises:
+          ValueError: If OCR extraction fails
+        """
+        try:
+            # Preprocess if requested
+            if preprocess:
+                processed_image = self.preprocess_image(image)
+            else:
+                processed_image = image
 
-      logger.info(f"Extracted {len(cleaned_text)} characters from image")
-      logger.debug(f"Extracted text preview: {cleaned_text[:100]}...")
+            # Extract text using pytesseract
+            text = pytesseract.image_to_string(
+                processed_image,
+                lang=self.lang,
+                config="--psm 6",  # Assume uniform block of text
+            )
 
-      return cleaned_text
+            # Clean up extracted text
+            cleaned_text = self._clean_text(text)
 
-    except Exception as e:
-      logger.error(f"OCR extraction failed: {e}", exc_info=True)
-      raise ValueError(f"OCR extraction error: {e}") from e
+            logger.info(f"Extracted {len(cleaned_text)} characters from image")
+            logger.debug(f"Extracted text preview: {cleaned_text[:100]}...")
 
-  def _clean_text(self, text: str) -> str:
-    """
-    Clean up extracted text.
+            return cleaned_text
 
-    - Remove excessive whitespace
-    - Normalize line breaks
-    - Remove empty lines
+        except Exception as e:
+            logger.error(f"OCR extraction failed: {e}", exc_info=True)
+            raise ValueError(f"OCR extraction error: {e}") from e
 
-    Args:
-      text: Raw OCR text
+    def _clean_text(self, text: str) -> str:
+        """
+        Clean up extracted text.
 
-    Returns:
-      Cleaned text
-    """
-    if not text:
-      return ""
+        - Remove excessive whitespace
+        - Normalize line breaks
+        - Remove empty lines
 
-    # Split into lines
-    lines = text.split("\n")
+        Args:
+          text: Raw OCR text
 
-    # Remove empty lines and strip whitespace
-    cleaned_lines = [line.strip() for line in lines if line.strip()]
+        Returns:
+          Cleaned text
+        """
+        if not text:
+            return ""
 
-    # Join with single line break
-    cleaned_text = "\n".join(cleaned_lines)
+        # Split into lines
+        lines = text.split("\n")
 
-    return cleaned_text
+        # Remove empty lines and strip whitespace
+        cleaned_lines = [line.strip() for line in lines if line.strip()]
 
-  def extract_with_confidence(
-    self,
-    image_path: str | Path,
-    preprocess: bool = True,
-  ) -> Tuple[str, float]:
-    """
-    Extract text with confidence score.
+        # Join with single line break
+        cleaned_text = "\n".join(cleaned_lines)
 
-    Args:
-      image_path: Path to image file
-      preprocess: Whether to preprocess the image
+        return cleaned_text
 
-    Returns:
-      Tuple of (extracted_text, average_confidence)
+    def extract_with_confidence(
+        self,
+        image_path: str | Path,
+        preprocess: bool = True,
+    ) -> Tuple[str, float]:
+        """
+        Extract text with confidence score.
 
-    Raises:
-      FileNotFoundError: If image file not found
-      ValueError: If image cannot be processed
-    """
-    try:
-      image_path = Path(image_path)
+        Args:
+          image_path: Path to image file
+          preprocess: Whether to preprocess the image
 
-      if not image_path.exists():
-        raise FileNotFoundError(f"Image file not found: {image_path}")
+        Returns:
+          Tuple of (extracted_text, average_confidence)
 
-      # Load image
-      image = Image.open(image_path)
+        Raises:
+          FileNotFoundError: If image file not found
+          ValueError: If image cannot be processed
+        """
+        try:
+            image_path = Path(image_path)
 
-      # Preprocess if requested
-      if preprocess:
-        processed_image = self.preprocess_image(image)
-      else:
-        processed_image = image
+            if not image_path.exists():
+                raise FileNotFoundError(f"Image file not found: {image_path}")
 
-      # Extract text with detailed data
-      data = pytesseract.image_to_data(
-        processed_image,
-        lang=self.lang,
-        config="--psm 6",
-        output_type=pytesseract.Output.DICT,
-      )
+            # Load image
+            image = Image.open(image_path)
 
-      # Calculate average confidence (excluding -1 values)
-      confidences = [
-        float(conf) for conf in data["conf"] if int(conf) != -1
-      ]
-      avg_confidence = sum(confidences) / len(confidences) if confidences else 0.0
+            # Preprocess if requested
+            if preprocess:
+                processed_image = self.preprocess_image(image)
+            else:
+                processed_image = image
 
-      # Extract text
-      text = pytesseract.image_to_string(
-        processed_image,
-        lang=self.lang,
-        config="--psm 6",
-      )
+            # Extract text with detailed data
+            data = pytesseract.image_to_data(
+                processed_image,
+                lang=self.lang,
+                config="--psm 6",
+                output_type=pytesseract.Output.DICT,
+            )
 
-      cleaned_text = self._clean_text(text)
+            # Calculate average confidence (excluding -1 values)
+            confidences = [float(conf) for conf in data["conf"] if int(conf) != -1]
+            avg_confidence = sum(confidences) / len(confidences) if confidences else 0.0
 
-      logger.info(
-        f"Extracted text from {image_path.name} with confidence: {avg_confidence:.2f}%"
-      )
+            # Extract text
+            text = pytesseract.image_to_string(
+                processed_image,
+                lang=self.lang,
+                config="--psm 6",
+            )
 
-      return cleaned_text, avg_confidence
+            cleaned_text = self._clean_text(text)
 
-    except FileNotFoundError:
-      raise
-    except Exception as e:
-      logger.error(
-        f"Failed to extract text with confidence from {image_path}: {e}",
-        exc_info=True,
-      )
-      raise ValueError(f"OCR extraction error: {e}") from e
+            logger.info(
+                f"Extracted text from {image_path.name} with confidence: {avg_confidence:.2f}%"
+            )
+
+            return cleaned_text, avg_confidence
+
+        except FileNotFoundError:
+            raise
+        except Exception as e:
+            logger.error(
+                f"Failed to extract text with confidence from {image_path}: {e}",
+                exc_info=True,
+            )
+            raise ValueError(f"OCR extraction error: {e}") from e

@@ -15,309 +15,313 @@ from typing import Any, Dict, Optional, Tuple
 
 @dataclass
 class NormalizedIngredient:
-  """Normalized ingredient data structure."""
+    """Normalized ingredient data structure."""
 
-  name: str
-  quantity: Optional[Decimal]
-  unit: Optional[str]
-  original_text: str
-  note: Optional[str] = None
+    name: str
+    quantity: Optional[Decimal]
+    unit: Optional[str]
+    original_text: str
+    note: Optional[str] = None
 
 
 class IngredientNormalizer:
-  """
-  Service for normalizing ingredient names, quantities, and units.
-
-  Handles Japanese ingredient name variations, synonym mapping,
-  quantity parsing (including fractions), and unit standardization.
-  """
-
-  def __init__(self, mappings_path: Optional[str] = None):
     """
-    Initialize the normalizer with ingredient mappings.
+    Service for normalizing ingredient names, quantities, and units.
 
-    Args:
-      mappings_path: Path to the ingredient_mappings.json file.
-                     Defaults to config/ingredient_mappings.json
+    Handles Japanese ingredient name variations, synonym mapping,
+    quantity parsing (including fractions), and unit standardization.
     """
-    if mappings_path is None:
-      base_dir = Path(__file__).parent.parent.parent
-      mappings_path = base_dir / "config" / "ingredient_mappings.json"
 
-    self.mappings_path = Path(mappings_path)
-    self._load_mappings()
+    def __init__(self, mappings_path: Optional[str] = None):
+        """
+        Initialize the normalizer with ingredient mappings.
 
-  def _load_mappings(self) -> None:
-    """Load ingredient mappings from JSON file."""
-    try:
-      with open(self.mappings_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+        Args:
+          mappings_path: Path to the ingredient_mappings.json file.
+                         Defaults to config/ingredient_mappings.json
+        """
+        if mappings_path is None:
+            base_dir = Path(__file__).parent.parent.parent
+            mappings_path = base_dir / "config" / "ingredient_mappings.json"
 
-      self.ingredient_synonyms: Dict[str, str] = data.get("ingredient_synonyms", {})
-      self.unit_synonyms: Dict[str, str] = data.get("unit_synonyms", {})
-      self.quantity_keywords: Dict[str, str] = data.get("quantity_keywords", {})
+        self.mappings_path = Path(mappings_path)
+        self._load_mappings()
 
-    except FileNotFoundError:
-      raise FileNotFoundError(
-        f"Ingredient mappings file not found: {self.mappings_path}"
-      )
-    except json.JSONDecodeError as e:
-      raise ValueError(f"Invalid JSON in mappings file: {e}")
+    def _load_mappings(self) -> None:
+        """Load ingredient mappings from JSON file."""
+        try:
+            with open(self.mappings_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
 
-  def normalize_ingredient_name(self, name: str) -> str:
-    """
-    Normalize ingredient name to canonical form.
+            self.ingredient_synonyms: Dict[str, str] = data.get(
+                "ingredient_synonyms", {}
+            )
+            self.unit_synonyms: Dict[str, str] = data.get("unit_synonyms", {})
+            self.quantity_keywords: Dict[str, str] = data.get("quantity_keywords", {})
 
-    Args:
-      name: Original ingredient name
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                f"Ingredient mappings file not found: {self.mappings_path}"
+            )
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON in mappings file: {e}")
 
-    Returns:
-      Normalized ingredient name
-    """
-    # Remove extra whitespace
-    name = name.strip()
+    def normalize_ingredient_name(self, name: str) -> str:
+        """
+        Normalize ingredient name to canonical form.
 
-    # Convert to hiragana if possible (simple katakana to hiragana)
-    normalized = self._katakana_to_hiragana(name)
+        Args:
+          name: Original ingredient name
 
-    # Look up synonym mapping
-    if normalized in self.ingredient_synonyms:
-      return self.ingredient_synonyms[normalized]
+        Returns:
+          Normalized ingredient name
+        """
+        # Remove extra whitespace
+        name = name.strip()
 
-    # Try case-insensitive lookup
-    name_lower = normalized.lower()
-    for key, value in self.ingredient_synonyms.items():
-      if key.lower() == name_lower:
-        return value
+        # Convert to hiragana if possible (simple katakana to hiragana)
+        normalized = self._katakana_to_hiragana(name)
 
-    # Return normalized version if no mapping found
-    return normalized
+        # Look up synonym mapping
+        if normalized in self.ingredient_synonyms:
+            return self.ingredient_synonyms[normalized]
 
-  def normalize_unit(self, unit: str) -> str:
-    """
-    Normalize measurement unit.
+        # Try case-insensitive lookup
+        name_lower = normalized.lower()
+        for key, value in self.ingredient_synonyms.items():
+            if key.lower() == name_lower:
+                return value
 
-    Args:
-      unit: Original unit string
+        # Return normalized version if no mapping found
+        return normalized
 
-    Returns:
-      Normalized unit
-    """
-    # Remove extra whitespace
-    unit = unit.strip()
+    def normalize_unit(self, unit: str) -> str:
+        """
+        Normalize measurement unit.
 
-    # Look up unit synonym mapping
-    if unit in self.unit_synonyms:
-      return self.unit_synonyms[unit]
+        Args:
+          unit: Original unit string
 
-    # Try case-insensitive lookup
-    unit_lower = unit.lower()
-    for key, value in self.unit_synonyms.items():
-      if key.lower() == unit_lower:
-        return value
+        Returns:
+          Normalized unit
+        """
+        # Remove extra whitespace
+        unit = unit.strip()
 
-    # Return original if no mapping found
-    return unit
+        # Look up unit synonym mapping
+        if unit in self.unit_synonyms:
+            return self.unit_synonyms[unit]
 
-  def parse_quantity(self, quantity_str: str) -> Tuple[Optional[Decimal], Optional[str]]:
-    """
-    Parse quantity string into numeric value and note.
+        # Try case-insensitive lookup
+        unit_lower = unit.lower()
+        for key, value in self.unit_synonyms.items():
+            if key.lower() == unit_lower:
+                return value
 
-    Handles fractions (1/2, 2/3), decimals, ranges, and keywords (少々, 適量).
+        # Return original if no mapping found
+        return unit
 
-    Args:
-      quantity_str: Quantity string to parse
+    def parse_quantity(
+        self, quantity_str: str
+    ) -> Tuple[Optional[Decimal], Optional[str]]:
+        """
+        Parse quantity string into numeric value and note.
 
-    Returns:
-      Tuple of (quantity as Decimal or None, note/keyword)
-    """
-    quantity_str = quantity_str.strip()
+        Handles fractions (1/2, 2/3), decimals, ranges, and keywords (少々, 適量).
 
-    # Check for quantity keywords (少々, 適量, etc.)
-    for keyword in self.quantity_keywords.keys():
-      if keyword in quantity_str:
-        return (None, self.quantity_keywords[keyword])
+        Args:
+          quantity_str: Quantity string to parse
 
-    # Handle fractions (1/2, 2/3, etc.)
-    fraction_pattern = r"(\d+)\s*/\s*(\d+)"
-    fraction_match = re.search(fraction_pattern, quantity_str)
-    if fraction_match:
-      numerator = Decimal(fraction_match.group(1))
-      denominator = Decimal(fraction_match.group(2))
-      if denominator != 0:
-        quantity = numerator / denominator
+        Returns:
+          Tuple of (quantity as Decimal or None, note/keyword)
+        """
+        quantity_str = quantity_str.strip()
 
-        # Check for mixed numbers (e.g., "1と1/2" or "1 1/2")
-        prefix_pattern = r"(\d+)\s*[と＋+]?\s*\d+\s*/\s*\d+"
-        prefix_match = re.search(prefix_pattern, quantity_str)
-        if prefix_match:
-          whole_number = Decimal(prefix_match.group(1))
-          quantity += whole_number
+        # Check for quantity keywords (少々, 適量, etc.)
+        for keyword in self.quantity_keywords.keys():
+            if keyword in quantity_str:
+                return (None, self.quantity_keywords[keyword])
 
-        return (quantity, None)
+        # Handle fractions (1/2, 2/3, etc.)
+        fraction_pattern = r"(\d+)\s*/\s*(\d+)"
+        fraction_match = re.search(fraction_pattern, quantity_str)
+        if fraction_match:
+            numerator = Decimal(fraction_match.group(1))
+            denominator = Decimal(fraction_match.group(2))
+            if denominator != 0:
+                quantity = numerator / denominator
 
-    # Handle decimal numbers
-    decimal_pattern = r"(\d+\.?\d*)"
-    decimal_match = re.search(decimal_pattern, quantity_str)
-    if decimal_match:
-      try:
-        quantity = Decimal(decimal_match.group(1))
-        return (quantity, None)
-      except InvalidOperation:
-        pass
+                # Check for mixed numbers (e.g., "1と1/2" or "1 1/2")
+                prefix_pattern = r"(\d+)\s*[と＋+]?\s*\d+\s*/\s*\d+"
+                prefix_match = re.search(prefix_pattern, quantity_str)
+                if prefix_match:
+                    whole_number = Decimal(prefix_match.group(1))
+                    quantity += whole_number
 
-    # Handle range (e.g., "2-3", "2〜3")
-    range_pattern = r"(\d+\.?\d*)\s*[-〜～]\s*(\d+\.?\d*)"
-    range_match = re.search(range_pattern, quantity_str)
-    if range_match:
-      try:
-        min_val = Decimal(range_match.group(1))
-        max_val = Decimal(range_match.group(2))
-        avg_val = (min_val + max_val) / 2
-        return (avg_val, f"range: {min_val}-{max_val}")
-      except InvalidOperation:
-        pass
+                return (quantity, None)
 
-    # Could not parse - return as note
-    return (None, quantity_str)
+        # Handle decimal numbers
+        decimal_pattern = r"(\d+\.?\d*)"
+        decimal_match = re.search(decimal_pattern, quantity_str)
+        if decimal_match:
+            try:
+                quantity = Decimal(decimal_match.group(1))
+                return (quantity, None)
+            except InvalidOperation:
+                pass
 
-  def normalize(self, ingredient_text: str) -> NormalizedIngredient:
-    """
-    Normalize a full ingredient text string.
+        # Handle range (e.g., "2-3", "2〜3")
+        range_pattern = r"(\d+\.?\d*)\s*[-〜～]\s*(\d+\.?\d*)"
+        range_match = re.search(range_pattern, quantity_str)
+        if range_match:
+            try:
+                min_val = Decimal(range_match.group(1))
+                max_val = Decimal(range_match.group(2))
+                avg_val = (min_val + max_val) / 2
+                return (avg_val, f"range: {min_val}-{max_val}")
+            except InvalidOperation:
+                pass
 
-    Parses ingredient name, quantity, and unit from a single string.
+        # Could not parse - return as note
+        return (None, quantity_str)
 
-    Args:
-      ingredient_text: Full ingredient text (e.g., "玉ねぎ 1/2個", "醤油 大さじ2")
+    def normalize(self, ingredient_text: str) -> NormalizedIngredient:
+        """
+        Normalize a full ingredient text string.
 
-    Returns:
-      NormalizedIngredient object
-    """
-    original_text = ingredient_text.strip()
+        Parses ingredient name, quantity, and unit from a single string.
 
-    # Pattern: ingredient name followed by quantity and unit
-    # Examples: "玉ねぎ 1個", "醤油 大さじ2", "塩 少々"
-    pattern = r"^([^\d]+?)\s*(\d+\.?\d*(?:/\d+)?(?:[と＋+]\d+\.?\d*(?:/\d+)?)?|少々|適量|ひとつまみ|ひとかけ|お好み|適宜)?\s*(.+)?$"
+        Args:
+          ingredient_text: Full ingredient text (e.g., "玉ねぎ 1/2個", "醤油 大さじ2")
 
-    match = re.match(pattern, original_text)
+        Returns:
+          NormalizedIngredient object
+        """
+        original_text = ingredient_text.strip()
 
-    if match:
-      name_part = match.group(1).strip() if match.group(1) else original_text
-      quantity_part = match.group(2).strip() if match.group(2) else None
-      unit_part = match.group(3).strip() if match.group(3) else None
+        # Pattern: ingredient name followed by quantity and unit
+        # Examples: "玉ねぎ 1個", "醤油 大さじ2", "塩 少々"
+        pattern = r"^([^\d]+?)\s*(\d+\.?\d*(?:/\d+)?(?:[と＋+]\d+\.?\d*(?:/\d+)?)?|少々|適量|ひとつまみ|ひとかけ|お好み|適宜)?\s*(.+)?$"
 
-      # Normalize name
-      normalized_name = self.normalize_ingredient_name(name_part)
+        match = re.match(pattern, original_text)
 
-      # Parse quantity
-      quantity = None
-      note = None
-      if quantity_part:
-        quantity, note = self.parse_quantity(quantity_part)
+        if match:
+            name_part = match.group(1).strip() if match.group(1) else original_text
+            quantity_part = match.group(2).strip() if match.group(2) else None
+            unit_part = match.group(3).strip() if match.group(3) else None
 
-      # Normalize unit
-      normalized_unit = None
-      if unit_part:
-        normalized_unit = self.normalize_unit(unit_part)
+            # Normalize name
+            normalized_name = self.normalize_ingredient_name(name_part)
 
-      return NormalizedIngredient(
-        name=normalized_name,
-        quantity=quantity,
-        unit=normalized_unit,
-        original_text=original_text,
-        note=note,
-      )
+            # Parse quantity
+            quantity = None
+            note = None
+            if quantity_part:
+                quantity, note = self.parse_quantity(quantity_part)
 
-    # Fallback: treat entire text as ingredient name
-    return NormalizedIngredient(
-      name=self.normalize_ingredient_name(original_text),
-      quantity=None,
-      unit=None,
-      original_text=original_text,
-      note=None,
-    )
+            # Normalize unit
+            normalized_unit = None
+            if unit_part:
+                normalized_unit = self.normalize_unit(unit_part)
 
-  def normalize_batch(self, ingredients: list[str]) -> list[NormalizedIngredient]:
-    """
-    Normalize a batch of ingredient strings.
+            return NormalizedIngredient(
+                name=normalized_name,
+                quantity=quantity,
+                unit=normalized_unit,
+                original_text=original_text,
+                note=note,
+            )
 
-    Args:
-      ingredients: List of ingredient text strings
+        # Fallback: treat entire text as ingredient name
+        return NormalizedIngredient(
+            name=self.normalize_ingredient_name(original_text),
+            quantity=None,
+            unit=None,
+            original_text=original_text,
+            note=None,
+        )
 
-    Returns:
-      List of NormalizedIngredient objects
-    """
-    return [self.normalize(ingredient) for ingredient in ingredients]
+    def normalize_batch(self, ingredients: list[str]) -> list[NormalizedIngredient]:
+        """
+        Normalize a batch of ingredient strings.
 
-  def to_dict(self, normalized: NormalizedIngredient) -> Dict[str, Any]:
-    """
-    Convert NormalizedIngredient to dictionary.
+        Args:
+          ingredients: List of ingredient text strings
 
-    Args:
-      normalized: NormalizedIngredient object
+        Returns:
+          List of NormalizedIngredient objects
+        """
+        return [self.normalize(ingredient) for ingredient in ingredients]
 
-    Returns:
-      Dictionary representation
-    """
-    return {
-      "name": normalized.name,
-      "quantity": str(normalized.quantity) if normalized.quantity else None,
-      "unit": normalized.unit,
-      "original_text": normalized.original_text,
-      "note": normalized.note,
-    }
+    def to_dict(self, normalized: NormalizedIngredient) -> Dict[str, Any]:
+        """
+        Convert NormalizedIngredient to dictionary.
 
-  @staticmethod
-  def _katakana_to_hiragana(text: str) -> str:
-    """
-    Convert katakana to hiragana (simple conversion).
+        Args:
+          normalized: NormalizedIngredient object
 
-    Args:
-      text: Input text
+        Returns:
+          Dictionary representation
+        """
+        return {
+            "name": normalized.name,
+            "quantity": str(normalized.quantity) if normalized.quantity else None,
+            "unit": normalized.unit,
+            "original_text": normalized.original_text,
+            "note": normalized.note,
+        }
 
-    Returns:
-      Text with katakana converted to hiragana
-    """
-    result = []
-    for char in text:
-      code = ord(char)
-      # Katakana range: 0x30A0 - 0x30FF
-      # Hiragana range: 0x3040 - 0x309F
-      if 0x30A0 <= code <= 0x30FF:
-        # Convert katakana to hiragana by subtracting offset
-        hiragana_code = code - 0x60
-        if 0x3040 <= hiragana_code <= 0x309F:
-          result.append(chr(hiragana_code))
-        else:
-          result.append(char)
-      else:
-        result.append(char)
+    @staticmethod
+    def _katakana_to_hiragana(text: str) -> str:
+        """
+        Convert katakana to hiragana (simple conversion).
 
-    return "".join(result)
+        Args:
+          text: Input text
+
+        Returns:
+          Text with katakana converted to hiragana
+        """
+        result = []
+        for char in text:
+            code = ord(char)
+            # Katakana range: 0x30A0 - 0x30FF
+            # Hiragana range: 0x3040 - 0x309F
+            if 0x30A0 <= code <= 0x30FF:
+                # Convert katakana to hiragana by subtracting offset
+                hiragana_code = code - 0x60
+                if 0x3040 <= hiragana_code <= 0x309F:
+                    result.append(chr(hiragana_code))
+                else:
+                    result.append(char)
+            else:
+                result.append(char)
+
+        return "".join(result)
 
 
 # Example usage
 if __name__ == "__main__":
-  normalizer = IngredientNormalizer()
+    normalizer = IngredientNormalizer()
 
-  # Test cases
-  test_ingredients = [
-    "玉ねぎ 1/2個",
-    "醤油 大さじ2",
-    "塩 少々",
-    "豚バラ肉 200g",
-    "ニンジン 1本",
-    "小麦粉 適量",
-    "牛乳 200ml",
-    "砂糖 大さじ1と1/2",
-  ]
+    # Test cases
+    test_ingredients = [
+        "玉ねぎ 1/2個",
+        "醤油 大さじ2",
+        "塩 少々",
+        "豚バラ肉 200g",
+        "ニンジン 1本",
+        "小麦粉 適量",
+        "牛乳 200ml",
+        "砂糖 大さじ1と1/2",
+    ]
 
-  print("Ingredient Normalization Test:\n")
-  for ingredient in test_ingredients:
-    normalized = normalizer.normalize(ingredient)
-    print(f"Original: {ingredient}")
-    print(f"  Name: {normalized.name}")
-    print(f"  Quantity: {normalized.quantity}")
-    print(f"  Unit: {normalized.unit}")
-    print(f"  Note: {normalized.note}")
-    print()
+    print("Ingredient Normalization Test:\n")
+    for ingredient in test_ingredients:
+        normalized = normalizer.normalize(ingredient)
+        print(f"Original: {ingredient}")
+        print(f"  Name: {normalized.name}")
+        print(f"  Quantity: {normalized.quantity}")
+        print(f"  Unit: {normalized.unit}")
+        print(f"  Note: {normalized.note}")
+        print()

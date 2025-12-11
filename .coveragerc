@@ -1,0 +1,59 @@
+# Coverage configuration for Personal Recipe Intelligence
+
+[run]
+source = backend,src
+omit =
+  */tests/*
+  */test_*.py
+  */__pycache__/*
+  */venv/*
+  */env/*
+  */node_modules/*
+  */.venv/*
+
+branch = True
+parallel = False
+
+[report]
+precision = 2
+show_missing = True
+skip_covered = False
+skip_empty = False
+
+exclude_lines =
+  # Have to re-enable the standard pragma
+  pragma: no cover
+
+  # Don't complain about missing debug-only code
+  def __repr__
+  def __str__
+
+  # Don't complain if tests don't hit defensive assertion code
+  raise AssertionError
+  raise NotImplementedError
+
+  # Don't complain if non-runnable code isn't run
+  if __name__ == .__main__.:
+  if TYPE_CHECKING:
+  if typing.TYPE_CHECKING:
+
+  # Don't complain about abstract methods
+  @abstractmethod
+  @abc.abstractmethod
+
+  # Don't complain about overload definitions
+  @overload
+
+  # Don't complain about ellipsis in protocol definitions
+  \.\.\.
+
+[html]
+directory = coverage_html
+title = Personal Recipe Intelligence Coverage Report
+
+[xml]
+output = coverage.xml
+
+[json]
+output = coverage.json
+pretty_print = True

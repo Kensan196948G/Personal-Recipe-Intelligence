@@ -16,203 +16,216 @@ logger = logging.getLogger(__name__)
 
 
 class CookpadScraper(BaseScraper):
-  """Scraper for Cookpad recipe pages."""
+    """Scraper for Cookpad recipe pages."""
 
-  async def scrape(self, url: str) -> Dict[str, Any]:
-    """
-    Scrape recipe from Cookpad URL.
+    async def scrape(self, url: str) -> Dict[str, Any]:
+        """
+        Scrape recipe from Cookpad URL.
 
-    Args:
-      url: Cookpad recipe URL
+        Args:
+          url: Cookpad recipe URL
 
-    Returns:
-      Dictionary containing recipe data
+        Returns:
+          Dictionary containing recipe data
 
-    Raises:
-      ParseError: If parsing fails
-    """
-    html = await self.fetch_html(url)
-    soup = self.parse_html(html)
+        Raises:
+          ParseError: If parsing fails
+        """
+        html = await self.fetch_html(url)
+        soup = self.parse_html(html)
 
-    # Try schema.org first
-    recipe = RecipeParser.extract_schema_org_recipe(soup)
-    if recipe:
-      recipe["source_url"] = url
-      logger.info(f"Extracted recipe from Cookpad using schema.org: {recipe['title']}")
-      return recipe
+        # Try schema.org first
+        recipe = RecipeParser.extract_schema_org_recipe(soup)
+        if recipe:
+            recipe["source_url"] = url
+            logger.info(
+                f"Extracted recipe from Cookpad using schema.org: {recipe['title']}"
+            )
+            return recipe
 
-    # Fallback to Cookpad-specific parsing
-    return self._parse_cookpad_specific(soup, url)
+        # Fallback to Cookpad-specific parsing
+        return self._parse_cookpad_specific(soup, url)
 
-  def _parse_cookpad_specific(self, soup: BeautifulSoup, url: str) -> Dict[str, Any]:
-    """
-    Parse Cookpad-specific HTML structure.
+    def _parse_cookpad_specific(self, soup: BeautifulSoup, url: str) -> Dict[str, Any]:
+        """
+        Parse Cookpad-specific HTML structure.
 
-    Args:
-      soup: BeautifulSoup object
-      url: Source URL
+        Args:
+          soup: BeautifulSoup object
+          url: Source URL
 
-    Returns:
-      Dictionary containing recipe data
+        Returns:
+          Dictionary containing recipe data
 
-    Raises:
-      ParseError: If critical elements are missing
-    """
-    # Extract title
-    title = None
-    title_elem = soup.find("h1", class_="recipe-title")
-    if not title_elem:
-      title_elem = soup.find("h1")
-    if title_elem:
-      title = title_elem.get_text(strip=True)
+        Raises:
+          ParseError: If critical elements are missing
+        """
+        # Extract title
+        title = None
+        title_elem = soup.find("h1", class_="recipe-title")
+        if not title_elem:
+            title_elem = soup.find("h1")
+        if title_elem:
+            title = title_elem.get_text(strip=True)
 
-    if not title:
-      raise ParseError("Failed to extract recipe title from Cookpad")
+        if not title:
+            raise ParseError("Failed to extract recipe title from Cookpad")
 
-    # Extract description
-    description = None
-    desc_elem = soup.find("p", class_="description")
-    if not desc_elem:
-      desc_elem = soup.find("div", class_="description")
-    if desc_elem:
-      description = desc_elem.get_text(strip=True)
+        # Extract description
+        description = None
+        desc_elem = soup.find("p", class_="description")
+        if not desc_elem:
+            desc_elem = soup.find("div", class_="description")
+        if desc_elem:
+            description = desc_elem.get_text(strip=True)
 
-    # Extract servings
-    servings = None
-    servings_elem = soup.find("span", class_="yield")
-    if not servings_elem:
-      servings_elem = soup.find(string=lambda text: text and "人分" in text)
-    if servings_elem:
-      import re
-      servings_text = servings_elem.get_text(strip=True) if hasattr(servings_elem, 'get_text') else str(servings_elem)
-      match = re.search(r"(\d+)", servings_text)
-      if match:
-        servings = int(match.group(1))
+        # Extract servings
+        servings = None
+        servings_elem = soup.find("span", class_="yield")
+        if not servings_elem:
+            servings_elem = soup.find(string=lambda text: text and "人分" in text)
+        if servings_elem:
+            import re
 
-    # Extract ingredients
-    ingredients = self._extract_cookpad_ingredients(soup)
+            servings_text = (
+                servings_elem.get_text(strip=True)
+                if hasattr(servings_elem, "get_text")
+                else str(servings_elem)
+            )
+            match = re.search(r"(\d+)", servings_text)
+            if match:
+                servings = int(match.group(1))
 
-    # Extract steps
-    steps = self._extract_cookpad_steps(soup)
+        # Extract ingredients
+        ingredients = self._extract_cookpad_ingredients(soup)
 
-    # Extract times (if available)
-    prep_time = None
-    cook_time = None
+        # Extract steps
+        steps = self._extract_cookpad_steps(soup)
 
-    # Some Cookpad recipes have time info
-    time_elem = soup.find("span", class_="cooking-time")
-    if time_elem:
-      cook_time = RecipeParser.parse_time(time_elem.get_text(strip=True))
+        # Extract times (if available)
+        prep_time = None
+        cook_time = None
 
-    recipe = RecipeParser.build_recipe_dict(
-      title=title,
-      description=description,
-      ingredients=ingredients,
-      steps=steps,
-      servings=servings,
-      prep_time=prep_time,
-      cook_time=cook_time,
-      source_url=url,
-      metadata={"scraper": "cookpad"},
-    )
+        # Some Cookpad recipes have time info
+        time_elem = soup.find("span", class_="cooking-time")
+        if time_elem:
+            cook_time = RecipeParser.parse_time(time_elem.get_text(strip=True))
 
-    logger.info(f"Extracted recipe from Cookpad: {title}")
-    return recipe
+        recipe = RecipeParser.build_recipe_dict(
+            title=title,
+            description=description,
+            ingredients=ingredients,
+            steps=steps,
+            servings=servings,
+            prep_time=prep_time,
+            cook_time=cook_time,
+            source_url=url,
+            metadata={"scraper": "cookpad"},
+        )
 
-  def _extract_cookpad_ingredients(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
-    """
-    Extract ingredients from Cookpad HTML.
+        logger.info(f"Extracted recipe from Cookpad: {title}")
+        return recipe
 
-    Args:
-      soup: BeautifulSoup object
+    def _extract_cookpad_ingredients(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
+        """
+        Extract ingredients from Cookpad HTML.
 
-    Returns:
-      List of ingredient dictionaries
-    """
-    ingredients = []
+        Args:
+          soup: BeautifulSoup object
 
-    # Find ingredients container
-    ingredients_container = soup.find("div", class_="ingredient_list")
-    if not ingredients_container:
-      ingredients_container = soup.find("div", id="ingredients_list")
-    if not ingredients_container:
-      logger.warning("Could not find ingredients container")
-      return ingredients
+        Returns:
+          List of ingredient dictionaries
+        """
+        ingredients = []
 
-    # Find all ingredient items
-    ingredient_items = ingredients_container.find_all("li", class_="ingredient")
-    if not ingredient_items:
-      ingredient_items = ingredients_container.find_all("div", class_="ingredient")
+        # Find ingredients container
+        ingredients_container = soup.find("div", class_="ingredient_list")
+        if not ingredients_container:
+            ingredients_container = soup.find("div", id="ingredients_list")
+        if not ingredients_container:
+            logger.warning("Could not find ingredients container")
+            return ingredients
 
-    for item in ingredient_items:
-      # Extract name
-      name_elem = item.find("span", class_="name")
-      if not name_elem:
-        name_elem = item.find("div", class_="ingredient_name")
+        # Find all ingredient items
+        ingredient_items = ingredients_container.find_all("li", class_="ingredient")
+        if not ingredient_items:
+            ingredient_items = ingredients_container.find_all(
+                "div", class_="ingredient"
+            )
 
-      # Extract amount
-      amount_elem = item.find("span", class_="amount")
-      if not amount_elem:
-        amount_elem = item.find("div", class_="ingredient_quantity")
+        for item in ingredient_items:
+            # Extract name
+            name_elem = item.find("span", class_="name")
+            if not name_elem:
+                name_elem = item.find("div", class_="ingredient_name")
 
-      if name_elem:
-        name = name_elem.get_text(strip=True)
-        name = RecipeParser.normalize_ingredient(name)
+            # Extract amount
+            amount_elem = item.find("span", class_="amount")
+            if not amount_elem:
+                amount_elem = item.find("div", class_="ingredient_quantity")
 
-        amount_str = amount_elem.get_text(strip=True) if amount_elem else ""
-        amount, unit = RecipeParser.parse_amount(amount_str)
+            if name_elem:
+                name = name_elem.get_text(strip=True)
+                name = RecipeParser.normalize_ingredient(name)
 
-        ingredients.append({
-          "name": name,
-          "amount": amount,
-          "unit": unit,
-          "raw": f"{name} {amount_str}".strip(),
-        })
+                amount_str = amount_elem.get_text(strip=True) if amount_elem else ""
+                amount, unit = RecipeParser.parse_amount(amount_str)
 
-    return ingredients
+                ingredients.append(
+                    {
+                        "name": name,
+                        "amount": amount,
+                        "unit": unit,
+                        "raw": f"{name} {amount_str}".strip(),
+                    }
+                )
 
-  def _extract_cookpad_steps(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
-    """
-    Extract cooking steps from Cookpad HTML.
+        return ingredients
 
-    Args:
-      soup: BeautifulSoup object
+    def _extract_cookpad_steps(self, soup: BeautifulSoup) -> List[Dict[str, Any]]:
+        """
+        Extract cooking steps from Cookpad HTML.
 
-    Returns:
-      List of step dictionaries
-    """
-    steps = []
+        Args:
+          soup: BeautifulSoup object
 
-    # Find steps container
-    steps_container = soup.find("div", class_="steps")
-    if not steps_container:
-      steps_container = soup.find("ol", class_="steps")
-    if not steps_container:
-      steps_container = soup.find("div", id="steps")
+        Returns:
+          List of step dictionaries
+        """
+        steps = []
 
-    if not steps_container:
-      logger.warning("Could not find steps container")
-      return steps
+        # Find steps container
+        steps_container = soup.find("div", class_="steps")
+        if not steps_container:
+            steps_container = soup.find("ol", class_="steps")
+        if not steps_container:
+            steps_container = soup.find("div", id="steps")
 
-    # Find all step items
-    step_items = steps_container.find_all("li", class_="step")
-    if not step_items:
-      step_items = steps_container.find_all("div", class_="step")
+        if not steps_container:
+            logger.warning("Could not find steps container")
+            return steps
 
-    for idx, item in enumerate(step_items, 1):
-      # Extract step text
-      text_elem = item.find("p", class_="step_text")
-      if not text_elem:
-        text_elem = item.find("div", class_="step_text")
-      if not text_elem:
-        text_elem = item
+        # Find all step items
+        step_items = steps_container.find_all("li", class_="step")
+        if not step_items:
+            step_items = steps_container.find_all("div", class_="step")
 
-      instruction = text_elem.get_text(strip=True)
+        for idx, item in enumerate(step_items, 1):
+            # Extract step text
+            text_elem = item.find("p", class_="step_text")
+            if not text_elem:
+                text_elem = item.find("div", class_="step_text")
+            if not text_elem:
+                text_elem = item
 
-      if instruction:
-        steps.append({
-          "order": idx,
-          "instruction": instruction,
-        })
+            instruction = text_elem.get_text(strip=True)
 
-    return steps
+            if instruction:
+                steps.append(
+                    {
+                        "order": idx,
+                        "instruction": instruction,
+                    }
+                )
+
+        return steps
