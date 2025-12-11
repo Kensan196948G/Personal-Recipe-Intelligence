@@ -229,7 +229,7 @@ class TestRecipeCRUD:
         for i in range(5):
             recipe = MockRecipe(
                 id=i + 1,
-                title=f"レシピ{i+1}",
+                title=f"レシピ{i + 1}",
                 ingredients=[{"name": "材料", "amount": "適量"}],
                 steps=["手順1"],
             )

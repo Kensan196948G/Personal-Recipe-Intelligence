@@ -47,9 +47,9 @@ class RecipeValidator:
 
         for i, step in enumerate(steps):
             if not isinstance(step, str):
-                raise TypeError(f"Step {i+1} must be a string")
+                raise TypeError(f"Step {i + 1} must be a string")
             if not step.strip():
-                raise ValueError(f"Step {i+1} cannot be empty")
+                raise ValueError(f"Step {i + 1} cannot be empty")
 
         return True
 

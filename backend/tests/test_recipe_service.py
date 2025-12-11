@@ -78,7 +78,7 @@ class TestRecipeService:
         """全レシピ取得のテスト"""
         # 3件作成
         for i in range(3):
-            service.create_recipe({"title": f"レシピ{i+1}"})
+            service.create_recipe({"title": f"レシピ{i + 1}"})
 
         recipes = service.get_all_recipes()
 
@@ -164,7 +164,7 @@ class TestRecipeService:
     def test_get_recipe_count(self, service):
         """レシピ総数取得のテスト"""
         for i in range(5):
-            service.create_recipe({"title": f"レシピ{i+1}"})
+            service.create_recipe({"title": f"レシピ{i + 1}"})
 
         count = service.get_recipe_count()
         assert count == 5
@@ -187,7 +187,7 @@ class TestRecipeService:
 
     def test_bulk_create_recipes(self, service):
         """一括作成のテスト"""
-        recipes_data = [{"title": f"レシピ{i+1}"} for i in range(3)]
+        recipes_data = [{"title": f"レシピ{i + 1}"} for i in range(3)]
 
         created = service.bulk_create_recipes(recipes_data)
 
@@ -197,7 +197,7 @@ class TestRecipeService:
         """一括削除のテスト"""
         ids = []
         for i in range(3):
-            recipe = service.create_recipe({"title": f"レシピ{i+1}"})
+            recipe = service.create_recipe({"title": f"レシピ{i + 1}"})
             ids.append(recipe.id)
 
         deleted_count = service.bulk_delete_recipes(ids)
