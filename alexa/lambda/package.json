@@ -1,0 +1,31 @@
+{
+  "name": "pri-alexa-skill",
+  "version": "1.0.0",
+  "description": "Personal Recipe Intelligence Alexa Skill Lambda Handler",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint .",
+    "deploy": "zip -r function.zip . && aws lambda update-function-code --function-name PersonalRecipeIntelligence --zip-file fileb://function.zip"
+  },
+  "keywords": [
+    "alexa",
+    "skill",
+    "recipe",
+    "cooking"
+  ],
+  "author": "Personal Recipe Intelligence",
+  "license": "MIT",
+  "dependencies": {
+    "ask-sdk-core": "^2.13.0",
+    "ask-sdk-model": "^1.39.0",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "jest": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

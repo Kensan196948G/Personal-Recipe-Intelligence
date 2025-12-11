@@ -1,0 +1,20 @@
+# Push Notification Dependencies
+# プッシュ通知機能用の依存パッケージ
+
+# Web Push
+pywebpush==1.14.0
+
+# VAPID Key Generation
+py-vapid==1.9.0
+
+# Job Scheduling
+APScheduler==3.10.4
+
+# Async Support
+aiofiles==23.2.1
+
+# Cryptography (VAPID dependencies)
+cryptography>=41.0.0
+
+# HTTP Client (for pywebpush)
+requests>=2.31.0

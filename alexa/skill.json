@@ -1,0 +1,242 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "locales": {
+        "ja-JP": {
+          "name": "パーソナル レシピ インテリジェンス",
+          "summary": "料理レシピを音声で管理・ナビゲーション",
+          "description": "Personal Recipe Intelligence（PRI）は、料理レシピの音声管理とハンズフリーナビゲーションを提供するスキルです。材料の読み上げ、手順のナビゲーション、タイマー設定などが可能です。",
+          "examplePhrases": [
+            "アレクサ、パーソナルレシピを開いて",
+            "次の手順を教えて",
+            "材料を読んで"
+          ],
+          "keywords": [
+            "料理",
+            "レシピ",
+            "クッキング",
+            "ナビゲーション",
+            "タイマー"
+          ]
+        }
+      },
+      "isAvailableWorldwide": false,
+      "testingInstructions": "「アレクサ、パーソナルレシピを開いて」と話しかけてください。その後、レシピのナビゲーションコマンドを試してください。",
+      "category": "FOOD_AND_DRINK",
+      "distributionCountries": ["JP"]
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "uri": "arn:aws:lambda:ap-northeast-1:ACCOUNT_ID:function:PersonalRecipeIntelligence"
+        },
+        "interfaces": []
+      }
+    },
+    "manifestVersion": "1.0",
+    "privacyAndCompliance": {
+      "allowsPurchases": false,
+      "usesPersonalInfo": false,
+      "isChildDirected": false,
+      "isExportCompliant": true,
+      "containsAds": false,
+      "locales": {
+        "ja-JP": {
+          "privacyPolicyUrl": "https://example.com/privacy",
+          "termsOfUseUrl": "https://example.com/terms"
+        }
+      }
+    }
+  },
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "パーソナルレシピ",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.PauseIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.ResumeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NextIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.PreviousIntent",
+          "samples": []
+        },
+        {
+          "name": "GetRecipeIntent",
+          "slots": [
+            {
+              "name": "recipeName",
+              "type": "AMAZON.Food"
+            }
+          ],
+          "samples": [
+            "{recipeName}のレシピを開いて",
+            "{recipeName}を教えて",
+            "{recipeName}のレシピ",
+            "{recipeName}の作り方"
+          ]
+        },
+        {
+          "name": "ReadIngredientsIntent",
+          "slots": [],
+          "samples": [
+            "材料を教えて",
+            "材料を読んで",
+            "材料は",
+            "何が必要",
+            "材料リスト"
+          ]
+        },
+        {
+          "name": "NextStepIntent",
+          "slots": [],
+          "samples": [
+            "次の手順",
+            "次",
+            "つぎ",
+            "次へ",
+            "続き"
+          ]
+        },
+        {
+          "name": "PreviousStepIntent",
+          "slots": [],
+          "samples": [
+            "前の手順",
+            "前",
+            "まえ",
+            "戻って",
+            "ひとつ前"
+          ]
+        },
+        {
+          "name": "RepeatStepIntent",
+          "slots": [],
+          "samples": [
+            "もう一度",
+            "もう一回",
+            "繰り返し",
+            "リピート",
+            "もう一度言って"
+          ]
+        },
+        {
+          "name": "StartFromBeginningIntent",
+          "slots": [],
+          "samples": [
+            "最初から",
+            "初めから",
+            "はじめから",
+            "スタート",
+            "最初の手順"
+          ]
+        },
+        {
+          "name": "SetTimerIntent",
+          "slots": [
+            {
+              "name": "duration",
+              "type": "AMAZON.DURATION"
+            }
+          ],
+          "samples": [
+            "{duration}のタイマー",
+            "タイマー{duration}",
+            "{duration}タイマーセット",
+            "{duration}計って"
+          ]
+        },
+        {
+          "name": "SearchRecipeIntent",
+          "slots": [
+            {
+              "name": "keyword",
+              "type": "AMAZON.SearchQuery"
+            }
+          ],
+          "samples": [
+            "{keyword}を検索",
+            "{keyword}のレシピを探して",
+            "{keyword}を探して"
+          ]
+        },
+        {
+          "name": "ReadTitleIntent",
+          "slots": [],
+          "samples": [
+            "レシピ名は",
+            "タイトルは",
+            "料理名は",
+            "何のレシピ"
+          ]
+        },
+        {
+          "name": "ReadAllIntent",
+          "slots": [],
+          "samples": [
+            "全部読んで",
+            "全て読んで",
+            "全部教えて",
+            "レシピ全体を教えて"
+          ]
+        },
+        {
+          "name": "GoToStepIntent",
+          "slots": [
+            {
+              "name": "stepNumber",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "手順{stepNumber}",
+            "{stepNumber}番目の手順",
+            "ステップ{stepNumber}"
+          ]
+        },
+        {
+          "name": "HowManyStepsIntent",
+          "slots": [],
+          "samples": [
+            "手順はいくつ",
+            "何ステップ",
+            "全部で何手順"
+          ]
+        },
+        {
+          "name": "CurrentStepIntent",
+          "slots": [],
+          "samples": [
+            "今どこ",
+            "現在の手順",
+            "今何番目"
+          ]
+        }
+      ],
+      "types": []
+    }
+  }
+}
