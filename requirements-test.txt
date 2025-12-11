@@ -14,6 +14,9 @@ sqlmodel>=0.0.8
 pydantic-settings>=2.0.0
 python-dotenv>=1.0.0
 pydantic>=2.0.0
+python-multipart>=0.0.6
+uvicorn>=0.23.0
+aiofiles>=23.0.0
 
 # HTML parsing for scraper tests
 beautifulsoup4>=4.12.0
