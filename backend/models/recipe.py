@@ -97,6 +97,7 @@ class RecipeTag(SQLModel, table=True):
     tag_id: int = Field(foreign_key="tag.id")
 
     recipe: Recipe = Relationship(back_populates="tags")
+    tag: Tag = Relationship()
 
 
 class Source(SQLModel, table=True):
