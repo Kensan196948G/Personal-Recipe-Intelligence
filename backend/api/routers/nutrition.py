@@ -149,7 +149,7 @@ async def list_ingredients():
 
 @router.get("/search")
 async def search_ingredients(
-    q: str = Query(..., description="検索クエリ", min_length=1)
+    q: str = Query(..., description="検索クエリ", min_length=1),
 ):
     """
     材料を検索

@@ -209,7 +209,7 @@ class ShareService:
             time_info.append(f"調理: {cook_time}分")
         if time_info:
             html_parts.append(
-                f'    <p><strong>時間:</strong> {" / ".join(time_info)}</p>'
+                f"    <p><strong>時間:</strong> {' / '.join(time_info)}</p>"
             )
 
         html_parts.append(f"    <p><strong>分量:</strong> {servings}人分</p>")

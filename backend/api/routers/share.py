@@ -116,7 +116,7 @@ async def get_recipe_json(
 
 @router.get("/{recipe_id}/markdown", response_class=PlainTextResponse)
 async def get_recipe_markdown(
-    recipe_id: int = PathParam(..., ge=1, description="レシピID")
+    recipe_id: int = PathParam(..., ge=1, description="レシピID"),
 ):
     """
     レシピをMarkdown形式で取得（印刷・ブログ用）
@@ -148,7 +148,7 @@ async def get_recipe_markdown(
 
 @router.get("/{recipe_id}/html", response_class=HTMLResponse)
 async def get_recipe_html(
-    recipe_id: int = PathParam(..., ge=1, description="レシピID")
+    recipe_id: int = PathParam(..., ge=1, description="レシピID"),
 ):
     """
     レシピをHTML形式で取得（Webページ埋め込み用）
