@@ -9,9 +9,53 @@ import os
 import sys
 import pytest
 from unittest.mock import patch
+from sqlmodel import Session, SQLModel, create_engine
 
 # backend ディレクトリをパスに追加
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+# テスト用インメモリDBエンジン
+_test_engine = None
+
+
+def get_test_engine():
+  """テスト用のインメモリDBエンジンを取得（シングルトン）"""
+  global _test_engine
+  if _test_engine is None:
+    _test_engine = create_engine(
+      "sqlite:///:memory:",
+      echo=False,
+      connect_args={"check_same_thread": False}
+    )
+  return _test_engine
+
+
+@pytest.fixture(scope="function")
+def db_session():
+  """
+  テスト用のDBセッションを提供するフィクスチャ
+
+  各テストごとに新しいセッションを作成し、
+  テスト終了後にロールバックする。
+  """
+  engine = get_test_engine()
+
+  # モデルのインポート
+  try:
+    from backend.models.recipe import Recipe, Ingredient, Step, Tag, RecipeTag
+  except ImportError:
+    from models.recipe import Recipe, Ingredient, Step, Tag, RecipeTag
+
+  # テーブルを作成
+  SQLModel.metadata.create_all(engine)
+
+  with Session(engine) as session:
+    yield session
+    session.rollback()
+
+  # テスト後にテーブルをクリア
+  SQLModel.metadata.drop_all(engine)
+  SQLModel.metadata.create_all(engine)
 
 
 @pytest.fixture(scope="session", autouse=True)

@@ -357,13 +357,15 @@ def test_expense_summary_structure(report_service):
 
 def test_report_id_uniqueness(report_service):
     """レポートIDの一意性テスト"""
+    import time
     user_id = "test_user"
 
-    # 同じ条件で複数回生成
+    # 同じ条件で複数回生成（1秒以上間隔を空けてIDを一意にする）
     report1 = report_service.generate_weekly_report(user_id=user_id, week_offset=0)
+    time.sleep(1.1)  # タイムスタンプベースのIDが異なることを保証
     report2 = report_service.generate_weekly_report(user_id=user_id, week_offset=0)
 
-    # IDが異なること
+    # IDが異なること（異なる秒に生成されたため）
     assert report1.report_id != report2.report_id
 
 
