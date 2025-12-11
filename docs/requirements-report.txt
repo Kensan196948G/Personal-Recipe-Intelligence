@@ -1,0 +1,7 @@
+# レポート機能の追加依存関係
+
+# PDF Generation
+reportlab==4.0.9
+
+# 日本語フォント（システムにインストール済みを想定）
+# sudo apt-get install fonts-noto-cjk
