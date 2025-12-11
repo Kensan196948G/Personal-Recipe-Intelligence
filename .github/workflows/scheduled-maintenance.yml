@@ -10,6 +10,8 @@ jobs:
   check-dependencies:
     name: Check for outdated dependencies
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -59,6 +61,8 @@ jobs:
   cleanup-old-branches:
     name: Report stale branches
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -73,6 +77,8 @@ jobs:
   generate-maintenance-report:
     name: Generate maintenance report
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: [check-dependencies, check-security, cleanup-old-branches]
     if: always()
     steps:
