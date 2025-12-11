@@ -218,11 +218,20 @@ def setup_test_env():
     os.environ["TESTING"] = "true"
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["LOG_LEVEL"] = "ERROR"
+    # API_KEY設定（CI環境での必須環境変数）
+    os.environ["API_KEY"] = "test_api_key_for_testing"
+    os.environ["OPENAI_API_KEY"] = "test_openai_key"
+    os.environ["DEEPL_API_KEY"] = "test_deepl_key"
+    os.environ["DEBUG"] = "false"
+    os.environ["APP_ENV"] = "testing"
 
     yield
 
     # クリーンアップ
     os.environ.pop("TESTING", None)
+    os.environ.pop("API_KEY", None)
+    os.environ.pop("OPENAI_API_KEY", None)
+    os.environ.pop("DEEPL_API_KEY", None)
 
 
 @pytest.fixture
