@@ -2,10 +2,11 @@
   import RecipeList from './components/RecipeList.svelte';
   import RecipeDetail from './components/RecipeDetail.svelte';
   import RecipeForm from './components/RecipeForm.svelte';
-  import { fetchRecipe, currentRecipe } from './stores/recipes.js';
+  import CsvImport from './components/CsvImport.svelte';
+  import { fetchRecipe, currentRecipe, fetchRecipes } from './stores/recipes.js';
 
   // View state
-  let view = 'list'; // 'list', 'detail', 'create', 'edit'
+  let view = 'list'; // 'list', 'detail', 'create', 'edit', 'import'
   let selectedRecipe = null;
 
   async function handleView(event) {
@@ -36,6 +37,15 @@
     view = 'list';
     selectedRecipe = null;
   }
+
+  function handleImport() {
+    view = 'import';
+  }
+
+  async function handleImported() {
+    await fetchRecipes();
+    view = 'list';
+  }
 </script>
 
 <main>
@@ -50,6 +60,7 @@
         on:view={handleView}
         on:edit={handleEdit}
         on:create={handleCreate}
+        on:import={handleImport}
       />
     {:else if view === 'detail' && selectedRecipe}
       <RecipeDetail
@@ -65,6 +76,11 @@
         mode="edit"
         on:back={handleBack}
         on:saved={handleSaved}
+      />
+    {:else if view === 'import'}
+      <CsvImport
+        on:back={handleBack}
+        on:imported={handleImported}
       />
     {/if}
   </section>

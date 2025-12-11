@@ -41,6 +41,10 @@
     dispatch('create');
   }
 
+  function handleImport() {
+    dispatch('import');
+  }
+
   function formatTime(minutes) {
     if (!minutes) return '-';
     if (minutes < 60) return `${minutes}分`;
@@ -61,7 +65,10 @@
       />
       <button on:click={handleSearch}>検索</button>
     </div>
-    <button class="btn-primary" on:click={handleCreate}>新規作成</button>
+    <div class="toolbar-actions">
+      <button class="btn-secondary" on:click={handleImport}>CSVインポート</button>
+      <button class="btn-primary" on:click={handleCreate}>新規作成</button>
+    </div>
   </div>
 
   {#if $loading}
@@ -251,6 +258,21 @@
 
   .btn-primary:hover {
     background: #005580;
+  }
+
+  .btn-secondary {
+    background: #f5f5f5;
+    color: #333;
+    border-color: #ccc;
+  }
+
+  .btn-secondary:hover {
+    background: #e8e8e8;
+  }
+
+  .toolbar-actions {
+    display: flex;
+    gap: 0.5rem;
   }
 
   .btn-danger {
