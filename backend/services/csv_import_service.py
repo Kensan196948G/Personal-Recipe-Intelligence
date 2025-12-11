@@ -44,8 +44,31 @@ class CSVImportService:
         "tags",
     ]
 
+    # 日本語ヘッダーから英語ヘッダーへのマッピング
+    HEADER_MAPPING = {
+        "タイトル": "title",
+        "説明": "description",
+        "人数": "servings",
+        "準備時間（分）": "prep_time_minutes",
+        "調理時間（分）": "cook_time_minutes",
+        "URL": "source_url",
+        "ソース種別": "source_type",
+        "材料": "ingredients",
+        "手順": "steps",
+        "タグ": "tags",
+    }
+
     def __init__(self, session: Session):
         self.session = session
+
+    def _normalize_headers(self, row: dict) -> dict:
+        """日本語ヘッダーを英語ヘッダーに変換"""
+        normalized = {}
+        for key, value in row.items():
+            # 日本語ヘッダーの場合は英語に変換
+            normalized_key = self.HEADER_MAPPING.get(key, key)
+            normalized[normalized_key] = value
+        return normalized
 
     def parse_csv(self, csv_content: str) -> list[dict]:
         """CSVコンテンツをパースしてレシピデータのリストを返す"""
@@ -56,16 +79,23 @@ class CSVImportService:
             reader = csv.DictReader(io.StringIO(csv_content))
             headers = reader.fieldnames or []
 
-            # 必須カラムのチェック
+            # ヘッダーを正規化（日本語→英語）
+            normalized_headers = [
+                self.HEADER_MAPPING.get(h, h) for h in headers
+            ]
+
+            # 必須カラムのチェック（日本語・英語両方対応）
             missing_columns = [
-                col for col in self.REQUIRED_COLUMNS if col not in headers
+                col for col in self.REQUIRED_COLUMNS if col not in normalized_headers
             ]
             if missing_columns:
-                raise ValueError(f"必須カラムがありません: {', '.join(missing_columns)}")
+                raise ValueError(f"必須カラムがありません: {', '.join(missing_columns)}（「タイトル」または「title」）")
 
             for row_num, row in enumerate(reader, start=2):
                 try:
-                    recipe_data = self._parse_row(row)
+                    # 日本語ヘッダーを英語に変換
+                    normalized_row = self._normalize_headers(row)
+                    recipe_data = self._parse_row(normalized_row)
                     recipes.append(recipe_data)
                 except ValueError as e:
                     errors.append({"row": row_num, "error": str(e)})
@@ -330,18 +360,18 @@ class CSVImportService:
         output = io.StringIO()
         writer = csv.writer(output)
 
-        # ヘッダー
+        # ヘッダー（日本語）
         headers = [
-            "title",
-            "description",
-            "servings",
-            "prep_time_minutes",
-            "cook_time_minutes",
-            "source_url",
-            "source_type",
-            "ingredients",
-            "steps",
-            "tags",
+            "タイトル",
+            "説明",
+            "人数",
+            "準備時間（分）",
+            "調理時間（分）",
+            "URL",
+            "ソース種別",
+            "材料",
+            "手順",
+            "タグ",
         ]
         writer.writerow(headers)
 
