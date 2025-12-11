@@ -1,0 +1,383 @@
+/**
+ * IngredientScanner スタイル
+ */
+
+.ingredient-scanner {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.scanner-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.scanner-header h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.scanner-header p {
+  color: #666;
+  font-size: 14px;
+}
+
+/* エラーメッセージ */
+.error-message {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.error-icon {
+  font-size: 20px;
+}
+
+/* カメラコンテナ */
+.camera-container {
+  background-color: #f5f5f5;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* プレースホルダー */
+.camera-placeholder {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.placeholder-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.camera-placeholder p {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ボタンスタイル */
+.btn-primary,
+.btn-secondary,
+.btn-capture,
+.btn-cancel,
+.btn-reset,
+.btn-search-recipes {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #545b62;
+}
+
+.btn-capture {
+  background-color: #28a745;
+  color: white;
+  font-size: 16px;
+  padding: 14px 32px;
+}
+
+.btn-capture:hover {
+  background-color: #218838;
+}
+
+.btn-cancel {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-cancel:hover {
+  background-color: #c82333;
+}
+
+.btn-reset {
+  background-color: #ffc107;
+  color: #333;
+  margin-top: 10px;
+}
+
+.btn-reset:hover {
+  background-color: #e0a800;
+}
+
+.btn-search-recipes {
+  background-color: #28a745;
+  color: white;
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+}
+
+.btn-search-recipes:hover {
+  background-color: #218838;
+}
+
+.btn-search-recipes:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* カメラビュー */
+.camera-view {
+  width: 100%;
+  position: relative;
+}
+
+.video-preview {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.camera-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 15px;
+}
+
+/* 撮影画像 */
+.captured-image {
+  width: 100%;
+  text-align: center;
+  padding: 20px;
+}
+
+.captured-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ローディング */
+.loading-indicator {
+  text-align: center;
+  padding: 40px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 20px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-indicator p {
+  color: #666;
+  font-size: 14px;
+}
+
+/* 認識結果 */
+.recognition-results {
+  margin-top: 30px;
+}
+
+.recognition-results h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.results-hint {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+/* 結果アイテム */
+.result-item {
+  background-color: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.result-item:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+
+.result-item.selected {
+  border-color: #28a745;
+  background-color: #f0f9f4;
+}
+
+.result-info {
+  flex: 1;
+}
+
+.result-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.result-name strong {
+  font-size: 16px;
+  color: #333;
+}
+
+.result-name-en {
+  font-size: 13px;
+  color: #999;
+}
+
+.result-meta {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.result-category {
+  background-color: #e9ecef;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #495057;
+}
+
+.result-confidence {
+  color: #666;
+}
+
+.result-keywords {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.keyword-tag {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.result-checkbox {
+  width: 30px;
+  height: 30px;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #28a745;
+  flex-shrink: 0;
+}
+
+.result-item.selected .result-checkbox {
+  border-color: #28a745;
+  background-color: #28a745;
+  color: white;
+}
+
+/* 検索アクション */
+.search-action {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* レスポンシブ */
+@media (max-width: 600px) {
+  .ingredient-scanner {
+    padding: 15px;
+  }
+
+  .scanner-header h2 {
+    font-size: 20px;
+  }
+
+  .camera-container {
+    min-height: 300px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+
+  .result-name {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .result-meta {
+    flex-direction: column;
+    gap: 5px;
+  }
+}

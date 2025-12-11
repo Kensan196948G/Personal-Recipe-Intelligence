@@ -1,0 +1,148 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "レシピアシスタント",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "SearchRecipe",
+          "slots": [
+            {
+              "name": "query",
+              "type": "AMAZON.SearchQuery",
+              "samples": [
+                "{query}"
+              ]
+            }
+          ],
+          "samples": [
+            "{query}のレシピ",
+            "{query}の作り方",
+            "{query}を作りたい",
+            "{query}のレシピを教えて",
+            "{query}はどうやって作るの"
+          ]
+        },
+        {
+          "name": "GetRecipeSteps",
+          "slots": [],
+          "samples": [
+            "レシピを開始",
+            "作り方を教えて",
+            "手順を教えて",
+            "どうやって作るの",
+            "作り方"
+          ]
+        },
+        {
+          "name": "NextStep",
+          "slots": [],
+          "samples": [
+            "次",
+            "次の手順",
+            "次へ",
+            "続き",
+            "次に進んで"
+          ]
+        },
+        {
+          "name": "PreviousStep",
+          "slots": [],
+          "samples": [
+            "前",
+            "前の手順",
+            "戻る",
+            "前に戻って",
+            "一つ前"
+          ]
+        },
+        {
+          "name": "RepeatStep",
+          "slots": [],
+          "samples": [
+            "もう一度",
+            "繰り返して",
+            "もう一回",
+            "もう一度言って",
+            "聞き取れなかった"
+          ]
+        },
+        {
+          "name": "GetIngredients",
+          "slots": [],
+          "samples": [
+            "材料",
+            "材料は何",
+            "何が必要",
+            "材料を教えて",
+            "必要なものは"
+          ]
+        },
+        {
+          "name": "SetTimer",
+          "slots": [
+            {
+              "name": "duration",
+              "type": "AMAZON.NUMBER",
+              "samples": [
+                "{duration}分",
+                "{duration}"
+              ]
+            }
+          ],
+          "samples": [
+            "タイマー{duration}分",
+            "{duration}分タイマー",
+            "タイマーを{duration}分にセット",
+            "{duration}分測って",
+            "{duration}分のタイマー"
+          ]
+        }
+      ],
+      "types": []
+    },
+    "dialog": {
+      "intents": [
+        {
+          "name": "SearchRecipe",
+          "confirmationRequired": false,
+          "prompts": {},
+          "slots": [
+            {
+              "name": "query",
+              "type": "AMAZON.SearchQuery",
+              "confirmationRequired": false,
+              "elicitationRequired": true,
+              "prompts": {
+                "elicitation": "Elicit.Slot.xxx.query"
+              }
+            }
+          ]
+        }
+      ],
+      "delegationStrategy": "ALWAYS"
+    },
+    "prompts": [
+      {
+        "id": "Elicit.Slot.xxx.query",
+        "variations": [
+          {
+            "type": "PlainText",
+            "value": "どんな料理のレシピをお探しですか？"
+          }
+        ]
+      }
+    ]
+  }
+}
