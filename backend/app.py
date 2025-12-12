@@ -22,11 +22,18 @@ from backend.api.v1 import (
   ocr_router,
   video_router,
   scraper_router,
-  recipes_router,
 )
+# Use the full implementation router instead of stub
+from backend.api.routers.recipes import router as recipes_router
+from backend.api.routers.collector import router as collector_router
+
+# Database initialization
+from backend.core.database import create_db_and_tables
+# Import models to register them with SQLModel
+from backend.models import Recipe, Ingredient, Tag, RecipeTag, Step
 
 # Configure logging
-log_dir = Path("/mnt/Linux-ExHDD/Personal-Recipe-Intelligence/logs")
+log_dir = Path(__file__).resolve().parent.parent / "logs"
 log_dir.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
@@ -59,7 +66,14 @@ app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 # Configure CORS (adjust origins for production)
 app.add_middleware(
   CORSMiddleware,
-  allow_origins=["http://localhost:3000", "http://localhost:5173"],
+  allow_origins=[
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://192.168.0.187:3000",
+    "http://192.168.0.187:5173",
+    "http://192.168.0.187:8000",
+    "*",  # Allow all origins for development
+  ],
   allow_credentials=True,
   allow_methods=["*"],
   allow_headers=["*"],
@@ -70,6 +84,7 @@ app.include_router(ocr_router)
 app.include_router(video_router)
 app.include_router(scraper_router)
 app.include_router(recipes_router)
+app.include_router(collector_router)
 
 
 @app.on_event("startup")
@@ -78,6 +93,12 @@ async def startup_event():
   Application startup event handler
   """
   logger.info("Starting Personal Recipe Intelligence API")
+
+  # Initialize database tables
+  logger.info("Initializing database tables...")
+  create_db_and_tables()
+  logger.info("Database tables initialized")
+
   logger.info(f"Rate limiting enabled with slowapi")
   logger.info(f"Docs available at /api/docs")
 

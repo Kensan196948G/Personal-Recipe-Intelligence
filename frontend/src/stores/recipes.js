@@ -11,7 +11,7 @@ export const loading = writable(false);
 export const error = writable(null);
 export const pagination = writable({
   page: 1,
-  per_page: 20,
+  per_page: 10,
   total: 0,
   total_pages: 0,
 });
@@ -28,8 +28,11 @@ export async function fetchRecipes(params = {}) {
   loading.set(true);
   error.set(null);
 
+  // デフォルトで10件表示
+  const requestParams = { per_page: 10, ...params };
+
   try {
-    const response = await recipeApi.list(params);
+    const response = await recipeApi.list(requestParams);
     if (response.status === "ok") {
       recipes.set(response.data.items);
       pagination.set({

@@ -1,5 +1,6 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
+  import { fetchRecipes } from '../stores/recipes.js';
 
   let status = null;
   let collecting = false;
@@ -43,6 +44,8 @@
       if (res.ok) {
         collectResult = await res.json();
         await fetchStatus();
+        // 収集後にレシピ一覧を更新
+        await fetchRecipes();
       } else {
         const errData = await res.json().catch(() => ({}));
         error = errData.detail || '収集に失敗しました';
@@ -201,14 +204,14 @@
     </div>
 
     <div class="form-group">
-      <label for="tags">タグ (オプション):</label>
+      <label for="tags">カテゴリ (オプション):</label>
       <input
         type="text"
         id="tags"
         bind:value={tags}
-        placeholder="例: main course, vegetarian"
+        placeholder="例: デザート、肉料理、vegetarian"
       />
-      <small>カンマ区切りで複数指定可。空欄でランダム取得。</small>
+      <small>日本語・英語どちらでも入力可能。カンマ区切りで複数指定可。空欄でランダム取得。</small>
     </div>
 
     <button

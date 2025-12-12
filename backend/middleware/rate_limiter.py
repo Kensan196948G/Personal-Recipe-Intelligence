@@ -90,7 +90,7 @@ limiter = Limiter(
   default_limits=["100/minute"],
   storage_uri="memory://",  # In-memory storage for simplicity
   strategy="fixed-window",  # Fixed window strategy
-  headers_enabled=True,  # Add rate limit headers to responses
+  headers_enabled=False,  # Disabled for compatibility with FastAPI
 )
 
 

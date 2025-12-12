@@ -53,9 +53,9 @@ class RecipeService:
                 selectinload(Recipe.steps),
                 selectinload(Recipe.tags),
             )
+            .order_by(Recipe.id.desc())  # 新しい順に並べる（IDの降順で最新が先頭）
             .offset(offset)
             .limit(per_page)
-            .order_by(Recipe.updated_at.desc())
         )
 
         recipes = self.session.exec(query).all()
