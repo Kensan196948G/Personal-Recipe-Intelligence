@@ -15,6 +15,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hooks configuration (4 hooks)
 - Development phase documentation
 
+## [0.2.0] - 2025-12-12
+
+### Added
+- 海外レシピ収集機能（Spoonacular API + DeepL翻訳）の完全統合
+- データベース自動初期化機能（アプリ起動時）
+- レシピ収集後の自動リスト更新機能
+
+### Changed
+- レシピ一覧の表示順を新しい順（ID降順）に変更
+- ページあたり表示件数を20件から10件に変更
+- Vite プロキシ設定をLAN IPアドレス対応に更新
+
+### Fixed
+- collector routerがapp.pyに未登録だった問題を修正
+- rate_limiter headers_enabled互換性問題を修正
+- WebUIボタンが機能しない問題を修正（APIレスポンス形式の不一致）
+- データベーステーブル未作成エラーを修正
+
 ## [0.1.0] - 2024-12-11
 
 ### Added

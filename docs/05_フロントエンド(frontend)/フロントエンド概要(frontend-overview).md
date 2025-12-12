@@ -117,10 +117,23 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 export default defineConfig({
   plugins: [svelte()],
   server: {
-    port: 3000,
+    host: '0.0.0.0',  // LAN内アクセス許可
+    port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://192.168.0.187:8000',
+        changeOrigin: true
+      },
+      '/collector': {
+        target: 'http://192.168.0.187:8000',
+        changeOrigin: true
+      },
+      '/recipes': {
+        target: 'http://192.168.0.187:8000',
+        changeOrigin: true
+      },
+      '/health': {
+        target: 'http://192.168.0.187:8000',
         changeOrigin: true
       }
     }
@@ -138,6 +151,8 @@ export default defineConfig({
   }
 })
 ```
+
+> **注意**: `host: '0.0.0.0'` により、同一LAN内の他デバイスからアクセス可能
 
 ### 5.2 package.json スクリプト
 
@@ -292,3 +307,4 @@ export const api = {
 | 日付 | バージョン | 変更内容 |
 |------|-----------|----------|
 | 2024-12-11 | 1.0.0 | 初版作成 |
+| 2025-12-12 | 1.1.0 | Viteプロキシ設定をLAN IP対応に更新、ページネーション10件/ページに変更 |
