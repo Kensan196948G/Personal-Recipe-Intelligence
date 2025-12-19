@@ -1,6 +1,7 @@
 {
   "agent_type": "subagent",
   "name": "QaAgent",
+  "icon": "🧪",
   "async": true,
   "model": "claude-3-5-sonnet-20241022",
   "autonomy_level": "medium",

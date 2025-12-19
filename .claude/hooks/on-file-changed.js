@@ -1,6 +1,7 @@
 /**
- * onFileChanged Hook - ファイル変更時の自動同期
+ * 👁 onFileChanged Hook - ファイル変更時の自動同期
  * backend/frontend の変更を監視し、関連SubAgentに通知
+ * @icon 👁
  */
 
 /**

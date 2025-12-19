@@ -10,10 +10,13 @@
     searchRecipes,
   } from '../stores/recipes.js';
   import { onMount } from 'svelte';
+  import ConfirmModal from './ConfirmModal.svelte';
 
   const dispatch = createEventDispatcher();
 
   let searchInput = '';
+  let showDeleteModal = false;
+  let deleteTarget = { id: null, title: '' };
 
   onMount(() => {
     fetchRecipes();
@@ -23,9 +26,15 @@
     await searchRecipes(searchInput);
   }
 
-  async function handleDelete(id, title) {
-    if (confirm(`「${title}」を削除しますか？`)) {
-      await deleteRecipe(id);
+  function handleDelete(id, title) {
+    deleteTarget = { id, title };
+    showDeleteModal = true;
+  }
+
+  async function confirmDelete() {
+    if (deleteTarget.id) {
+      await deleteRecipe(deleteTarget.id);
+      deleteTarget = { id: null, title: '' };
     }
   }
 
@@ -145,6 +154,16 @@
       </div>
     {/if}
   {/if}
+
+  <ConfirmModal
+    bind:show={showDeleteModal}
+    title="レシピの削除"
+    message={`「${deleteTarget.title}」を削除しますか？この操作は取り消せません。`}
+    confirmText="削除"
+    cancelText="キャンセル"
+    danger={true}
+    on:confirm={confirmDelete}
+  />
 </div>
 
 <style>

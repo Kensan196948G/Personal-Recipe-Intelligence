@@ -1,6 +1,7 @@
 /**
- * onMcpEvent Hook - MCPイベント処理
+ * 📡 onMcpEvent Hook - MCPイベント処理
  * Browser / Puppeteer / Filesystem の状態を監視・制御
+ * @icon 📡
  */
 
 import mcpManager from './mcp-manager.js';

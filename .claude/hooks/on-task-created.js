@@ -1,6 +1,7 @@
 /**
- * onTaskCreated Hook - タスク生成時の自動振り分け
+ * 📬 onTaskCreated Hook - タスク生成時の自動振り分け
  * PlannerAgentが生成したタスクを適切なSubAgentへルーティング
+ * @icon 📬
  */
 
 import mcpManager from './mcp-manager.js';

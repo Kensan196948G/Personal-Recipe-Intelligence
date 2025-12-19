@@ -70,20 +70,20 @@
         source_type: formData.source_type,
       };
 
-      if (mode === 'create') {
-        data.ingredients = formData.ingredients.map((i, idx) => ({
-          name: i.name,
-          amount: i.amount || null,
-          unit: i.unit || null,
-          note: i.note || null,
-          order: idx,
-        }));
-        data.steps = formData.steps.map((s, idx) => ({
-          description: s.description,
-          order: idx + 1,
-        }));
-        data.tag_ids = formData.tag_ids;
+      data.ingredients = formData.ingredients.map((i, idx) => ({
+        name: i.name,
+        amount: i.amount || null,
+        unit: i.unit || null,
+        note: i.note || null,
+        order: idx,
+      }));
+      data.steps = formData.steps.map((s, idx) => ({
+        description: s.description,
+        order: idx + 1,
+      }));
+      data.tag_ids = formData.tag_ids;
 
+      if (mode === 'create') {
         await createRecipe(data);
       } else {
         await updateRecipe(recipe.id, data);
@@ -204,45 +204,43 @@
       </div>
     {/if}
 
-    {#if mode === 'create'}
-      <section class="form-section">
-        <div class="section-header">
-          <h3>材料</h3>
-          <button type="button" class="add-btn" on:click={addIngredient}>+ 追加</button>
+    <section class="form-section">
+      <div class="section-header">
+        <h3>材料</h3>
+        <button type="button" class="add-btn" on:click={addIngredient}>+ 追加</button>
+      </div>
+      {#each formData.ingredients as ingredient, i}
+        <div class="ingredient-row">
+          <input type="text" placeholder="名前" bind:value={ingredient.name} />
+          <input
+            type="number"
+            placeholder="量"
+            bind:value={ingredient.amount}
+            step="0.1"
+          />
+          <input type="text" placeholder="単位" bind:value={ingredient.unit} />
+          <input type="text" placeholder="備考" bind:value={ingredient.note} />
+          <button type="button" class="remove-btn" on:click={() => removeIngredient(i)}>
+            ×
+          </button>
         </div>
-        {#each formData.ingredients as ingredient, i}
-          <div class="ingredient-row">
-            <input type="text" placeholder="名前" bind:value={ingredient.name} />
-            <input
-              type="number"
-              placeholder="量"
-              bind:value={ingredient.amount}
-              step="0.1"
-            />
-            <input type="text" placeholder="単位" bind:value={ingredient.unit} />
-            <input type="text" placeholder="備考" bind:value={ingredient.note} />
-            <button type="button" class="remove-btn" on:click={() => removeIngredient(i)}>
-              ×
-            </button>
-          </div>
-        {/each}
-      </section>
+      {/each}
+    </section>
 
-      <section class="form-section">
-        <div class="section-header">
-          <h3>手順</h3>
-          <button type="button" class="add-btn" on:click={addStep}>+ 追加</button>
+    <section class="form-section">
+      <div class="section-header">
+        <h3>手順</h3>
+        <button type="button" class="add-btn" on:click={addStep}>+ 追加</button>
+      </div>
+      {#each formData.steps as step, i}
+        <div class="step-row">
+          <span class="step-number">{i + 1}.</span>
+          <textarea placeholder="手順を入力..." bind:value={step.description} rows="2"
+          ></textarea>
+          <button type="button" class="remove-btn" on:click={() => removeStep(i)}>×</button>
         </div>
-        {#each formData.steps as step, i}
-          <div class="step-row">
-            <span class="step-number">{i + 1}.</span>
-            <textarea placeholder="手順を入力..." bind:value={step.description} rows="2"
-            ></textarea>
-            <button type="button" class="remove-btn" on:click={() => removeStep(i)}>×</button>
-          </div>
-        {/each}
-      </section>
-    {/if}
+      {/each}
+    </section>
 
     <div class="form-actions">
       <button type="button" on:click={handleBack}>キャンセル</button>

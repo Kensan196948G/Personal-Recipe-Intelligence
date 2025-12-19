@@ -1,7 +1,7 @@
 /**
  * Recipe Store - Svelte reactive store for recipes
  */
-import { writable, derived } from "svelte/store";
+import { writable, derived, get } from "svelte/store";
 import { recipeApi } from "../services/api.js";
 
 // Store definitions
@@ -155,8 +155,8 @@ export async function filterByTag(tagId) {
  */
 export async function changePage(page) {
   let params = { page };
-  const query = searchQuery;
-  const tagId = selectedTagId;
+  const query = get(searchQuery);
+  const tagId = get(selectedTagId);
 
   if (query) params.search = query;
   if (tagId) params.tag_id = tagId;

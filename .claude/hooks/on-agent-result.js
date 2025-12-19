@@ -1,6 +1,7 @@
 /**
- * onAgentResult Hook - Agent完了時の連鎖処理
+ * ⛓ onAgentResult Hook - Agent完了時の連鎖処理
  * SubAgentの結果に基づいて次のAgentを自動起動
+ * @icon ⛓
  */
 
 import mcpManager from './mcp-manager.js';
