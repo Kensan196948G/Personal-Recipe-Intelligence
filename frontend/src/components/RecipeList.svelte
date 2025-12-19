@@ -17,6 +17,7 @@
   let searchInput = '';
   let showDeleteModal = false;
   let deleteTarget = { id: null, title: '' };
+  let searchLabelId = 'search-label';
 
   onMount(() => {
     fetchRecipes();
@@ -70,13 +71,15 @@
 <div class="recipe-list">
   <div class="toolbar">
     <div class="search-box">
+      <label id={searchLabelId} class="visually-hidden">レシピを検索</label>
       <input
         type="text"
         placeholder="レシピを検索..."
         bind:value={searchInput}
         on:keydown={(e) => e.key === 'Enter' && handleSearch()}
+        aria-labelledby={searchLabelId}
       />
-      <button on:click={handleSearch}>検索</button>
+      <button on:click={handleSearch} aria-label="レシピを検索">検索</button>
     </div>
     <div class="toolbar-actions">
       <button class="btn-collector" on:click={handleCollector}>
@@ -128,7 +131,7 @@
           <div class="actions">
             <button on:click={() => handleView(recipe)}>詳細</button>
             <button on:click={() => handleEdit(recipe)}>編集</button>
-            <button class="btn-danger" on:click={() => handleDelete(recipe.id, recipe.title)}>
+            <button class="btn-danger" on:click={() => handleDelete(recipe.id, recipe.title)} aria-label="レシピを削除">
               削除
             </button>
           </div>
@@ -141,6 +144,7 @@
         <button
           disabled={$pagination.page <= 1}
           on:click={() => fetchRecipes({ page: $pagination.page - 1 })}
+          aria-label="前のページへ"
         >
           前へ
         </button>
@@ -148,6 +152,7 @@
         <button
           disabled={$pagination.page >= $pagination.total_pages}
           on:click={() => fetchRecipes({ page: $pagination.page + 1 })}
+          aria-label="次のページへ"
         >
           次へ
         </button>
@@ -333,5 +338,17 @@
     align-items: center;
     gap: 1rem;
     margin-top: 1.5rem;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
   }
 </style>

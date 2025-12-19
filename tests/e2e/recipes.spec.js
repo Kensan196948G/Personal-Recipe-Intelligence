@@ -102,6 +102,142 @@ test.describe('Recipe Management', () => {
       }
     }
   });
+
+  test('should edit an existing recipe', async ({ page }) => {
+    // Find first recipe in the list
+    const recipeCard = page.locator('.recipe-card, .recipe-item, [data-testid="recipe-card"]').first();
+
+    if (await recipeCard.isVisible()) {
+      // Click on recipe to view details or click edit button
+      const editButton = page.locator('button:has-text("編集"), button:has-text("Edit"), [data-testid="edit-recipe"]').first();
+
+      if (await editButton.isVisible()) {
+        await editButton.click();
+      } else {
+        // If no edit button, click recipe card first
+        await recipeCard.click();
+        await page.waitForTimeout(500);
+        await page.locator('button:has-text("編集"), button:has-text("Edit")').first().click();
+      }
+
+      // Wait for form to be visible
+      const form = page.locator('form').first();
+      await expect(form).toBeVisible({ timeout: 5000 });
+
+      // Modify recipe title
+      const titleInput = page.locator('input[id="title"], input[name="title"]');
+      await titleInput.fill('編集済みレシピ - E2Eテスト');
+
+      // Modify description
+      const descInput = page.locator('textarea[id="description"], textarea[name="description"]');
+      await descInput.fill('Playwrightによる編集テスト');
+
+      // Submit form
+      await page.click('button[type="submit"], button:has-text("保存"), button:has-text("更新")');
+
+      // Verify success - check for updated content or success message
+      await page.waitForTimeout(1000);
+      const updatedTitle = page.locator('text=編集済みレシピ - E2Eテスト');
+      const successMessage = page.locator('.success, .toast, .notification');
+
+      // Either title is visible or success message appeared
+      const titleVisible = await updatedTitle.isVisible().catch(() => false);
+      const messageVisible = await successMessage.isVisible().catch(() => false);
+
+      expect(titleVisible || messageVisible).toBeTruthy();
+    }
+  });
+
+  test('should delete a recipe', async ({ page }) => {
+    // Find first recipe in the list
+    const recipeCard = page.locator('.recipe-card, .recipe-item, [data-testid="recipe-card"]').first();
+
+    if (await recipeCard.isVisible()) {
+      // Get initial recipe count
+      const initialCount = await page.locator('.recipe-card, .recipe-item').count();
+
+      // Look for delete button
+      const deleteButton = page.locator('button:has-text("削除"), button:has-text("Delete"), [data-testid="delete-recipe"]').first();
+
+      if (await deleteButton.isVisible()) {
+        await deleteButton.click();
+      } else {
+        // If no delete button, click recipe card first to view details
+        await recipeCard.click();
+        await page.waitForTimeout(500);
+        await page.locator('button:has-text("削除"), button:has-text("Delete")').first().click();
+      }
+
+      // Handle confirmation dialog if exists
+      const confirmButton = page.locator('button:has-text("確認"), button:has-text("OK"), button:has-text("はい"), .confirm-delete');
+      if (await confirmButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await confirmButton.click();
+      }
+
+      // Wait for deletion to complete
+      await page.waitForTimeout(1000);
+
+      // Verify recipe is removed - check for success message or reduced count
+      const successMessage = page.locator('.success, .toast, text=削除');
+      const finalCount = await page.locator('.recipe-card, .recipe-item').count();
+
+      const messageVisible = await successMessage.isVisible().catch(() => false);
+      const countReduced = finalCount < initialCount;
+
+      expect(messageVisible || countReduced).toBeTruthy();
+    }
+  });
+
+  test('should display error for invalid recipe data', async ({ page }) => {
+    // Click create button
+    const createButton = page.locator('button:has-text("新規"), button:has-text("作成"), [data-testid="create-recipe"]');
+
+    if (await createButton.isVisible()) {
+      await createButton.click();
+
+      // Wait for form
+      const form = page.locator('form').first();
+      await expect(form).toBeVisible();
+
+      // Try to submit form with empty required fields
+      await page.click('button[type="submit"], button:has-text("保存")');
+
+      // Wait for error messages
+      await page.waitForTimeout(500);
+
+      // Check for validation errors
+      const errorMessage = page.locator('.error, .validation-error, .field-error, [role="alert"]');
+      const invalidFeedback = page.locator('.invalid-feedback, .error-message');
+      const requiredMessage = page.locator('text=必須, text=required, text=入力してください');
+
+      // At least one error indicator should be visible
+      const hasError = await errorMessage.isVisible().catch(() => false);
+      const hasInvalidFeedback = await invalidFeedback.isVisible().catch(() => false);
+      const hasRequiredMessage = await requiredMessage.isVisible().catch(() => false);
+
+      expect(hasError || hasInvalidFeedback || hasRequiredMessage).toBeTruthy();
+
+      // Test invalid servings value (negative number)
+      const servingsField = page.locator('input[id="servings"], input[name="servings"]');
+      if (await servingsField.isVisible()) {
+        await servingsField.fill('-1');
+
+        // Fill required fields
+        await page.fill('input[id="title"], input[name="title"]', 'エラーテスト');
+
+        // Submit
+        await page.click('button[type="submit"], button:has-text("保存")');
+        await page.waitForTimeout(500);
+
+        // Check for error about invalid servings
+        const servingsError = page.locator('text=無効, text=invalid, text=正しい, .error');
+        const hasServingsError = await servingsError.isVisible().catch(() => false);
+
+        // Error should be shown or form should prevent submission
+        expect(hasServingsError || await errorMessage.isVisible()).toBeTruthy();
+      }
+    }
+  });
 });
 
 test.describe('API Health Check', () => {

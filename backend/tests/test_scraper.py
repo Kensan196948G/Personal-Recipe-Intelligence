@@ -1,10 +1,9 @@
 """Tests for web scraper functionality.
 
-NOTE: This test file is skipped due to fixture initialization errors.
+MockScraper を使用したスクレイパー機能のユニットテスト。
 """
 
 import pytest
-pytestmark = pytest.mark.skip(reason="Fixture initialization errors")
 from unittest.mock import Mock, patch
 from bs4 import BeautifulSoup
 
