@@ -63,20 +63,17 @@ app.state.limiter = limiter
 # Register rate limit exceeded handler
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
-# Configure CORS (adjust origins for production)
+# Configure CORS
+# For development: use specific origins; avoid wildcard "*" with credentials
+import os
+CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173").split(",")
+
 app.add_middleware(
   CORSMiddleware,
-  allow_origins=[
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://192.168.0.187:3000",
-    "http://192.168.0.187:5173",
-    "http://192.168.0.187:8000",
-    "*",  # Allow all origins for development
-  ],
+  allow_origins=CORS_ORIGINS,
   allow_credentials=True,
-  allow_methods=["*"],
-  allow_headers=["*"],
+  allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
 )
 
 # Include routers with rate limiting
@@ -183,6 +180,9 @@ async def global_exception_handler(request: Request, exc: Exception):
     }
   )
 
+  # Only expose error details in development mode
+  is_debug = os.environ.get("DEBUG", "false").lower() in ("true", "1", "yes")
+
   return JSONResponse(
     status_code=500,
     content={
@@ -191,7 +191,7 @@ async def global_exception_handler(request: Request, exc: Exception):
       "error": {
         "code": "INTERNAL_SERVER_ERROR",
         "message": "An unexpected error occurred",
-        "detail": str(exc)
+        "detail": str(exc) if is_debug else None
       }
     }
   )

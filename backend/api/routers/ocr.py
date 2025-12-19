@@ -31,6 +31,10 @@ class Base64ImageRequest(BaseModel):
     save: bool = Field(default=False, description="OCR後に保存するか")
 
 
+# Maximum upload size (10MB)
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
+
+
 @router.post("/extract", response_model=ApiResponse)
 async def extract_from_image(
     file: UploadFile = File(...), save: bool = False, session=Depends(get_session)
@@ -43,6 +47,17 @@ async def extract_from_image(
         if not file.content_type or not file.content_type.startswith("image/"):
             raise HTTPException(
                 status_code=400, detail="画像ファイルをアップロードしてください"
+            )
+
+        # ファイルサイズチェック
+        file.file.seek(0, 2)  # Move to end of file
+        file_size = file.file.tell()
+        file.file.seek(0)  # Reset to beginning
+
+        if file_size > MAX_UPLOAD_SIZE:
+            raise HTTPException(
+                status_code=413,
+                detail=f"ファイルサイズが大きすぎます。最大{MAX_UPLOAD_SIZE // (1024 * 1024)}MBまでアップロード可能です"
             )
 
         # 画像データ読み込み

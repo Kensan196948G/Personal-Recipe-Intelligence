@@ -7,8 +7,21 @@ import logging
 from typing import Optional
 
 import httpx
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type,
+)
 
 logger = logging.getLogger(__name__)
+
+
+def should_retry_http_error(exception):
+    """HTTPエラーのリトライ判定（429と5xxエラーのみ）"""
+    if isinstance(exception, httpx.HTTPStatusError):
+        return exception.response.status_code == 429 or exception.response.status_code >= 500
+    return False
 
 
 class DeepLTranslator:
@@ -25,6 +38,12 @@ class DeepLTranslator:
         else:
             self.base_url = "https://api.deepl.com/v2"
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=4),
+        retry=retry_if_exception_type(httpx.HTTPStatusError) & retry(should_retry_http_error),
+        reraise=True,
+    )
     def translate(
         self,
         text: str,
@@ -56,6 +75,12 @@ class DeepLTranslator:
             logger.error(f"Translation error: {e}")
             raise
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=4),
+        retry=retry_if_exception_type(httpx.HTTPStatusError) & retry(should_retry_http_error),
+        reraise=True,
+    )
     def translate_batch(
         self,
         texts: list[str],
@@ -100,6 +125,12 @@ class DeepLTranslator:
             logger.error(f"Batch translation error: {e}")
             raise
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=4),
+        retry=retry_if_exception_type(httpx.HTTPStatusError) & retry(should_retry_http_error),
+        reraise=True,
+    )
     def get_usage(self) -> dict:
         """API使用量を取得"""
         try:

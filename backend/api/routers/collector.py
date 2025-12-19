@@ -2,12 +2,17 @@
 Recipe Collector API Router - 海外レシピ収集エンドポイント
 """
 
+import logging
+import os
+import re
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
 
 from backend.services.recipe_scheduler import get_scheduler
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/collector", tags=["collector"])
 
@@ -44,11 +49,60 @@ def get_collector_status():
     return scheduler.get_status()
 
 
+def is_japanese(text: str) -> bool:
+    """テキストに日本語が含まれるかチェック"""
+    if not text:
+        return False
+    # ひらがな、カタカナ、漢字のいずれかが含まれていれば日本語
+    return bool(re.search(r'[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]', text))
+
+
+def translate_tags_to_english(tags: str) -> str:
+    """日本語タグを英語に翻訳（DeepL API使用）"""
+    from backend.services.deepl_translator import DeepLTranslator
+    from backend.core.config import settings
+
+    deepl_key = settings.deepl_api_key or os.getenv("DEEPL_API_KEY")
+    if not deepl_key:
+        logger.warning("DeepL API key not configured, using original tags")
+        return tags
+
+    try:
+        translator = DeepLTranslator(api_key=deepl_key)
+        # カンマ区切りで複数タグを処理
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        translated_tags = []
+
+        for tag in tag_list:
+            if is_japanese(tag):
+                translated = translator.translate(tag, target_lang="EN", source_lang="JA")
+                translated_tags.append(translated.lower())
+                logger.info(f"Translated tag: {tag} -> {translated}")
+            else:
+                translated_tags.append(tag.lower())
+
+        return ",".join(translated_tags)
+    except Exception as e:
+        logger.error(f"Tag translation failed: {e}")
+        return tags
+
+
 @router.post("/collect", response_model=CollectResponse)
 def collect_recipes(request: CollectRequest):
-    """今すぐレシピを収集"""
+    """今すぐレシピを収集
+
+    タグは日本語でも入力可能です。DeepL APIで自動的に英語に翻訳されます。
+    例: 「肉料理」→ "meat dish", 「デザート」→ "dessert"
+    """
     scheduler = get_scheduler()
-    result = scheduler.collect_now(count=request.count, tags=request.tags)
+
+    # 日本語タグを英語に翻訳
+    tags = request.tags
+    if tags and is_japanese(tags):
+        tags = translate_tags_to_english(tags)
+        logger.info(f"Using translated tags: {tags}")
+
+    result = scheduler.collect_now(count=request.count, tags=tags)
     return CollectResponse(**result)
 
 

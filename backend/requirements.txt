@@ -44,3 +44,6 @@ apscheduler>=3.10.0
 
 # Calendar
 icalendar>=5.0.0
+
+# Retry Logic
+tenacity>=8.2.0

@@ -8,8 +8,21 @@ import random
 from typing import Optional
 
 import httpx
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type,
+)
 
 logger = logging.getLogger(__name__)
+
+
+def should_retry_http_error(exception):
+    """HTTPエラーのリトライ判定（429と5xxエラーのみ）"""
+    if isinstance(exception, httpx.HTTPStatusError):
+        return exception.response.status_code == 429 or exception.response.status_code >= 500
+    return False
 
 
 class SpoonacularClient:
@@ -22,6 +35,12 @@ class SpoonacularClient:
         if not self.api_key:
             raise ValueError("SPOONACULAR_API_KEY is required")
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=4),
+        retry=retry_if_exception_type(httpx.HTTPStatusError) & retry(should_retry_http_error),
+        reraise=True,
+    )
     def _request(self, endpoint: str, params: Optional[dict] = None) -> dict:
         """API リクエストを送信"""
         params = params or {}

@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 
+// API target: use environment variable or default to localhost
+const API_TARGET = process.env.API_TARGET || 'http://127.0.0.1:8000';
+
 export default defineConfig({
   plugins: [svelte()],
   server: {
@@ -8,19 +11,19 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://192.168.0.187:8000',
+        target: API_TARGET,
         changeOrigin: true,
       },
       '/collector': {
-        target: 'http://192.168.0.187:8000',
+        target: API_TARGET,
         changeOrigin: true,
       },
       '/recipes': {
-        target: 'http://192.168.0.187:8000',
+        target: API_TARGET,
         changeOrigin: true,
       },
       '/health': {
-        target: 'http://192.168.0.187:8000',
+        target: API_TARGET,
         changeOrigin: true,
       },
     },

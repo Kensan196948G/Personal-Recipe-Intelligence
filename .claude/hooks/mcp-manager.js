@@ -1,6 +1,7 @@
 /**
- * MCP Manager - MCP同時起動制御ユーティリティ
+ * 🔌 MCP Manager - MCP同時起動制御ユーティリティ
  * Browser / Puppeteer / Filesystem の同時起動数を1に制限
+ * @icon 🔌
  */
 
 // MCP状態管理
