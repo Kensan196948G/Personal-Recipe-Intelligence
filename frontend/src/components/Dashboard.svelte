@@ -97,17 +97,11 @@
     {#if stats.source_stats && Object.keys(stats.source_stats).length > 0}
       <div class="section">
         <h3>ソース別レシピ</h3>
-        <div class="source-chart">
+        <div class="source-list">
           {#each Object.entries(stats.source_stats) as [type, count]}
-            <div class="source-bar">
-              <div class="source-label">{getSourceLabel(type)}</div>
-              <div class="source-progress">
-                <div
-                  class="source-fill source-fill--{type}"
-                  style="width: {(count / stats.total_recipes) * 100}%"
-                ></div>
-              </div>
-              <div class="source-count">{count}</div>
+            <div class="source-item">
+              <span class="source-label">{getSourceLabel(type)}</span>
+              <span class="source-count">{count}件</span>
             </div>
           {/each}
         </div>
@@ -194,50 +188,30 @@
     font-weight: 600;
   }
 
-  .source-chart {
+  .source-list {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
 
-  .source-bar {
+  .source-item {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    background: #f8f9fa;
+    border-radius: 6px;
   }
 
   .source-label {
-    width: 80px;
     font-size: 0.875rem;
-    color: #666;
+    color: #333;
   }
-
-  .source-progress {
-    flex: 1;
-    height: 24px;
-    background: #f0f0f0;
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  .source-fill {
-    height: 100%;
-    border-radius: 12px;
-    min-width: 8px;
-    transition: width 0.5s ease;
-  }
-
-  .source-fill--manual { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-  .source-fill--web { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-  .source-fill--ocr { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-  .source-fill--api { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
 
   .source-count {
-    width: 40px;
-    text-align: right;
     font-size: 0.875rem;
     font-weight: 600;
-    color: #333;
+    color: #667eea;
   }
 
   .recent-list {
