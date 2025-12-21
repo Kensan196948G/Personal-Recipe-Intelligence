@@ -5,6 +5,18 @@ from sqlmodel import SQLModel
 Base = SQLModel
 
 from .recipe import Recipe, RecipeBase, Ingredient, IngredientBase, Tag, RecipeTag, Step, StepBase
+from .shopping_list import (
+    ShoppingList,
+    ShoppingListBase,
+    ShoppingListCreate,
+    ShoppingListUpdate,
+    ShoppingListRead,
+    ShoppingListItem,
+    ShoppingListItemBase,
+    ShoppingListItemCreate,
+    ShoppingListItemUpdate,
+    ShoppingListItemRead,
+)
 
 __all__ = [
     "Base",
@@ -17,4 +29,14 @@ __all__ = [
     "RecipeTag",
     "Step",
     "StepBase",
+    "ShoppingList",
+    "ShoppingListBase",
+    "ShoppingListCreate",
+    "ShoppingListUpdate",
+    "ShoppingListRead",
+    "ShoppingListItem",
+    "ShoppingListItemBase",
+    "ShoppingListItemCreate",
+    "ShoppingListItemUpdate",
+    "ShoppingListItemRead",
 ]

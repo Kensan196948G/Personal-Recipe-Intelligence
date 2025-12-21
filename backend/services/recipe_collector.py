@@ -14,6 +14,7 @@ from sqlmodel import Session, select
 from backend.models.recipe import Recipe, Ingredient, Step, Tag, RecipeTag
 from backend.services.spoonacular_client import SpoonacularClient
 from backend.services.deepl_translator import DeepLTranslator
+from backend.services.image_download_service import ImageDownloadService
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +88,9 @@ class RecipeCollector:
                 self.translator = None
         else:
             self.translator = None
+
+        # 画像ダウンロードサービス
+        self.image_service = ImageDownloadService()
 
     def _translate_cached(self, text: str) -> str:
         """キャッシュを使った翻訳（翻訳不可の場合は原文を返す）"""
@@ -249,13 +253,14 @@ class RecipeCollector:
             "cook_time_minutes": original.get("cook_time_minutes"),
             "source_url": recipe_data.get("source_url", ""),
             "source_type": "spoonacular",
+            "image_url": original.get("image"),  # 画像URLを追加
             "ingredients": translated_ingredients,
             "steps": translated_steps,
             "tags": tags_ja,
             "source_id": recipe_data.get("source_id"),
         }
 
-    def save_recipe(self, session: Session, recipe_data: dict) -> dict:
+    async def save_recipe(self, session: Session, recipe_data: dict) -> dict:
         """レシピをデータベースに保存し、ID・タイトルを返す"""
         # 重複チェック（source_id で）
         source_id = recipe_data.get("source_id")
@@ -280,11 +285,29 @@ class RecipeCollector:
             cook_time_minutes=recipe_data.get("cook_time_minutes"),
             source_url=recipe_data.get("source_url"),
             source_type=recipe_data.get("source_type", "spoonacular"),
+            source_id=recipe_data.get("source_id"),  # 外部APIのレシピID
+            image_url=recipe_data.get("image_url"),
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )
         session.add(recipe)
         session.flush()  # IDを取得
+
+        # 画像URLがあればダウンロードして保存（エラー時も処理を継続）
+        image_url = recipe_data.get("image_url")
+        if image_url:
+            try:
+                image_path = await self.image_service.download_and_save(
+                    image_url, recipe.id
+                )
+                if image_path:
+                    recipe.image_path = image_path
+                    logger.info(f"Image saved for recipe {recipe.id}: {image_path}")
+                else:
+                    logger.warning(f"Failed to download image for recipe {recipe.id}")
+            except Exception as e:
+                logger.error(f"Error downloading image for recipe {recipe.id}: {e}")
+                # 画像取得失敗でもレシピ保存は継続
 
         # 材料追加
         for i, ing_data in enumerate(recipe_data.get("ingredients", [])):
@@ -330,7 +353,7 @@ class RecipeCollector:
         logger.info(f"Saved recipe: {recipe_title} (ID: {recipe_id})")
         return {"id": recipe_id, "title": recipe_title}
 
-    def collect_random_recipes(
+    async def collect_random_recipes(
         self,
         session: Session,
         count: int = 5,
@@ -353,7 +376,7 @@ class RecipeCollector:
                 translated = self.translate_recipe(extracted)
 
                 # 保存（辞書を返す）
-                recipe_info = self.save_recipe(session, translated)
+                recipe_info = await self.save_recipe(session, translated)
                 saved_recipes.append(recipe_info)
 
             except Exception as e:
@@ -363,7 +386,7 @@ class RecipeCollector:
         logger.info(f"Successfully saved {len(saved_recipes)} recipes")
         return saved_recipes
 
-    def collect_recipes_by_search(
+    async def collect_recipes_by_search(
         self,
         session: Session,
         query: str,
@@ -391,7 +414,7 @@ class RecipeCollector:
                 raw = self.spoonacular.get_recipe_information(recipe_id)
                 extracted = self.spoonacular.extract_recipe_data(raw)
                 translated = self.translate_recipe(extracted)
-                recipe_info = self.save_recipe(session, translated)
+                recipe_info = await self.save_recipe(session, translated)
                 saved_recipes.append(recipe_info)
 
             except Exception as e:

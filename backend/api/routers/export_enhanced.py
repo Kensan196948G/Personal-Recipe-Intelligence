@@ -4,6 +4,7 @@
 複数フォーマットでのエクスポート、レシピブック生成、買い物リスト、栄養レポート、バックアップ機能を提供
 """
 
+import asyncio
 import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -139,7 +140,9 @@ async def export_recipes(request: ExportRequest):
     """
     try:
         # レシピを読み込み
-        recipes = _load_recipes_from_storage(request.recipe_ids)
+        recipes = await asyncio.to_thread(
+            _load_recipes_from_storage, request.recipe_ids
+        )
 
         # エクスポート
         data = export_service.export_recipes(
@@ -178,7 +181,9 @@ async def export_recipe_book(request: RecipeBookRequest):
     """
     try:
         # レシピを読み込み
-        recipes = _load_recipes_from_storage(request.recipe_ids)
+        recipes = await asyncio.to_thread(
+            _load_recipes_from_storage, request.recipe_ids
+        )
 
         # オプション設定
         options = request.options or {}
@@ -217,7 +222,9 @@ async def export_shopping_list(request: ShoppingListRequest):
     """
     try:
         # レシピを読み込み
-        recipes = _load_recipes_from_storage(request.recipe_ids)
+        recipes = await asyncio.to_thread(
+            _load_recipes_from_storage, request.recipe_ids
+        )
 
         # オプション設定
         options = request.options or {}
@@ -266,7 +273,9 @@ async def export_nutrition_report(request: NutritionReportRequest):
     """
     try:
         # レシピを読み込み
-        recipes = _load_recipes_from_storage(request.recipe_ids)
+        recipes = await asyncio.to_thread(
+            _load_recipes_from_storage, request.recipe_ids
+        )
 
         # オプション設定
         options = request.options or {}
@@ -315,7 +324,7 @@ async def create_backup(request: BackupRequest):
     """
     try:
         # 全レシピを読み込み
-        recipes = _load_all_recipes()
+        recipes = await asyncio.to_thread(_load_all_recipes)
 
         # バックアップ作成
         backup_file = export_service.create_backup(
@@ -355,8 +364,11 @@ async def restore_backup(request: RestoreRequest):
         data_dir.mkdir(parents=True, exist_ok=True)
         recipes_file = data_dir / "recipes.json"
 
-        with open(recipes_file, "w", encoding="utf-8") as f:
-            json.dump(backup_data["recipes"], f, indent=2, ensure_ascii=False)
+        await asyncio.to_thread(
+            recipes_file.write_text,
+            json.dumps(backup_data["recipes"], indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
 
         return {
             "status": "ok",

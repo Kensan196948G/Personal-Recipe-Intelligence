@@ -6,11 +6,39 @@
   let collecting = false;
   let collectResult = null;
   let error = null;
+  let quotaError = null;  // API制限エラー専用
   let collectCount = 5;
   let tags = '';
   let refreshInterval;
 
   const API_BASE = '';
+
+  // 日時をユーザーフレンドリーな形式でフォーマット
+  function formatResetTime(isoString) {
+    if (!isoString) return '';
+    const resetDate = new Date(isoString);
+    const now = new Date();
+
+    // 日本時間に変換
+    const jstOptions = {
+      timeZone: 'Asia/Tokyo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    };
+
+    // 残り時間を計算
+    const diffMs = resetDate - now;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    const formattedDate = resetDate.toLocaleString('ja-JP', jstOptions);
+    const remaining = `${diffHours}時間${diffMinutes}分後`;
+
+    return { formattedDate, remaining };
+  }
 
   async function fetchStatus() {
     try {
@@ -30,6 +58,7 @@
     collecting = true;
     collectResult = null;
     error = null;
+    quotaError = null;
 
     try {
       const res = await fetch(`${API_BASE}/collector/collect`, {
@@ -42,10 +71,23 @@
       });
 
       if (res.ok) {
-        collectResult = await res.json();
-        await fetchStatus();
-        // 収集後にレシピ一覧を更新
-        await fetchRecipes();
+        const result = await res.json();
+
+        // API制限エラーのチェック
+        if (result.quota_exceeded && result.quota_info) {
+          quotaError = {
+            message: result.error || 'API制限に到達しました',
+            errorCode: result.quota_info.error_code,
+            resetTime: result.quota_info.reset_time,
+            quotaLeft: result.quota_info.quota_left,
+          };
+          collectResult = null;
+        } else {
+          collectResult = result;
+          await fetchStatus();
+          // 収集後にレシピ一覧を更新
+          await fetchRecipes();
+        }
       } else {
         const errData = await res.json().catch(() => ({}));
         error = errData.detail || '収集に失敗しました';
@@ -118,6 +160,58 @@
         <line x1="12" y1="16" x2="12.01" y2="16"/>
       </svg>
       {error}
+    </div>
+  {/if}
+
+  {#if quotaError}
+    {@const resetInfo = formatResetTime(quotaError.resetTime)}
+    <div class="quota-error-card">
+      <div class="quota-error-header">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <h3>API制限に到達しました</h3>
+      </div>
+
+      <div class="quota-error-body">
+        <p class="quota-message">{quotaError.message}</p>
+
+        <div class="quota-details">
+          {#if quotaError.errorCode}
+            <div class="quota-detail-item">
+              <span class="label">エラーコード:</span>
+              <span class="value code">{quotaError.errorCode}</span>
+            </div>
+          {/if}
+
+          {#if resetInfo}
+            <div class="quota-detail-item">
+              <span class="label">リセット予定:</span>
+              <span class="value">{resetInfo.formattedDate}</span>
+            </div>
+            <div class="quota-detail-item">
+              <span class="label">残り時間:</span>
+              <span class="value highlight">{resetInfo.remaining}</span>
+            </div>
+          {/if}
+        </div>
+
+        <p class="quota-hint">
+          <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4"/>
+            <path d="M12 8h.01"/>
+          </svg>
+          Spoonacular APIの日次クォータ（50ポイント）を超過しました。
+          リセット後に再度お試しください。
+        </p>
+      </div>
+
+      <button class="btn btn-secondary" on:click={() => quotaError = null}>
+        閉じる
+      </button>
     </div>
   {/if}
 
@@ -529,5 +623,110 @@
   @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+  }
+
+  /* API制限エラーカード */
+  .quota-error-card {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffe8a1 100%);
+    border: 2px solid #ffc107;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  }
+
+  .quota-error-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .quota-error-header svg {
+    color: #856404;
+    flex-shrink: 0;
+  }
+
+  .quota-error-header h3 {
+    margin: 0;
+    color: #856404;
+    font-size: 1.2rem;
+  }
+
+  .quota-error-body {
+    margin-bottom: 1rem;
+  }
+
+  .quota-message {
+    font-size: 1rem;
+    color: #664d03;
+    margin-bottom: 1rem;
+  }
+
+  .quota-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .quota-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .quota-detail-item .label {
+    font-size: 0.8rem;
+    color: #856404;
+    font-weight: 500;
+  }
+
+  .quota-detail-item .value {
+    font-size: 1rem;
+    color: #664d03;
+    font-weight: 600;
+  }
+
+  .quota-detail-item .value.code {
+    font-family: monospace;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    width: fit-content;
+  }
+
+  .quota-detail-item .value.highlight {
+    color: #d63384;
+    font-size: 1.1rem;
+  }
+
+  .quota-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #856404;
+    background: rgba(255, 255, 255, 0.4);
+    padding: 0.75rem;
+    border-radius: 6px;
+    line-height: 1.5;
+  }
+
+  .quota-hint svg {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: #5a6268;
   }
 </style>

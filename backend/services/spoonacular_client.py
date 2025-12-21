@@ -5,7 +5,9 @@ Spoonacular API Client - 海外レシピ取得サービス
 import os
 import logging
 import random
+from datetime import datetime, timezone, timedelta
 from typing import Optional
+from dataclasses import dataclass
 
 import httpx
 from tenacity import (
@@ -18,11 +20,58 @@ from tenacity import (
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class QuotaInfo:
+    """Spoonacular APIクォータ情報"""
+    quota_left: Optional[int] = None  # 残りポイント
+    quota_request: Optional[int] = None  # このリクエストで消費したポイント
+    is_exceeded: bool = False  # 制限超過フラグ
+    reset_time: Optional[datetime] = None  # リセット予定時刻（UTC 0:00）
+    error_code: Optional[int] = None  # HTTPエラーコード
+    error_message: Optional[str] = None  # エラーメッセージ
+
+    def to_dict(self) -> dict:
+        return {
+            "quota_left": self.quota_left,
+            "quota_request": self.quota_request,
+            "is_exceeded": self.is_exceeded,
+            "reset_time": self.reset_time.isoformat() if self.reset_time else None,
+            "error_code": self.error_code,
+            "error_message": self.error_message,
+        }
+
+
+class SpoonacularQuotaExceeded(Exception):
+    """Spoonacular APIクォータ超過例外"""
+    def __init__(self, quota_info: QuotaInfo, message: str = "API制限に到達しました"):
+        self.quota_info = quota_info
+        self.message = message
+        super().__init__(self.message)
+
+
+def get_next_reset_time() -> datetime:
+    """次のSpoonacular APIリセット時刻を計算（UTC 0:00）"""
+    now = datetime.now(timezone.utc)
+    # 次のUTC 0:00を計算
+    tomorrow = now.date() + timedelta(days=1)
+    return datetime(tomorrow.year, tomorrow.month, tomorrow.day, 0, 0, 0, tzinfo=timezone.utc)
+
+
 def should_retry_http_error(exception):
-    """HTTPエラーのリトライ判定（429と5xxエラーのみ）"""
+    """HTTPエラーのリトライ判定（429と5xxエラーのみ、402は除外）"""
     if isinstance(exception, httpx.HTTPStatusError):
         return exception.response.status_code == 429 or exception.response.status_code >= 500
     return False
+
+
+# グローバルなクォータ情報（最新の状態を保持）
+_last_quota_info: Optional[QuotaInfo] = None
+
+
+def get_last_quota_info() -> Optional[QuotaInfo]:
+    """最後のAPIリクエストのクォータ情報を取得"""
+    global _last_quota_info
+    return _last_quota_info
 
 
 class SpoonacularClient:
@@ -43,20 +92,62 @@ class SpoonacularClient:
     )
     def _request(self, endpoint: str, params: Optional[dict] = None) -> dict:
         """API リクエストを送信"""
+        global _last_quota_info
         params = params or {}
         params["apiKey"] = self.api_key
 
         try:
             with httpx.Client(timeout=30.0) as client:
                 response = client.get(f"{self.BASE_URL}{endpoint}", params=params)
+
+                # クォータ情報をレスポンスヘッダーから取得
+                quota_info = self._extract_quota_info(response)
+                _last_quota_info = quota_info
+
+                # 402エラー（支払い必須/クォータ超過）の場合は専用例外をスロー
+                if response.status_code == 402:
+                    quota_info.is_exceeded = True
+                    quota_info.error_code = 402
+                    quota_info.error_message = response.text or "Daily quota exceeded"
+                    quota_info.reset_time = get_next_reset_time()
+                    logger.warning(f"Spoonacular API quota exceeded: {quota_info.error_message}")
+                    raise SpoonacularQuotaExceeded(quota_info)
+
                 response.raise_for_status()
                 return response.json()
+        except SpoonacularQuotaExceeded:
+            # クォータ超過例外はそのまま再スロー
+            raise
         except httpx.HTTPStatusError as e:
             logger.error(f"Spoonacular API error: {e.response.status_code} - {e.response.text}")
             raise
         except Exception as e:
             logger.error(f"Spoonacular request error: {e}")
             raise
+
+    def _extract_quota_info(self, response: httpx.Response) -> QuotaInfo:
+        """レスポンスヘッダーからクォータ情報を抽出"""
+        headers = response.headers
+        quota_left = headers.get("X-API-Quota-Left")
+        quota_request = headers.get("X-API-Quota-Request")
+
+        quota_info = QuotaInfo(
+            quota_left=int(quota_left) if quota_left else None,
+            quota_request=int(quota_request) if quota_request else None,
+        )
+
+        # クォータが少ない場合は警告をログ
+        if quota_info.quota_left is not None and quota_info.quota_left < 10:
+            logger.warning(f"Spoonacular API quota running low: {quota_info.quota_left} points remaining")
+
+        return quota_info
+
+    def get_quota_status(self) -> QuotaInfo:
+        """現在のクォータ状態を取得（軽量なAPIコールで確認）"""
+        global _last_quota_info
+        if _last_quota_info:
+            return _last_quota_info
+        return QuotaInfo()
 
     def get_random_recipes(self, number: int = 5, tags: Optional[str] = None) -> list[dict]:
         """ランダムなレシピを取得

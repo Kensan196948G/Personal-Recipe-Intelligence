@@ -17,7 +17,13 @@ class RecipeBase(SQLModel):
     prep_time_minutes: Optional[int] = None
     cook_time_minutes: Optional[int] = None
     source_url: Optional[str] = None
-    source_type: str = Field(default="manual")  # manual, web, ocr
+    source_type: str = Field(default="manual")  # manual, web, ocr, spoonacular
+    source_id: Optional[str] = Field(default=None, index=True)  # 外部APIのレシピID
+    is_favorite: bool = Field(default=False, index=True)
+    rating: Optional[int] = Field(default=None, ge=0, le=5)  # 0-5 stars
+    image_url: Optional[str] = Field(default=None)  # 元画像URL
+    image_path: Optional[str] = Field(default=None)  # ローカル保存パス
+    image_status: Optional[str] = Field(default=None)  # 画像取得状態: None, "ok", "画像ソースなし", "API制限到達。後日再取得"
 
 
 class Recipe(RecipeBase, table=True):

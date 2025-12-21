@@ -19,6 +19,11 @@ class MockAPIClient:
 
     def post(self, endpoint: str, data: dict = None):
         """Mock POST request."""
+        if "/translate" in endpoint:
+            return Mock(
+                status_code=200,
+                json=lambda: {"status": "ok", "data": data, "error": None},
+            )
         return Mock(
             status_code=201, json=lambda: {"status": "ok", "data": data, "error": None}
         )

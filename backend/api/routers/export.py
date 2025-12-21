@@ -73,8 +73,10 @@ def get_export_service():
     Returns:
         ExportService: エクスポートサービスインスタンス
     """
-    # TODO: DB実装後にセッション管理を追加
-    db_session = None
+    # Get database session
+    from backend.core.database import get_session
+
+    db_session = next(get_session())
     return ExportService(db_session)
 
 

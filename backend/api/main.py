@@ -6,10 +6,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.routers import (
+    cache_router,
+    nutrition_router,
     ocr_router,
     recipes_router,
     scraper_router,
     search_router,
+    shopping_list_router,
     tags_router,
     translation_router,
 )
@@ -27,9 +30,13 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
+        "http://localhost:5174",
         "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
         "http://192.168.0.29:3000",
         "http://192.168.0.29:5173",
+        "http://192.168.0.187:5173",
+        "http://192.168.0.187:5174",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -43,8 +50,11 @@ app.include_router(scraper_router)
 app.include_router(ocr_router)
 app.include_router(translation_router)
 app.include_router(search_router)
+app.include_router(nutrition_router)
+app.include_router(cache_router)
 app.include_router(csv_import_router)
 app.include_router(collector_router)
+app.include_router(shopping_list_router)
 
 
 @app.get("/")

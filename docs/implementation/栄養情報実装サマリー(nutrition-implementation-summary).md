@@ -115,7 +115,7 @@ Personal Recipe Intelligence プロジェクトに栄養計算機能を実装し
 - 全材料リスト取得
 
 #### GET /api/v1/nutrition/recipe/{recipe_id}
-- レシピIDから栄養取得（未実装・将来対応）
+- レシピIDから栄養取得（実装済み）
 
 ---
 

@@ -38,8 +38,9 @@ class APIResponse(BaseModel):
     error: Optional[str] = Field(None, description="エラーメッセージ")
 
 
-# ダミーレシピデータベース（実際はDBから取得）
-# TODO: 実際のDB接続に置き換える
+# ダミーレシピデータベース（デモ用）
+# Note: In production, replace with actual database queries
+# TODO: Replace mock data with database integration using backend.models.Recipe
 RECIPES_DB = {
     1: {
         "id": 1,

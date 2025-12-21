@@ -1,11 +1,14 @@
 """
 Follow Router - フォロー関連APIエンドポイント
+
+JWT認証統合済み - すべてのエンドポイントで認証が必要
 """
 
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel, Field
 from backend.services.follow_service import FollowService
+from backend.core.auth import get_current_user_id
 
 router = APIRouter(prefix="/api/v1/follow", tags=["follow"])
 
@@ -57,13 +60,8 @@ def get_follow_service() -> FollowService:
     return FollowService()
 
 
-def get_current_user_id() -> str:
-    """
-    現在のユーザーIDを取得（仮実装）
-
-    TODO: 認証機能実装時に JWT トークンから取得するように変更
-    """
-    return "user_1"
+# Note: get_current_user_id is now imported from backend.core.auth
+# JWT authentication is fully implemented
 
 
 @router.post("/{user_id}", response_model=FollowResponse)

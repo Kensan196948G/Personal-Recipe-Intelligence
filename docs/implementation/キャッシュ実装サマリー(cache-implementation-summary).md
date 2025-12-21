@@ -191,8 +191,8 @@ For integrating into existing services:
 - [x] Documentation
 - [x] Usage examples
 - [x] CLI tools
-- [ ] Integration with actual database services (TODO)
-- [ ] Integration with API framework (FastAPI/Flask) (TODO)
+- [x] Integration with actual database services (API レイヤーで DB 結果をキャッシュ)
+- [x] Integration with API framework (FastAPI)
 
 ## Next Steps
 

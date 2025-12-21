@@ -124,6 +124,7 @@ class RecipeCreate(BaseModel):
     cook_time_minutes: Optional[int] = Field(None, ge=0, le=1440)
     source_url: Optional[str] = Field(None, max_length=2000)
     source_type: str = Field(default="manual", pattern="^(manual|web|ocr)$")
+    image_url: Optional[str] = Field(None, max_length=2000)  # 画像URL
     ingredients: list[IngredientCreate] = Field(default_factory=list)
     steps: list[StepCreate] = Field(default_factory=list)
     tag_ids: list[int] = Field(default_factory=list)
@@ -142,6 +143,9 @@ class RecipeRead(BaseModel):
     cook_time_minutes: Optional[int]
     source_url: Optional[str]
     source_type: str
+    image_url: Optional[str]  # 画像URL
+    image_path: Optional[str]  # ローカル保存パス
+    image_status: Optional[str] = None  # 画像取得状態: "ok", "画像ソースなし", "API制限到達。後日再取得"
     created_at: datetime
     updated_at: datetime
     ingredients: list[IngredientRead] = Field(default_factory=list)
@@ -159,6 +163,7 @@ class RecipeUpdate(BaseModel):
     cook_time_minutes: Optional[int] = Field(None, ge=0, le=1440)
     source_url: Optional[str] = Field(None, max_length=2000)
     source_type: Optional[str] = Field(None, pattern="^(manual|web|ocr)$")
+    image_url: Optional[str] = Field(None, max_length=2000)  # 画像URL
 
 
 class RecipeListItem(BaseModel):
@@ -173,6 +178,9 @@ class RecipeListItem(BaseModel):
     prep_time_minutes: Optional[int]
     cook_time_minutes: Optional[int]
     source_type: str
+    image_url: Optional[str]  # 画像URL
+    image_path: Optional[str]  # ローカル保存パス
+    image_status: Optional[str] = None  # 画像取得状態: "ok", "画像ソースなし", "API制限到達。後日再取得"
     created_at: datetime
     tag_count: int = 0
     ingredient_count: int = 0

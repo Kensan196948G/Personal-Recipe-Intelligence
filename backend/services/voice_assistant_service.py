@@ -10,6 +10,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from enum import Enum
+from sqlalchemy.orm import Session
+from backend.models import Recipe, Ingredient, Step
+from backend.core.database import get_session
 
 logger = logging.getLogger(__name__)
 
@@ -262,24 +265,47 @@ class VoiceAssistantService:
         """レシピ検索"""
         query = parameters.get("query", "")
 
-        # TODO: 実際のレシピ検索を実装
-        # ここではダミーレスポンス
-        speech = f"{query}のレシピを検索しています。カレーライス、ハヤシライス、ビーフシチューが見つかりました。どれにしますか？"
+        # Search recipes from database
+        try:
+            db = next(get_session())
+            recipes = (
+                db.query(Recipe)
+                .filter(Recipe.title.ilike(f"%{query}%"))
+                .limit(5)
+                .all()
+            )
 
-        # セッションにコンテキスト保存
-        self._update_session(
-            session["session_id"],
-            {
-                "context": {
-                    "last_search": query,
-                    "search_results": [
-                        "カレーライス",
-                        "ハヤシライス",
-                        "ビーフシチュー",
-                    ],
-                }
-            },
-        )
+            if recipes:
+                recipe_names = [recipe.title for recipe in recipes]
+                recipe_ids = {recipe.title: recipe.id for recipe in recipes}
+
+                if len(recipe_names) == 1:
+                    speech = f"{query}のレシピが見つかりました。{recipe_names[0]}です。このレシピを開始しますか？"
+                else:
+                    recipe_list = "、".join(recipe_names[:3])
+                    speech = f"{query}のレシピを検索しています。{recipe_list}が見つかりました。どれにしますか？"
+
+                # セッションにコンテキスト保存
+                self._update_session(
+                    session["session_id"],
+                    {
+                        "context": {
+                            "last_search": query,
+                            "search_results": recipe_names,
+                            "search_result_ids": recipe_ids,
+                        }
+                    },
+                )
+            else:
+                speech = f"申し訳ございません。{query}のレシピが見つかりませんでした。別のキーワードで検索してください。"
+                self._update_session(
+                    session["session_id"],
+                    {"context": {"last_search": query, "search_results": []}},
+                )
+
+        except Exception as e:
+            logger.error(f"Error searching recipes: {e}")
+            speech = "レシピ検索中にエラーが発生しました。もう一度お試しください。"
 
         return self._format_response(speech, assistant, should_end_session=False)
 
@@ -292,26 +318,48 @@ class VoiceAssistantService:
         """レシピ手順取得"""
         recipe_id = parameters.get("recipe_id")
 
-        # TODO: 実際のレシピ取得を実装
-        # ダミーレシピ
-        dummy_steps = [
-            "玉ねぎとにんじんを一口大に切ります",
-            "鍋に油を熱し、肉を炒めます",
-            "野菜を加えてさらに炒めます",
-            "水を加えて20分煮込みます",
-            "カレールーを加えて溶かし、5分煮込みます",
-        ]
+        # Get recipe from database
+        try:
+            db = next(get_session())
 
-        self._update_session(
-            session["session_id"],
-            {
-                "current_recipe_id": recipe_id,
-                "current_step_index": 0,
-                "context": {"steps": dummy_steps},
-            },
-        )
+            # If recipe_id not provided, try to use context
+            if not recipe_id:
+                context = session.get("context", {})
+                search_result_ids = context.get("search_result_ids", {})
+                if search_result_ids:
+                    # Use first result
+                    recipe_id = list(search_result_ids.values())[0]
 
-        speech = f"レシピを開始します。手順1: {dummy_steps[0]}"
+            if not recipe_id:
+                speech = "レシピが選択されていません。まずレシピを検索してください。"
+                return self._format_response(speech, assistant, should_end_session=False)
+
+            recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+
+            if not recipe:
+                speech = "レシピが見つかりませんでした。"
+                return self._format_response(speech, assistant, should_end_session=False)
+
+            # Get steps
+            steps = sorted(recipe.steps, key=lambda s: s.step_number) if recipe.steps else []
+            steps_text = [step.instruction for step in steps]
+
+            if not steps_text:
+                speech = f"{recipe.title}の手順が登録されていません。"
+            else:
+                self._update_session(
+                    session["session_id"],
+                    {
+                        "current_recipe_id": recipe_id,
+                        "current_step_index": 0,
+                        "context": {"steps": steps_text, "recipe_title": recipe.title},
+                    },
+                )
+                speech = f"{recipe.title}を開始します。手順1: {steps_text[0]}"
+
+        except Exception as e:
+            logger.error(f"Error getting recipe steps: {e}")
+            speech = "レシピ手順の取得中にエラーが発生しました。"
 
         return self._format_response(speech, assistant, should_end_session=False)
 
@@ -319,11 +367,37 @@ class VoiceAssistantService:
         self, session: Dict[str, Any], assistant: VoiceAssistant
     ) -> Dict[str, Any]:
         """材料取得"""
-        if not session.get("current_recipe_id"):
+        recipe_id = session.get("current_recipe_id")
+
+        if not recipe_id:
             speech = "レシピが選択されていません。まずレシピを検索してください。"
         else:
-            # TODO: 実際の材料取得を実装
-            speech = "材料は、玉ねぎ1個、にんじん1本、牛肉200グラム、カレールー1箱、水600ミリリットルです。"
+            # Get ingredients from database
+            try:
+                db = next(get_session())
+                recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+
+                if not recipe:
+                    speech = "レシピが見つかりませんでした。"
+                elif not recipe.ingredients:
+                    speech = "このレシピには材料が登録されていません。"
+                else:
+                    # Build ingredients list
+                    ingredients_list = []
+                    for ing in sorted(recipe.ingredients, key=lambda i: i.order_index):
+                        if ing.quantity and ing.unit:
+                            ingredients_list.append(f"{ing.name}{ing.quantity}{ing.unit}")
+                        elif ing.quantity:
+                            ingredients_list.append(f"{ing.name}{ing.quantity}")
+                        else:
+                            ingredients_list.append(ing.name)
+
+                    ingredients_text = "、".join(ingredients_list)
+                    speech = f"材料は、{ingredients_text}です。"
+
+            except Exception as e:
+                logger.error(f"Error getting ingredients: {e}")
+                speech = "材料の取得中にエラーが発生しました。"
 
         return self._format_response(speech, assistant, should_end_session=False)
 
@@ -390,9 +464,24 @@ class VoiceAssistantService:
         """タイマー設定"""
         duration = parameters.get("duration", 5)
 
+        # Store timer information in session
+        self._update_session(
+            session["session_id"],
+            {
+                "context": {
+                    **session.get("context", {}),
+                    "timer": {
+                        "duration_minutes": duration,
+                        "started_at": datetime.now().isoformat(),
+                    }
+                }
+            },
+        )
+
         speech = f"{duration}分のタイマーをセットしました"
 
-        # TODO: 実際のタイマー機能実装（プッシュ通知など）
+        # Note: Actual timer notification would require push notification service
+        # This is a placeholder for future implementation with notification service
 
         return self._format_response(speech, assistant, should_end_session=False)
 

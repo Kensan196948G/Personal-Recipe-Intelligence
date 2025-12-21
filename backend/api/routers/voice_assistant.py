@@ -73,7 +73,10 @@ async def alexa_webhook(
     try:
         logger.info(f"Alexa request received: {request.request.get('type')}")
 
-        # TODO: 本番環境では署名検証を実装
+        # Note: Alexa request signature verification
+        # In production, verify the request signature for security
+        # TODO: Implement Alexa signature verification
+        # from backend.services.alexa_verifier import verify_alexa_signature
         # verify_alexa_signature(signature, signature_cert_chain_url, request)
 
         response = voice_service.process_alexa_request(request.dict())
