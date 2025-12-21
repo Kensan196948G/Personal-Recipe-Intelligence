@@ -94,15 +94,32 @@ async def get_recipe_balance(recipe_id: int):
       レシピのバランス評価データ
     """
     try:
-        # TODO: 実際のDB連携時はレシピIDから栄養データを取得
-        # 現在はモックデータで動作確認
+        from backend.core.database import get_session
+        from backend.models import Recipe
+
+        # Get recipe from database
+        db = next(get_session())
+        recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+
+        if not recipe:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Recipe {recipe_id} not found"
+            )
+
+        # Calculate nutrition based on ingredients
+        # Note: This is a simplified calculation
+        # In production, use nutrition database for accurate values
+        ingredient_count = len(recipe.ingredients) if recipe.ingredients else 0
+
+        # Mock calculation based on ingredient count
         mock_nutrition = {
-            "calories": 650,
-            "protein": 25,
-            "fat": 20,
-            "carbs": 85,
-            "fiber": 5,
-            "salt": 2.5,
+            "calories": ingredient_count * 100,
+            "protein": ingredient_count * 5,
+            "fat": ingredient_count * 3,
+            "carbs": ingredient_count * 15,
+            "fiber": ingredient_count * 2,
+            "salt": ingredient_count * 0.5,
         }
 
         evaluation = BalanceService.get_recipe_balance_evaluation(mock_nutrition)
@@ -111,6 +128,8 @@ async def get_recipe_balance(recipe_id: int):
             status="ok", data={"recipe_id": recipe_id, "evaluation": evaluation}
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -170,14 +189,29 @@ async def get_pfc_balance(recipe_id: int):
       PFCバランスデータ
     """
     try:
-        # TODO: 実際のDB連携時はレシピIDから栄養データを取得
+        from backend.core.database import get_session
+        from backend.models import Recipe
+
+        # Get recipe from database
+        db = next(get_session())
+        recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+
+        if not recipe:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Recipe {recipe_id} not found"
+            )
+
+        # Calculate nutrition based on ingredients (simplified)
+        ingredient_count = len(recipe.ingredients) if recipe.ingredients else 0
+
         mock_nutrition = {
-            "calories": 650,
-            "protein": 25,
-            "fat": 20,
-            "carbs": 85,
-            "fiber": 5,
-            "salt": 2.5,
+            "calories": ingredient_count * 100,
+            "protein": ingredient_count * 5,
+            "fat": ingredient_count * 3,
+            "carbs": ingredient_count * 15,
+            "fiber": ingredient_count * 2,
+            "salt": ingredient_count * 0.5,
         }
 
         pfc_balance = BalanceService.calculate_pfc_balance(mock_nutrition)
@@ -186,6 +220,8 @@ async def get_pfc_balance(recipe_id: int):
             status="ok", data={"recipe_id": recipe_id, "pfc_balance": pfc_balance}
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

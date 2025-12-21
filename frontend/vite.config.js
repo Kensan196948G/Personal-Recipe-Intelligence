@@ -8,7 +8,8 @@ export default defineConfig({
   plugins: [svelte()],
   server: {
     host: '0.0.0.0',  // Allow external access
-    port: 5173,
+    port: 5174,       // Fixed port
+    strictPort: true, // Fail if port is already in use (handled by dev.sh)
     proxy: {
       '/api': {
         target: API_TARGET,

@@ -218,8 +218,10 @@ class PerformanceAuditor:
                     # Large file reads
                     if ".readlines()" in line or ".read()" in line:
                         # Check if in a loop (inefficient)
+                        recent_lines = lines[max(0, i - 10) : i]
                         if any(
-                            re.search(r"for\s+\w+\s+in\s+", lines[max(0, i - 10) : i])
+                            re.search(r"for\s+\w+\s+in\s+", recent_line)
+                            for recent_line in recent_lines
                         ):
                             self.issues["inefficient_io"].append(
                                 (

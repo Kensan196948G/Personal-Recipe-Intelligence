@@ -400,7 +400,28 @@ class ImageRecognitionService:
         Returns:
           認識結果
         """
-        # TODO: OpenAI Vision API, Google Cloud Vision API等との統合
+        # External AI API integration placeholder
+        # Supported APIs:
+        # - OpenAI Vision API (GPT-4 Vision)
+        # - Google Cloud Vision API
+        # - AWS Rekognition
+        # - Azure Computer Vision
+
+        # TODO: Implement external API integration
+        # Example implementation for OpenAI Vision:
+        # import openai
+        # response = openai.ChatCompletion.create(
+        #     model="gpt-4-vision-preview",
+        #     messages=[{
+        #         "role": "user",
+        #         "content": [
+        #             {"type": "text", "text": "Identify food ingredients in this image"},
+        #             {"type": "image_url", "image_url": {"url": img_base64}}
+        #         ]
+        #     }],
+        #     max_tokens=300
+        # )
+
         logger.warning("External API not yet implemented, using mock results")
         return self._generate_mock_results(max_results)
 

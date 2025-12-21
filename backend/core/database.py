@@ -2,6 +2,7 @@
 Personal Recipe Intelligence - Database Configuration
 """
 
+from sqlalchemy import event
 from sqlmodel import Session, SQLModel, create_engine
 
 from backend.core.config import settings
@@ -12,6 +13,17 @@ engine = create_engine(
     echo=settings.debug,
     connect_args={"check_same_thread": False},
 )
+
+
+@event.listens_for(engine, "connect")
+def _set_sqlite_pragmas(dbapi_connection, connection_record) -> None:
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA synchronous=NORMAL")
+    cursor.execute("PRAGMA temp_store=MEMORY")
+    cursor.execute("PRAGMA cache_size=-10000")
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 
 def create_db_and_tables():

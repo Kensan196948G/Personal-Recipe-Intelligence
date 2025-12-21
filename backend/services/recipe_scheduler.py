@@ -1,8 +1,9 @@
 """
 Recipe Scheduler - 定期レシピ収集スケジューラー
-1日5件の海外レシピを自動収集
+1日5件の海外レシピを自動収集 + 画像バックフィル
 """
 
+import asyncio
 import os
 import logging
 import threading
@@ -15,8 +16,12 @@ from sqlmodel import Session
 from backend.core.database import engine
 from backend.core.config import settings
 from backend.services.recipe_collector import RecipeCollector
+from backend.services.spoonacular_client import SpoonacularQuotaExceeded
 
 logger = logging.getLogger(__name__)
+
+# 画像バックフィル用の定数
+IMAGE_BACKFILL_LIMIT = 10  # 1回のバックフィルで処理する最大件数
 
 
 class RecipeScheduler:
@@ -83,11 +88,12 @@ class RecipeScheduler:
             )
 
             with self._get_session() as session:
-                recipes = collector.collect_random_recipes(
+                # collect_random_recipesはasyncなのでasyncio.runで実行
+                recipes = asyncio.run(collector.collect_random_recipes(
                     session=session,
                     count=count,
                     tags=tags,
-                )
+                ))
 
             self._last_collection = datetime.now()
 
@@ -98,12 +104,61 @@ class RecipeScheduler:
                 "timestamp": self._last_collection.isoformat(),
             }
 
+        except SpoonacularQuotaExceeded as e:
+            # API制限エラーの場合は詳細情報を返却
+            logger.warning(f"Spoonacular API quota exceeded: {e.quota_info}")
+            return {
+                "success": False,
+                "error": "API制限に到達しました",
+                "collected": 0,
+                "quota_exceeded": True,
+                "quota_info": e.quota_info.to_dict(),
+            }
+
         except Exception as e:
             logger.error(f"Collection failed: {e}")
             return {
                 "success": False,
                 "error": str(e),
                 "collected": 0,
+            }
+
+    def backfill_images(self, limit: Optional[int] = None) -> dict:
+        """画像がないレシピの画像をバックフィル"""
+        limit = limit or IMAGE_BACKFILL_LIMIT
+
+        if not self.spoonacular_key:
+            return {
+                "success": False,
+                "error": "SPOONACULAR_API_KEY is not set",
+                "processed": 0,
+                "failed": 0,
+            }
+
+        try:
+            from backend.scripts.backfill_spoonacular_images import backfill_from_spoonacular
+
+            # asyncio.runで非同期関数を実行
+            success_count, fail_count = asyncio.run(
+                backfill_from_spoonacular(dry_run=False, limit=limit)
+            )
+
+            logger.info(f"Image backfill completed: success={success_count}, failed={fail_count}")
+
+            return {
+                "success": True,
+                "processed": success_count,
+                "failed": fail_count,
+                "timestamp": datetime.now().isoformat(),
+            }
+
+        except Exception as e:
+            logger.error(f"Image backfill failed: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "processed": 0,
+                "failed": 0,
             }
 
     def _run_loop(self):
@@ -113,6 +168,7 @@ class RecipeScheduler:
         while self._running:
             try:
                 if self._should_collect():
+                    # 1. 新規レシピ収集
                     logger.info("Starting scheduled collection...")
                     result = self.collect_now()
 
@@ -122,6 +178,18 @@ class RecipeScheduler:
                             self._on_complete(result)
                     else:
                         logger.error(f"Collection failed: {result.get('error')}")
+
+                    # 2. 画像バックフィル（API制限到達分の再取得）
+                    logger.info("Starting image backfill...")
+                    backfill_result = self.backfill_images()
+
+                    if backfill_result["success"]:
+                        logger.info(
+                            f"Image backfill: processed={backfill_result['processed']}, "
+                            f"failed={backfill_result['failed']}"
+                        )
+                    else:
+                        logger.error(f"Image backfill failed: {backfill_result.get('error')}")
 
                 # 1時間ごとにチェック
                 for _ in range(60):  # 60 x 60秒 = 1時間
@@ -154,6 +222,24 @@ class RecipeScheduler:
             self._thread.join(timeout=5)
         logger.info("Scheduler stopped")
 
+    def _count_pending_images(self) -> int:
+        """画像バックフィル待ちのレシピ数を取得"""
+        try:
+            from sqlmodel import select
+            from backend.models.recipe import Recipe
+
+            with self._get_session() as session:
+                stmt = select(Recipe).where(
+                    Recipe.image_path == None,
+                    Recipe.source_type == "spoonacular",
+                    (Recipe.image_status == None) | (Recipe.image_status == "API制限到達。後日再取得")
+                )
+                recipes = session.exec(stmt).all()
+                return len(recipes)
+        except Exception as e:
+            logger.error(f"Failed to count pending images: {e}")
+            return 0
+
     def get_status(self) -> dict:
         """スケジューラーの状態を取得"""
         now = datetime.now()
@@ -175,6 +261,9 @@ class RecipeScheduler:
                 now.year, now.month, now.day, self.collection_hour
             )
 
+        # 画像バックフィル待ち件数
+        pending_images = self._count_pending_images()
+
         return {
             "running": self._running,
             "daily_count": self.daily_count,
@@ -184,6 +273,10 @@ class RecipeScheduler:
             "api_keys_configured": {
                 "spoonacular": bool(self.spoonacular_key),
                 "deepl": bool(self.deepl_key),
+            },
+            "image_backfill": {
+                "pending_count": pending_images,
+                "batch_limit": IMAGE_BACKFILL_LIMIT,
             },
         }
 

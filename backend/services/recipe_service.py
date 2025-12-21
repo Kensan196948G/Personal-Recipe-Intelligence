@@ -83,6 +83,7 @@ class RecipeService:
         cook_time_minutes: Optional[int] = None,
         source_url: Optional[str] = None,
         source_type: str = "manual",
+        image_url: Optional[str] = None,
         ingredients: Optional[list[dict]] = None,
         steps: Optional[list[dict]] = None,
         tag_ids: Optional[list[int]] = None,
@@ -96,6 +97,7 @@ class RecipeService:
             cook_time_minutes=cook_time_minutes,
             source_url=source_url,
             source_type=source_type,
+            image_url=image_url,
         )
         self.session.add(recipe)
         self.session.flush()
@@ -128,9 +130,13 @@ class RecipeService:
 
         # タグ追加
         if tag_ids:
+            existing_tag_ids = set(
+                self.session.exec(
+                    select(Tag.id).where(Tag.id.in_(tag_ids))
+                ).all()
+            )
             for tag_id in tag_ids:
-                tag = self.session.get(Tag, tag_id)
-                if tag:
+                if tag_id in existing_tag_ids:
                     recipe_tag = RecipeTag(recipe_id=recipe.id, tag_id=tag_id)
                     self.session.add(recipe_tag)
 
@@ -148,6 +154,7 @@ class RecipeService:
         cook_time_minutes: Optional[int] = None,
         source_url: Optional[str] = None,
         source_type: Optional[str] = None,
+        image_url: Optional[str] = None,
     ) -> Optional[Recipe]:
         """レシピ更新"""
         recipe = self.session.get(Recipe, recipe_id)
@@ -168,6 +175,8 @@ class RecipeService:
             recipe.source_url = source_url
         if source_type is not None:
             recipe.source_type = source_type
+        if image_url is not None:
+            recipe.image_url = image_url
 
         recipe.updated_at = datetime.now()
         self.session.commit()
@@ -285,6 +294,33 @@ class RecipeService:
         self.session.delete(step)
         self.session.commit()
         return True
+
+    # ===========================================
+    # Dashboard Statistics
+    # ===========================================
+    def count_recipes_since(self, since: datetime) -> int:
+        """指定日時以降に作成されたレシピ数を取得"""
+        query = select(func.count()).select_from(Recipe).where(Recipe.created_at >= since)
+        return self.session.exec(query).one() or 0
+
+    def count_favorites(self) -> int:
+        """お気に入りレシピ数を取得"""
+        query = select(func.count()).select_from(Recipe).where(Recipe.is_favorite == True)
+        return self.session.exec(query).one() or 0
+
+    def count_tags(self) -> int:
+        """タグ数を取得"""
+        query = select(func.count()).select_from(Tag)
+        return self.session.exec(query).one() or 0
+
+    def get_source_type_stats(self) -> dict:
+        """ソースタイプ別の統計を取得"""
+        query = (
+            select(Recipe.source_type, func.count(Recipe.id))
+            .group_by(Recipe.source_type)
+        )
+        results = self.session.exec(query).all()
+        return {source_type: count for source_type, count in results}
 
 
 class TagService:

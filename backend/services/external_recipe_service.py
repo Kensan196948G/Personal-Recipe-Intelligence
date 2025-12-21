@@ -9,6 +9,8 @@ from typing import Dict, List, Optional, Any
 from urllib.parse import urlparse
 import logging
 
+from backend.services.image_download_service import ImageDownloadService
+
 logger = logging.getLogger(__name__)
 
 
@@ -113,6 +115,7 @@ class ExternalRecipeService:
     def __init__(self):
         self.parsers: List[RecipeParser] = []
         self._register_parsers()
+        self.image_service = ImageDownloadService()
 
     def _register_parsers(self):
         """パーサーを登録"""
@@ -141,8 +144,20 @@ class ExternalRecipeService:
         logger.warning(f"No parser found for URL: {url}")
         return None
 
-    async def import_recipe(self, url: str, html: str) -> RecipeData:
-        """URLからレシピをインポート"""
+    async def import_recipe(
+        self, url: str, html: str, recipe_id: Optional[int] = None
+    ) -> RecipeData:
+        """
+        URLからレシピをインポート
+
+        Args:
+            url: レシピURL
+            html: HTML内容
+            recipe_id: レシピID（画像保存用、指定時のみ画像をダウンロード）
+
+        Returns:
+            RecipeData: パース済みレシピデータ
+        """
         parser = self.get_parser(url)
         if not parser:
             raise ValueError(f"Unsupported URL: {url}")
@@ -150,6 +165,29 @@ class ExternalRecipeService:
         try:
             recipe_data = await parser.parse(html, url)
             logger.info(f"Successfully parsed recipe: {recipe_data.title}")
+
+            # recipe_idが指定されている場合は画像をダウンロード
+            if recipe_id and recipe_data.image_url:
+                try:
+                    image_path = await self.image_service.download_and_save(
+                        recipe_data.image_url, recipe_id
+                    )
+                    if image_path:
+                        logger.info(
+                            f"Image downloaded for recipe {recipe_id}: {image_path}"
+                        )
+                        # RecipeDataに保存パスを追加するために
+                        # to_dict()で辞書に変換する前に処理する必要がある
+                    else:
+                        logger.warning(
+                            f"Failed to download image for recipe {recipe_id}"
+                        )
+                except Exception as e:
+                    logger.error(
+                        f"Error downloading image for recipe {recipe_id}: {e}"
+                    )
+                    # 画像取得失敗でもレシピインポートは継続
+
             return recipe_data
         except Exception as e:
             logger.error(f"Failed to parse recipe from {url}: {str(e)}", exc_info=True)

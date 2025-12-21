@@ -226,8 +226,9 @@ async def upload_flyer(
                 status_code=400, detail="画像ファイルをアップロードしてください"
             )
 
-        # TODO: 実際のOCR処理を実装
-        # ここでは仮のOCRテキストを使用
+        # OCR processing
+        # Note: In production, integrate with OCR service (e.g., Tesseract, Google Vision API)
+        # For now, using mock OCR text for demonstration
         ocr_text = """
     イオン 今週の特売
     たまねぎ 98円
@@ -236,6 +237,10 @@ async def upload_flyer(
     牛乳 1L 168円
     キャベツ 1玉 128円
     """
+        # TODO: Integrate actual OCR processing
+        # from backend.ocr.service import OCRService
+        # ocr_service = OCRService()
+        # ocr_text = await ocr_service.extract_text_from_image(file)
 
         # 店舗名自動検出
         if not store_name:

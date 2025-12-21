@@ -10,6 +10,9 @@ import json
 from pathlib import Path
 
 from pydantic import BaseModel, Field, ValidationError
+from sqlalchemy.orm import Session
+from backend.models import Recipe, Ingredient, Step, Tag
+from backend.core.database import get_session
 
 
 class RecipeExportSchema(BaseModel):
@@ -359,27 +362,54 @@ class ExportService:
         Returns:
             List[RecipeExportSchema]: レシピリスト
         """
-        # TODO: DB実装後に実装
-        # 仮実装
-        return [
-            RecipeExportSchema(
-                id=1,
-                title="サンプルレシピ",
-                source_url="https://example.com/recipe/1",
-                source_type="web",
-                ingredients=[
-                    {"name": "玉ねぎ", "amount": "1個", "unit": "個"},
-                    {"name": "豚肉", "amount": "200", "unit": "g"},
-                ],
-                steps=["玉ねぎを切る", "豚肉を炒める", "調味料を加える"],
-                cooking_time=30,
-                servings=2,
-                tags=["簡単", "時短"],
-                notes="美味しいです",
-                created_at=datetime.utcnow().isoformat(),
-                updated_at=datetime.utcnow().isoformat(),
-            )
-        ]
+        recipes_list = []
+
+        try:
+            # Get all recipes from database
+            all_recipes = self.db.query(Recipe).all()
+
+            for recipe in all_recipes:
+                # Convert ingredients
+                ingredients_data = [
+                    {
+                        "name": ing.name,
+                        "amount": str(ing.quantity) if ing.quantity else "",
+                        "unit": ing.unit or "",
+                    }
+                    for ing in recipe.ingredients
+                ] if recipe.ingredients else []
+
+                # Convert steps
+                steps_data = [
+                    step.instruction
+                    for step in sorted(recipe.steps, key=lambda s: s.step_number)
+                ] if recipe.steps else []
+
+                # Convert tags
+                tags_data = [tag.name for tag in recipe.tags] if recipe.tags else []
+
+                recipe_export = RecipeExportSchema(
+                    id=recipe.id,
+                    title=recipe.title,
+                    source_url=recipe.source_url,
+                    source_type=recipe.source_type,
+                    ingredients=ingredients_data,
+                    steps=steps_data,
+                    cooking_time=recipe.total_time_minutes,
+                    servings=recipe.servings,
+                    tags=tags_data,
+                    notes=recipe.notes,
+                    image_path=recipe.image_path,
+                    created_at=recipe.created_at.isoformat() if recipe.created_at else None,
+                    updated_at=recipe.updated_at.isoformat() if recipe.updated_at else None,
+                )
+                recipes_list.append(recipe_export)
+
+        except Exception as e:
+            # If DB query fails, return empty list
+            print(f"Error fetching recipes: {e}")
+
+        return recipes_list
 
     def _fetch_recipe_by_id(self, recipe_id: int) -> Optional[RecipeExportSchema]:
         """
@@ -391,25 +421,50 @@ class ExportService:
         Returns:
             Optional[RecipeExportSchema]: レシピまたはNone
         """
-        # TODO: DB実装後に実装
-        # 仮実装
-        if recipe_id == 1:
+        try:
+            recipe = self.db.query(Recipe).filter(Recipe.id == recipe_id).first()
+
+            if not recipe:
+                return None
+
+            # Convert ingredients
+            ingredients_data = [
+                {
+                    "name": ing.name,
+                    "amount": str(ing.quantity) if ing.quantity else "",
+                    "unit": ing.unit or "",
+                }
+                for ing in recipe.ingredients
+            ] if recipe.ingredients else []
+
+            # Convert steps
+            steps_data = [
+                step.instruction
+                for step in sorted(recipe.steps, key=lambda s: s.step_number)
+            ] if recipe.steps else []
+
+            # Convert tags
+            tags_data = [tag.name for tag in recipe.tags] if recipe.tags else []
+
             return RecipeExportSchema(
-                id=1,
-                title="サンプルレシピ",
-                source_url="https://example.com/recipe/1",
-                source_type="web",
-                ingredients=[
-                    {"name": "玉ねぎ", "amount": "1個", "unit": "個"},
-                ],
-                steps=["玉ねぎを切る"],
-                cooking_time=30,
-                servings=2,
-                tags=["簡単"],
-                created_at=datetime.utcnow().isoformat(),
-                updated_at=datetime.utcnow().isoformat(),
+                id=recipe.id,
+                title=recipe.title,
+                source_url=recipe.source_url,
+                source_type=recipe.source_type,
+                ingredients=ingredients_data,
+                steps=steps_data,
+                cooking_time=recipe.total_time_minutes,
+                servings=recipe.servings,
+                tags=tags_data,
+                notes=recipe.notes,
+                image_path=recipe.image_path,
+                created_at=recipe.created_at.isoformat() if recipe.created_at else None,
+                updated_at=recipe.updated_at.isoformat() if recipe.updated_at else None,
             )
-        return None
+
+        except Exception as e:
+            print(f"Error fetching recipe {recipe_id}: {e}")
+            return None
 
     def _fetch_recipes_by_ids(self, recipe_ids: List[int]) -> List[RecipeExportSchema]:
         """
@@ -421,8 +476,6 @@ class ExportService:
         Returns:
             List[RecipeExportSchema]: レシピリスト
         """
-        # TODO: DB実装後に実装
-        # 仮実装
         recipes = []
         for recipe_id in recipe_ids:
             recipe = self._fetch_recipe_by_id(recipe_id)
@@ -440,10 +493,35 @@ class ExportService:
         Returns:
             Optional[Dict[str, Any]]: 重複情報またはNone
         """
-        # TODO: DB実装後に実装
-        # タイトルとURLで重複チェック
-        # 仮実装として常にNoneを返す
-        return None
+        try:
+            title = recipe_data.get("title")
+            source_url = recipe_data.get("source_url")
+
+            # Check by title (exact match)
+            if title:
+                duplicate = self.db.query(Recipe).filter(Recipe.title == title).first()
+                if duplicate:
+                    return {
+                        "id": duplicate.id,
+                        "title": duplicate.title,
+                        "match_type": "title"
+                    }
+
+            # Check by source URL (if provided)
+            if source_url:
+                duplicate = self.db.query(Recipe).filter(Recipe.source_url == source_url).first()
+                if duplicate:
+                    return {
+                        "id": duplicate.id,
+                        "title": duplicate.title,
+                        "match_type": "url"
+                    }
+
+            return None
+
+        except Exception as e:
+            print(f"Error checking duplicate: {e}")
+            return None
 
     def _save_recipe(self, recipe_data: Dict[str, Any]) -> int:
         """
@@ -455,9 +533,64 @@ class ExportService:
         Returns:
             int: 保存されたレシピのID
         """
-        # TODO: DB実装後に実装
-        # 仮実装
-        return 999
+        try:
+            # Create new recipe
+            new_recipe = Recipe(
+                title=recipe_data.get("title", ""),
+                description=recipe_data.get("description"),
+                source_url=recipe_data.get("source_url"),
+                source_type=recipe_data.get("source_type", "manual"),
+                servings=recipe_data.get("servings"),
+                total_time_minutes=recipe_data.get("cooking_time"),
+                notes=recipe_data.get("notes"),
+                image_path=recipe_data.get("image_path"),
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow()
+            )
+
+            self.db.add(new_recipe)
+            self.db.flush()  # Get ID without committing
+
+            # Add ingredients
+            if "ingredients" in recipe_data:
+                for idx, ing_data in enumerate(recipe_data["ingredients"]):
+                    ingredient = Ingredient(
+                        recipe_id=new_recipe.id,
+                        name=ing_data.get("name", ""),
+                        name_normalized=ing_data.get("name", "").lower(),
+                        quantity=float(ing_data.get("amount", "0")) if ing_data.get("amount") else None,
+                        unit=ing_data.get("unit"),
+                        order_index=idx
+                    )
+                    self.db.add(ingredient)
+
+            # Add steps
+            if "steps" in recipe_data:
+                for step_num, step_text in enumerate(recipe_data["steps"], start=1):
+                    step = Step(
+                        recipe_id=new_recipe.id,
+                        step_number=step_num,
+                        instruction=step_text if isinstance(step_text, str) else str(step_text)
+                    )
+                    self.db.add(step)
+
+            # Add tags
+            if "tags" in recipe_data:
+                for tag_name in recipe_data["tags"]:
+                    # Find or create tag
+                    tag = self.db.query(Tag).filter(Tag.name == tag_name).first()
+                    if not tag:
+                        tag = Tag(name=tag_name, created_at=datetime.utcnow())
+                        self.db.add(tag)
+                    new_recipe.tags.append(tag)
+
+            self.db.commit()
+            return new_recipe.id
+
+        except Exception as e:
+            self.db.rollback()
+            print(f"Error saving recipe: {e}")
+            raise
 
     def _update_recipe(self, recipe_id: int, recipe_data: Dict[str, Any]) -> None:
         """
@@ -467,8 +600,54 @@ class ExportService:
             recipe_id: レシピID
             recipe_data: 新しいレシピデータ
         """
-        # TODO: DB実装後に実装
-        pass
+        try:
+            recipe = self.db.query(Recipe).filter(Recipe.id == recipe_id).first()
+
+            if not recipe:
+                raise ValueError(f"Recipe {recipe_id} not found")
+
+            # Update basic fields
+            recipe.title = recipe_data.get("title", recipe.title)
+            recipe.description = recipe_data.get("description", recipe.description)
+            recipe.source_url = recipe_data.get("source_url", recipe.source_url)
+            recipe.servings = recipe_data.get("servings", recipe.servings)
+            recipe.total_time_minutes = recipe_data.get("cooking_time", recipe.total_time_minutes)
+            recipe.notes = recipe_data.get("notes", recipe.notes)
+            recipe.updated_at = datetime.utcnow()
+
+            # Delete existing ingredients and steps
+            self.db.query(Ingredient).filter(Ingredient.recipe_id == recipe_id).delete()
+            self.db.query(Step).filter(Step.recipe_id == recipe_id).delete()
+
+            # Add new ingredients
+            if "ingredients" in recipe_data:
+                for idx, ing_data in enumerate(recipe_data["ingredients"]):
+                    ingredient = Ingredient(
+                        recipe_id=recipe.id,
+                        name=ing_data.get("name", ""),
+                        name_normalized=ing_data.get("name", "").lower(),
+                        quantity=float(ing_data.get("amount", "0")) if ing_data.get("amount") else None,
+                        unit=ing_data.get("unit"),
+                        order_index=idx
+                    )
+                    self.db.add(ingredient)
+
+            # Add new steps
+            if "steps" in recipe_data:
+                for step_num, step_text in enumerate(recipe_data["steps"], start=1):
+                    step = Step(
+                        recipe_id=recipe.id,
+                        step_number=step_num,
+                        instruction=step_text if isinstance(step_text, str) else str(step_text)
+                    )
+                    self.db.add(step)
+
+            self.db.commit()
+
+        except Exception as e:
+            self.db.rollback()
+            print(f"Error updating recipe {recipe_id}: {e}")
+            raise
 
 
 def export_to_file(

@@ -4,15 +4,19 @@
 レシピの栄養価計算・材料の栄養情報取得を提供
 """
 
-from typing import List, Dict, Any
-from fastapi import APIRouter, HTTPException, Query
+from typing import List, Dict, Any, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
+from backend.core.cache import get_cache
+from backend.core.database import get_session
 from backend.services.nutrition_service import NutritionService
+from backend.services.recipe_service import RecipeService
 from backend.data.nutrition_database import (
     get_ingredient_nutrition,
     list_all_ingredients,
 )
+from config.cache_config import CacheConfig
 
 
 # Pydantic モデル定義
@@ -59,6 +63,18 @@ router = APIRouter(prefix="/api/v1/nutrition", tags=["nutrition"])
 
 # サービス初期化
 nutrition_service = NutritionService()
+
+
+def _format_amount(amount: Optional[float], unit: Optional[str]) -> str:
+    if amount is None:
+        return ""
+    if unit:
+        return f"{amount}{unit}"
+    return str(amount)
+
+
+def _recipe_nutrition_cache_key(recipe_id: int) -> str:
+    return f"{CacheConfig.PREFIX_NUTRITION}:recipe:{recipe_id}"
 
 
 @router.post("/calculate", response_model=NutritionResponse)
@@ -178,7 +194,10 @@ async def search_ingredients(
 
 
 @router.get("/recipe/{recipe_id}")
-async def get_recipe_nutrition(recipe_id: int):
+async def get_recipe_nutrition(
+    recipe_id: int,
+    session=Depends(get_session),
+):
     """
     レシピIDから栄養価を取得
 
@@ -192,9 +211,38 @@ async def get_recipe_nutrition(recipe_id: int):
       この機能は Recipe サービスとの統合が必要です
       現在はプレースホルダー実装
     """
-    # TODO: Recipe サービスからレシピデータを取得
-    # TODO: レシピの材料から栄養計算
-    raise HTTPException(
-        status_code=501,
-        detail="レシピIDからの栄養取得は未実装です。Recipe サービスとの統合が必要です。",
+    cache = get_cache()
+    cache_key = _recipe_nutrition_cache_key(recipe_id)
+    cached_response = cache.get(cache_key)
+    if cached_response is not None:
+        return cached_response
+
+    recipe_service = RecipeService(session)
+    recipe = recipe_service.get_recipe(recipe_id)
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    ingredients_list = []
+    for ing in recipe.ingredients:
+        ingredients_list.append(
+            {"name": ing.name, "amount": _format_amount(ing.amount, ing.unit)}
+        )
+
+    servings = recipe.servings or 1
+    result = nutrition_service.calculate_recipe_nutrition(
+        ingredients_list, servings
     )
+    result["summary"] = nutrition_service.get_nutrition_summary(result)
+    response_payload = {
+        "status": "ok",
+        "data": {
+            "recipe_id": recipe.id,
+            "title": recipe.title,
+            "servings": servings,
+            "nutrition": result,
+        },
+        "error": None,
+    }
+
+    cache.set(cache_key, response_payload, CacheConfig.TTL_NUTRITION)
+    return response_payload

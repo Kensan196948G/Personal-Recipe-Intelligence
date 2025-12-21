@@ -5,8 +5,10 @@ Tag API Router - CRUD operations for tags
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.api.schemas import ApiResponse, TagCreate, TagRead
+from backend.core.cache import get_cache, invalidate_cache
 from backend.core.database import get_session
 from backend.services.recipe_service import TagService
+from config.cache_config import CacheConfig
 
 router = APIRouter(prefix="/api/v1/tags", tags=["tags"])
 
@@ -18,11 +20,20 @@ def get_tag_service(session=Depends(get_session)) -> TagService:
 @router.get("", response_model=ApiResponse)
 async def list_tags(service: TagService = Depends(get_tag_service)):
     """タグ一覧取得"""
+    cache = get_cache()
+    cache_key = f"{CacheConfig.PREFIX_TAGS}:list"
+    cached_response = cache.get(cache_key)
+    if cached_response is not None:
+        return cached_response
+
     tags = service.get_tags()
-    return ApiResponse(
+    response_payload = ApiResponse(
         status="ok",
         data=[TagRead(id=t.id, name=t.name).model_dump() for t in tags],
-    )
+    ).model_dump()
+
+    cache.set(cache_key, response_payload, CacheConfig.TTL_TAGS)
+    return response_payload
 
 
 @router.get("/{tag_id}", response_model=ApiResponse)
@@ -41,6 +52,8 @@ async def create_tag(
 ):
     """タグ作成"""
     tag = service.create_tag(tag_data.name)
+    invalidate_cache(f"{CacheConfig.PREFIX_TAGS}:")
+    invalidate_cache(f"{CacheConfig.PREFIX_RECIPES}:")
     return ApiResponse(status="ok", data=TagRead(id=tag.id, name=tag.name).model_dump())
 
 
@@ -51,4 +64,6 @@ async def delete_tag(tag_id: int, service: TagService = Depends(get_tag_service)
     if not success:
         raise HTTPException(status_code=404, detail="Tag not found")
 
+    invalidate_cache(f"{CacheConfig.PREFIX_TAGS}:")
+    invalidate_cache(f"{CacheConfig.PREFIX_RECIPES}:")
     return ApiResponse(status="ok", data={"deleted": True})

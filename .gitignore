@@ -44,6 +44,23 @@ Thumbs.db
 coverage/
 .coverage
 htmlcov/
+coverage.xml
+
+# Tooling / local state
+.swarm/
+.claude-flow/metrics/
+--help
+database.db
+
+# Backend data artifacts
+backend/data/*.db
+backend/data/cache/
+backend/data/generator/
+backend/data/test_cache/
+backend/data/test_generator/
+backend/data/reviews/
+backend/data/user_activity.json
+backend/data/recommendation_feedback.json
 
 # Build
 *.log

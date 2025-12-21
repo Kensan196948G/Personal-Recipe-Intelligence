@@ -2,6 +2,7 @@
 画像認識APIルーター - 食材画像認識エンドポイント
 """
 
+import asyncio
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -138,9 +139,8 @@ async def recognize_image_file(file: UploadFile = File(...), max_results: int = 
         upload_dir.mkdir(parents=True, exist_ok=True)
 
         file_path = upload_dir / f"{datetime.now().timestamp()}_{file.filename}"
-        with open(file_path, "wb") as f:
-            content = await file.read()
-            f.write(content)
+        content = await file.read()
+        await asyncio.to_thread(file_path.write_bytes, content)
 
         # 認識実行
         service = get_image_recognition_service()

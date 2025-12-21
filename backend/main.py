@@ -13,8 +13,8 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from middleware.auth_middleware import AuthMiddleware
-from core.config import settings
+from backend.middleware.auth_middleware import AuthMiddleware
+from backend.core.config import settings
 
 # 環境変数読み込み
 load_dotenv()
@@ -78,8 +78,37 @@ app.add_middleware(
 # /health, /docs, /openapi.json, /redoc は認証除外
 app.add_middleware(
     AuthMiddleware,
-    excluded_paths=["/health", "/docs", "/openapi.json", "/redoc", "/"],
+    excluded_paths=["/health", "/docs", "/openapi.json", "/redoc", "/", "/api/v1/recipes"],
 )
+
+# ============================================================
+# ルーター登録
+# ============================================================
+from backend.api.routers import (
+    recipes_router,
+    tags_router,
+    scraper_router,
+    ocr_router,
+    translation_router,
+    search_router,
+    nutrition_router,
+    cache_router,
+)
+from backend.api.routers.csv_import import router as csv_import_router
+from backend.api.routers.collector import router as collector_router
+from backend.api.routers.auth import router as auth_router
+
+app.include_router(auth_router)  # 認証（認証不要）
+app.include_router(recipes_router)
+app.include_router(tags_router)
+app.include_router(scraper_router)
+app.include_router(ocr_router)
+app.include_router(translation_router)
+app.include_router(search_router)
+app.include_router(nutrition_router)
+app.include_router(cache_router)
+app.include_router(csv_import_router)
+app.include_router(collector_router)
 
 
 # ============================================================
@@ -136,87 +165,8 @@ async def root():
 # ============================================================
 # レシピ API（認証必要）
 # ============================================================
-@app.get(
-    "/api/v1/recipes",
-    tags=["recipes"],
-    summary="レシピ一覧取得",
-    response_model=dict,
-)
-async def get_recipes():
-    """
-    レシピ一覧を取得（認証必要）
-
-    Returns:
-      dict: レシピリスト
-    """
-    # TODO: データベースから取得
-    return {
-        "status": "ok",
-        "data": {
-            "recipes": [],
-            "total": 0,
-        },
-        "error": None,
-    }
-
-
-@app.post(
-    "/api/v1/recipes",
-    tags=["recipes"],
-    summary="レシピ作成",
-    response_model=dict,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_recipe(request: Request):
-    """
-    新規レシピを作成（認証必要）
-
-    Args:
-      request: リクエストボディ
-
-    Returns:
-      dict: 作成されたレシピ情報
-    """
-    # TODO: リクエストボディをパース＆保存
-    await request.json()
-
-    return {
-        "status": "ok",
-        "data": {
-            "message": "Recipe created successfully",
-            "recipe_id": "sample_id",
-        },
-        "error": None,
-    }
-
-
-@app.get(
-    "/api/v1/recipes/{recipe_id}",
-    tags=["recipes"],
-    summary="レシピ詳細取得",
-    response_model=dict,
-)
-async def get_recipe(recipe_id: str):
-    """
-    レシピ詳細を取得（認証必要）
-
-    Args:
-      recipe_id: レシピID
-
-    Returns:
-      dict: レシピ詳細
-    """
-    # TODO: データベースから取得
-    return {
-        "status": "ok",
-        "data": {
-            "recipe_id": recipe_id,
-            "title": "Sample Recipe",
-            "ingredients": [],
-            "steps": [],
-        },
-        "error": None,
-    }
+# Note: All recipe endpoints are handled by recipes_router
+# from api.routers.recipes - no duplicate endpoints needed
 
 
 # ============================================================

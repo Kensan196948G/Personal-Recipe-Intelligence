@@ -34,12 +34,14 @@ export async function fetchRecipes(params = {}) {
   try {
     const response = await recipeApi.list(requestParams);
     if (response.status === "ok") {
-      recipes.set(response.data.items);
+      // Support both 'items' and 'recipes' keys for backward compatibility
+      const recipeList = response.data.items || response.data.recipes || [];
+      recipes.set(recipeList);
       pagination.set({
-        page: response.data.page,
-        per_page: response.data.per_page,
-        total: response.data.total,
-        total_pages: response.data.total_pages,
+        page: response.data.page || 1,
+        per_page: response.data.per_page || 10,
+        total: response.data.total || 0,
+        total_pages: response.data.total_pages || 1,
       });
     }
   } catch (e) {

@@ -7,9 +7,28 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query
 
 from backend.api.schemas import ApiResponse, RecipeListItem
+from backend.core.cache import get_cache
 from backend.core.database import get_session
+from config.cache_config import CacheConfig
 
 router = APIRouter(prefix="/api/v1/search", tags=["search"])
+
+
+def _search_cache_key(
+    prefix: str,
+    query: Optional[str],
+    ingredients: Optional[list[str]],
+    fuzzy: bool,
+    page: int,
+    per_page: int,
+) -> str:
+    query_key = query or ""
+    ingredients_key = ",".join(ingredients) if ingredients else ""
+    return (
+        f"{CacheConfig.PREFIX_SEARCH}:{prefix}:"
+        f"q={query_key}:ingredients={ingredients_key}:fuzzy={fuzzy}:"
+        f"page={page}:per_page={per_page}"
+    )
 
 
 @router.get("/recipes", response_model=ApiResponse)
@@ -22,15 +41,27 @@ async def search_recipes(
     session=Depends(get_session),
 ):
     """レシピを検索（あいまい検索・材料検索対応）"""
+    cache = get_cache()
+    ingredient_list = None
+    if ingredients:
+        ingredient_list = [i.strip() for i in ingredients.split(",") if i.strip()]
+
+    cache_key = _search_cache_key(
+        "recipes",
+        q,
+        ingredient_list,
+        fuzzy,
+        page,
+        per_page,
+    )
+    cached_response = cache.get(cache_key)
+    if cached_response is not None:
+        return cached_response
+
     try:
         from backend.services.search_service import SearchService
 
         search_service = SearchService(session)
-
-        # 材料リストをパース
-        ingredient_list = None
-        if ingredients:
-            ingredient_list = [i.strip() for i in ingredients.split(",") if i.strip()]
 
         # 検索実行
         results, total = search_service.search(
@@ -63,7 +94,7 @@ async def search_recipes(
 
         total_pages = (total + per_page - 1) // per_page if total > 0 else 1
 
-        return ApiResponse(
+        response_payload = ApiResponse(
             status="ok",
             data={
                 "items": items,
@@ -75,7 +106,10 @@ async def search_recipes(
                 "ingredients": ingredient_list,
                 "fuzzy": fuzzy,
             },
-        )
+        ).model_dump()
+
+        cache.set(cache_key, response_payload, CacheConfig.TTL_SEARCH)
+        return response_payload
 
     except ImportError:
         # SearchServiceがない場合はフォールバック
@@ -103,7 +137,7 @@ async def search_recipes(
 
         total_pages = (total + per_page - 1) // per_page if total > 0 else 1
 
-        return ApiResponse(
+        response_payload = ApiResponse(
             status="ok",
             data={
                 "items": items,
@@ -114,7 +148,10 @@ async def search_recipes(
                 "query": q,
                 "fuzzy": False,
             },
-        )
+        ).model_dump()
+
+        cache.set(cache_key, response_payload, CacheConfig.TTL_SEARCH)
+        return response_payload
 
 
 @router.get("/by-ingredients", response_model=ApiResponse)
@@ -126,16 +163,27 @@ async def search_by_ingredients(
     session=Depends(get_session),
 ):
     """材料からレシピを検索"""
+    cache = get_cache()
+    ingredient_list = [i.strip() for i in ingredients.split(",") if i.strip()]
+    cache_key = _search_cache_key(
+        "ingredients",
+        None,
+        ingredient_list,
+        match_all,
+        page,
+        per_page,
+    )
+    cached_response = cache.get(cache_key)
+    if cached_response is not None:
+        return cached_response
+
     try:
         from backend.services.search_service import SearchService
 
         search_service = SearchService(session)
 
-        # 材料リストをパース
-        ingredient_list = [i.strip() for i in ingredients.split(",") if i.strip()]
-
         if not ingredient_list:
-            return ApiResponse(
+            response_payload = ApiResponse(
                 status="ok",
                 data={
                     "items": [],
@@ -144,7 +192,9 @@ async def search_by_ingredients(
                     "per_page": per_page,
                     "total_pages": 0,
                 },
-            )
+            ).model_dump()
+            cache.set(cache_key, response_payload, CacheConfig.TTL_SEARCH)
+            return response_payload
 
         # 材料検索実行
         results, total = search_service.search_by_ingredients(
@@ -175,7 +225,7 @@ async def search_by_ingredients(
 
         total_pages = (total + per_page - 1) // per_page if total > 0 else 1
 
-        return ApiResponse(
+        response_payload = ApiResponse(
             status="ok",
             data={
                 "items": items,
@@ -186,7 +236,10 @@ async def search_by_ingredients(
                 "ingredients": ingredient_list,
                 "match_all": match_all,
             },
-        )
+        ).model_dump()
+
+        cache.set(cache_key, response_payload, CacheConfig.TTL_SEARCH)
+        return response_payload
 
     except ImportError:
         return ApiResponse(

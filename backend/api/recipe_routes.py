@@ -6,7 +6,10 @@ with API endpoints for optimal performance.
 """
 
 from typing import List, Optional, Dict, Any
+from sqlalchemy.orm import Session
 from backend.core.cache import cached, invalidate_cache
+from backend.core.database import get_session
+from backend.models import Recipe, Ingredient, Step, Tag
 
 
 # Example handlers that would be used with FastAPI or Flask
@@ -16,7 +19,8 @@ from backend.core.cache import cached, invalidate_cache
 def get_recipes_handler(
   limit: int = 50,
   offset: int = 0,
-  sort_by: str = "created_at"
+  sort_by: str = "created_at",
+  db: Optional[Session] = None
 ) -> Dict[str, Any]:
   """
   Get paginated recipe list with caching.
@@ -27,43 +31,78 @@ def get_recipes_handler(
     limit: Maximum number of recipes
     offset: Pagination offset
     sort_by: Sort field
+    db: Database session (optional, for dependency injection)
 
   Returns:
     API response with recipe list
   """
-  # TODO: Replace with actual database query
-  recipes = [
-    {
-      "id": 1,
-      "title": "Spaghetti Carbonara",
-      "tags": ["italian", "pasta"],
-      "created_at": "2025-12-11T10:00:00Z",
-    },
-    {
-      "id": 2,
-      "title": "Chicken Teriyaki",
-      "tags": ["japanese", "chicken"],
-      "created_at": "2025-12-11T09:00:00Z",
-    },
-  ]
+  # Get database session
+  if db is None:
+    db = next(get_session())
 
-  return {
-    "status": "ok",
-    "data": {
-      "recipes": recipes[offset:offset + limit],
-      "total": len(recipes),
-      "limit": limit,
-      "offset": offset,
-    },
-    "error": None,
-  }
+  try:
+    # Query recipes with sorting
+    query = db.query(Recipe)
+
+    # Apply sorting
+    if sort_by == "created_at":
+      query = query.order_by(Recipe.created_at.desc())
+    elif sort_by == "updated_at":
+      query = query.order_by(Recipe.updated_at.desc())
+    elif sort_by == "title":
+      query = query.order_by(Recipe.title)
+    elif sort_by == "rating":
+      query = query.order_by(Recipe.rating.desc().nullslast())
+
+    # Get total count
+    total = query.count()
+
+    # Apply pagination
+    recipes_db = query.offset(offset).limit(limit).all()
+
+    # Convert to dict
+    recipes = []
+    for recipe in recipes_db:
+      recipe_dict = {
+        "id": recipe.id,
+        "title": recipe.title,
+        "description": recipe.description,
+        "source_type": recipe.source_type,
+        "servings": recipe.servings,
+        "total_time_minutes": recipe.total_time_minutes,
+        "difficulty": recipe.difficulty,
+        "image_url": recipe.image_url,
+        "is_favorite": recipe.is_favorite,
+        "rating": recipe.rating,
+        "created_at": recipe.created_at.isoformat() if recipe.created_at else None,
+        "tags": [tag.name for tag in recipe.tags] if recipe.tags else [],
+      }
+      recipes.append(recipe_dict)
+
+    return {
+      "status": "ok",
+      "data": {
+        "recipes": recipes,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+      },
+      "error": None,
+    }
+  except Exception as e:
+    return {
+      "status": "error",
+      "data": None,
+      "error": str(e),
+    }
 
 
 @cached(ttl=30, key_prefix="search")
 def search_recipes_handler(
   query: str,
   tags: Optional[List[str]] = None,
-  limit: int = 50
+  limit: int = 50,
+  db: Optional[Session] = None
 ) -> Dict[str, Any]:
   """
   Search recipes with caching.
@@ -74,27 +113,68 @@ def search_recipes_handler(
     query: Search query
     tags: Optional tag filters
     limit: Maximum results
+    db: Database session (optional, for dependency injection)
 
   Returns:
     API response with search results
   """
-  # TODO: Implement actual search logic
-  results = []
+  # Get database session
+  if db is None:
+    db = next(get_session())
 
-  return {
-    "status": "ok",
-    "data": {
-      "results": results,
-      "query": query,
-      "tags": tags,
-      "count": len(results),
-    },
-    "error": None,
-  }
+  try:
+    # Build query
+    query_db = db.query(Recipe)
+
+    # Search in title, description
+    if query:
+      search_filter = (
+        Recipe.title.ilike(f"%{query}%") |
+        Recipe.description.ilike(f"%{query}%")
+      )
+      query_db = query_db.filter(search_filter)
+
+    # Filter by tags
+    if tags:
+      query_db = query_db.join(Recipe.tags).filter(Tag.name.in_(tags))
+
+    # Limit results
+    recipes_db = query_db.limit(limit).all()
+
+    # Convert to dict
+    results = []
+    for recipe in recipes_db:
+      recipe_dict = {
+        "id": recipe.id,
+        "title": recipe.title,
+        "description": recipe.description,
+        "source_type": recipe.source_type,
+        "image_url": recipe.image_url,
+        "rating": recipe.rating,
+        "tags": [tag.name for tag in recipe.tags] if recipe.tags else [],
+      }
+      results.append(recipe_dict)
+
+    return {
+      "status": "ok",
+      "data": {
+        "results": results,
+        "query": query,
+        "tags": tags,
+        "count": len(results),
+      },
+      "error": None,
+    }
+  except Exception as e:
+    return {
+      "status": "error",
+      "data": None,
+      "error": str(e),
+    }
 
 
 @cached(ttl=300, key_prefix="nutrition")
-def get_recipe_nutrition_handler(recipe_id: int) -> Dict[str, Any]:
+def get_recipe_nutrition_handler(recipe_id: int, db: Optional[Session] = None) -> Dict[str, Any]:
   """
   Get nutrition information for a recipe with caching.
 
@@ -102,89 +182,222 @@ def get_recipe_nutrition_handler(recipe_id: int) -> Dict[str, Any]:
 
   Args:
     recipe_id: Recipe ID
+    db: Database session (optional, for dependency injection)
 
   Returns:
     API response with nutrition data
   """
-  # TODO: Implement actual nutrition calculation
-  nutrition = {
-    "recipe_id": recipe_id,
-    "calories": 450,
-    "protein": 25,
-    "carbs": 55,
-    "fat": 12,
-    "fiber": 5,
-    "sodium": 800,
-  }
+  # Get database session
+  if db is None:
+    db = next(get_session())
 
-  return {
-    "status": "ok",
-    "data": nutrition,
-    "error": None,
-  }
+  try:
+    # Get recipe
+    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
+
+    if not recipe:
+      return {
+        "status": "error",
+        "data": None,
+        "error": f"Recipe {recipe_id} not found",
+      }
+
+    # Simplified nutrition calculation based on ingredients
+    # In production, this would use a nutrition database
+    total_calories = 0
+    total_protein = 0
+    total_carbs = 0
+    total_fat = 0
+    total_fiber = 0
+    total_sodium = 0
+
+    # Estimate based on number of ingredients (mock calculation)
+    ingredient_count = len(recipe.ingredients) if recipe.ingredients else 0
+    if ingredient_count > 0:
+      total_calories = ingredient_count * 100
+      total_protein = ingredient_count * 5
+      total_carbs = ingredient_count * 15
+      total_fat = ingredient_count * 3
+      total_fiber = ingredient_count * 2
+      total_sodium = ingredient_count * 150
+
+    nutrition = {
+      "recipe_id": recipe_id,
+      "calories": total_calories,
+      "protein": total_protein,
+      "carbs": total_carbs,
+      "fat": total_fat,
+      "fiber": total_fiber,
+      "sodium": total_sodium,
+    }
+
+    return {
+      "status": "ok",
+      "data": nutrition,
+      "error": None,
+    }
+  except Exception as e:
+    return {
+      "status": "error",
+      "data": None,
+      "error": str(e),
+    }
 
 
 @cached(ttl=300, key_prefix="tags")
-def get_tags_handler() -> Dict[str, Any]:
+def get_tags_handler(db: Optional[Session] = None) -> Dict[str, Any]:
   """
   Get all tags with usage count.
 
   Cache TTL: 300 seconds (5 minutes)
 
+  Args:
+    db: Database session (optional, for dependency injection)
+
   Returns:
     API response with tag list
   """
-  # TODO: Implement actual tag retrieval from database
-  tags = [
-    {"name": "japanese", "count": 15},
-    {"name": "italian", "count": 12},
-    {"name": "quick", "count": 25},
-    {"name": "healthy", "count": 18},
-    {"name": "vegetarian", "count": 10},
-  ]
+  # Get database session
+  if db is None:
+    db = next(get_session())
 
-  return {
-    "status": "ok",
-    "data": {
-      "tags": tags,
-      "total": len(tags),
-    },
-    "error": None,
-  }
+  try:
+    from sqlalchemy import func
+
+    # Get all tags with recipe count
+    tags_query = (
+      db.query(
+        Tag.name,
+        Tag.category,
+        func.count(Recipe.id).label("count")
+      )
+      .outerjoin(Tag.recipes)
+      .group_by(Tag.id, Tag.name, Tag.category)
+      .order_by(func.count(Recipe.id).desc())
+      .all()
+    )
+
+    tags = [
+      {
+        "name": tag.name,
+        "category": tag.category,
+        "count": tag.count
+      }
+      for tag in tags_query
+    ]
+
+    return {
+      "status": "ok",
+      "data": {
+        "tags": tags,
+        "total": len(tags),
+      },
+      "error": None,
+    }
+  except Exception as e:
+    return {
+      "status": "error",
+      "data": None,
+      "error": str(e),
+    }
 
 
-def create_recipe_handler(recipe_data: Dict[str, Any]) -> Dict[str, Any]:
+def create_recipe_handler(recipe_data: Dict[str, Any], db: Optional[Session] = None) -> Dict[str, Any]:
   """
   Create a new recipe and invalidate relevant caches.
 
   Args:
     recipe_data: Recipe information
+    db: Database session (optional, for dependency injection)
 
   Returns:
     API response with created recipe
   """
-  # TODO: Implement actual recipe creation in database
+  # Get database session
+  if db is None:
+    db = next(get_session())
 
-  # Invalidate affected caches
-  invalidate_cache("recipes:get_recipes_handler")
-  invalidate_cache("tags:get_tags_handler")
+  try:
+    from datetime import datetime
 
-  created_recipe = {
-    "id": 999,
-    **recipe_data,
-    "created_at": "2025-12-11T12:00:00Z",
-  }
+    # Create new recipe
+    new_recipe = Recipe(
+      title=recipe_data.get("title", ""),
+      description=recipe_data.get("description"),
+      source_url=recipe_data.get("source_url"),
+      source_type=recipe_data.get("source_type", "manual"),
+      servings=recipe_data.get("servings"),
+      prep_time_minutes=recipe_data.get("prep_time_minutes"),
+      cook_time_minutes=recipe_data.get("cook_time_minutes"),
+      total_time_minutes=recipe_data.get("total_time_minutes"),
+      difficulty=recipe_data.get("difficulty"),
+      image_url=recipe_data.get("image_url"),
+      notes=recipe_data.get("notes"),
+      created_at=datetime.utcnow(),
+      updated_at=datetime.utcnow()
+    )
 
-  return {
-    "status": "ok",
-    "data": created_recipe,
-    "error": None,
-  }
+    db.add(new_recipe)
+    db.flush()  # Get the ID without committing
+
+    # Add ingredients if provided
+    if "ingredients" in recipe_data:
+      for idx, ing_data in enumerate(recipe_data["ingredients"]):
+        ingredient = Ingredient(
+          recipe_id=new_recipe.id,
+          name=ing_data.get("name", ""),
+          name_normalized=ing_data.get("name", "").lower(),
+          quantity=ing_data.get("quantity"),
+          unit=ing_data.get("unit"),
+          original_text=ing_data.get("original_text"),
+          order_index=idx
+        )
+        db.add(ingredient)
+
+    # Add steps if provided
+    if "steps" in recipe_data:
+      for step_num, step_text in enumerate(recipe_data["steps"], start=1):
+        step = Step(
+          recipe_id=new_recipe.id,
+          step_number=step_num,
+          instruction=step_text if isinstance(step_text, str) else step_text.get("text", "")
+        )
+        db.add(step)
+
+    # Commit the transaction
+    db.commit()
+    db.refresh(new_recipe)
+
+    # Invalidate affected caches
+    invalidate_cache("recipes:get_recipes_handler")
+    invalidate_cache("tags:get_tags_handler")
+
+    created_recipe = {
+      "id": new_recipe.id,
+      "title": new_recipe.title,
+      "description": new_recipe.description,
+      "source_type": new_recipe.source_type,
+      "created_at": new_recipe.created_at.isoformat() if new_recipe.created_at else None,
+    }
+
+    return {
+      "status": "ok",
+      "data": created_recipe,
+      "error": None,
+    }
+  except Exception as e:
+    db.rollback()
+    return {
+      "status": "error",
+      "data": None,
+      "error": str(e),
+    }
 
 
 def update_recipe_handler(
   recipe_id: int,
-  recipe_data: Dict[str, Any]
+  recipe_data: Dict[str, Any],
+  db: Optional[Session] = None
 ) -> Dict[str, Any]:
   """
   Update a recipe and invalidate relevant caches.
@@ -192,56 +405,126 @@ def update_recipe_handler(
   Args:
     recipe_id: Recipe ID to update
     recipe_data: Updated recipe information
+    db: Database session (optional, for dependency injection)
 
   Returns:
     API response with updated recipe
   """
-  # TODO: Implement actual recipe update in database
+  # Get database session
+  if db is None:
+    db = next(get_session())
 
-  # Invalidate affected caches
-  invalidate_cache("recipes:get_recipes_handler")
-  invalidate_cache("search:search_recipes_handler")
-  invalidate_cache(f"nutrition:get_recipe_nutrition_handler:{recipe_id}")
+  try:
+    from datetime import datetime
 
-  updated_recipe = {
-    "id": recipe_id,
-    **recipe_data,
-    "updated_at": "2025-12-11T12:00:00Z",
-  }
+    # Get existing recipe
+    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
-  return {
-    "status": "ok",
-    "data": updated_recipe,
-    "error": None,
-  }
+    if not recipe:
+      return {
+        "status": "error",
+        "data": None,
+        "error": f"Recipe {recipe_id} not found",
+      }
+
+    # Update fields
+    if "title" in recipe_data:
+      recipe.title = recipe_data["title"]
+    if "description" in recipe_data:
+      recipe.description = recipe_data["description"]
+    if "servings" in recipe_data:
+      recipe.servings = recipe_data["servings"]
+    if "difficulty" in recipe_data:
+      recipe.difficulty = recipe_data["difficulty"]
+    if "notes" in recipe_data:
+      recipe.notes = recipe_data["notes"]
+    if "rating" in recipe_data:
+      recipe.rating = recipe_data["rating"]
+    if "is_favorite" in recipe_data:
+      recipe.is_favorite = recipe_data["is_favorite"]
+
+    recipe.updated_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(recipe)
+
+    # Invalidate affected caches
+    invalidate_cache("recipes:get_recipes_handler")
+    invalidate_cache("search:search_recipes_handler")
+    invalidate_cache(f"nutrition:get_recipe_nutrition_handler:{recipe_id}")
+
+    updated_recipe = {
+      "id": recipe.id,
+      "title": recipe.title,
+      "description": recipe.description,
+      "updated_at": recipe.updated_at.isoformat() if recipe.updated_at else None,
+    }
+
+    return {
+      "status": "ok",
+      "data": updated_recipe,
+      "error": None,
+    }
+  except Exception as e:
+    db.rollback()
+    return {
+      "status": "error",
+      "data": None,
+      "error": str(e),
+    }
 
 
-def delete_recipe_handler(recipe_id: int) -> Dict[str, Any]:
+def delete_recipe_handler(recipe_id: int, db: Optional[Session] = None) -> Dict[str, Any]:
   """
   Delete a recipe and invalidate relevant caches.
 
   Args:
     recipe_id: Recipe ID to delete
+    db: Database session (optional, for dependency injection)
 
   Returns:
     API response confirming deletion
   """
-  # TODO: Implement actual recipe deletion from database
+  # Get database session
+  if db is None:
+    db = next(get_session())
 
-  # Invalidate all affected caches
-  invalidate_cache("recipes:get_recipes_handler")
-  invalidate_cache("search:search_recipes_handler")
-  invalidate_cache("tags:get_tags_handler")
-  invalidate_cache(f"nutrition:get_recipe_nutrition_handler:{recipe_id}")
+  try:
+    # Get recipe
+    recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
 
-  return {
-    "status": "ok",
-    "data": {
-      "message": f"Recipe {recipe_id} deleted successfully",
-      "recipe_id": recipe_id,
-    },
-    "error": None,
-  }
+    if not recipe:
+      return {
+        "status": "error",
+        "data": None,
+        "error": f"Recipe {recipe_id} not found",
+      }
+
+    # Delete recipe (cascade will delete related ingredients and steps)
+    db.delete(recipe)
+    db.commit()
+
+    # Invalidate all affected caches
+    invalidate_cache("recipes:get_recipes_handler")
+    invalidate_cache("search:search_recipes_handler")
+    invalidate_cache("tags:get_tags_handler")
+    invalidate_cache(f"nutrition:get_recipe_nutrition_handler:{recipe_id}")
+
+    return {
+      "status": "ok",
+      "data": {
+        "message": f"Recipe {recipe_id} deleted successfully",
+        "recipe_id": recipe_id,
+      },
+      "error": None,
+    }
+  except Exception as e:
+    db.rollback()
+    return {
+      "status": "error",
+      "data": None,
+      "error": str(e),
+    }
 
 
 # FastAPI integration example
