@@ -114,12 +114,12 @@ async def root():
 cd /mnt/Linux-ExHDD/Personal-Recipe-Intelligence
 
 # Uvicorn で起動
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn backend.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 起動確認：
 ```bash
-curl http://localhost:8000/api/v1/meal-history/daily/2025-12-10?user_id=test
+curl http://localhost:8001/api/v1/meal-history/daily/2025-12-10?user_id=test
 ```
 
 ### 5. フロントエンドのビルドと起動
@@ -155,7 +155,7 @@ pytest backend/tests/test_meal_history_service.py --cov=backend/services --cov-r
 
 ```bash
 # 食事記録
-curl -X POST http://localhost:8000/api/v1/meal-history/record \
+curl -X POST http://localhost:8001/api/v1/meal-history/record \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "user123",
@@ -173,13 +173,13 @@ curl -X POST http://localhost:8000/api/v1/meal-history/record \
   }'
 
 # 日別データ取得
-curl "http://localhost:8000/api/v1/meal-history/daily/2025-12-10?user_id=user123"
+curl "http://localhost:8001/api/v1/meal-history/daily/2025-12-10?user_id=user123"
 
 # 傾向分析
-curl "http://localhost:8000/api/v1/meal-history/trends?user_id=user123&days=30"
+curl "http://localhost:8001/api/v1/meal-history/trends?user_id=user123&days=30"
 
 # 栄養推移
-curl "http://localhost:8000/api/v1/meal-history/nutrition-trend?user_id=user123&nutrient=calories&days=30"
+curl "http://localhost:8001/api/v1/meal-history/nutrition-trend?user_id=user123&nutrient=calories&days=30"
 ```
 
 ---
@@ -192,7 +192,7 @@ curl "http://localhost:8000/api/v1/meal-history/nutrition-trend?user_id=user123&
 import requests
 
 response = requests.post(
-    "http://localhost:8000/api/v1/meal-history/record",
+    "http://localhost:8001/api/v1/meal-history/record",
     json={
         "user_id": "user123",
         "recipe_id": "recipe001",
@@ -219,7 +219,7 @@ print(response.json())
 
 ```python
 response = requests.get(
-    "http://localhost:8000/api/v1/meal-history/daily/2025-12-10",
+    "http://localhost:8001/api/v1/meal-history/daily/2025-12-10",
     params={"user_id": "user123"}
 )
 
@@ -320,7 +320,7 @@ chmod 755 data/
 
 ```bash
 # ルーターが登録されているか確認
-curl http://localhost:8000/docs
+curl http://localhost:8001/docs
 
 # Swagger UI でエンドポイントを確認
 ```

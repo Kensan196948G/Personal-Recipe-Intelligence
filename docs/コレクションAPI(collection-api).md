@@ -497,7 +497,7 @@ GET /api/v1/collection/stats/summary
 ```python
 import requests
 
-API_URL = "http://localhost:8000"
+API_URL = "http://localhost:8001"
 TOKEN = "your-auth-token"
 
 # コレクション作成
@@ -525,7 +525,7 @@ response = requests.post(
 ### JavaScript (Fetch)
 
 ```javascript
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://localhost:8001';
 const TOKEN = 'your-auth-token';
 
 // コレクション作成

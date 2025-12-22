@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 // API target: use environment variable or default to localhost
-const API_TARGET = process.env.API_TARGET || 'http://127.0.0.1:8000';
+const API_TARGET = process.env.API_TARGET || 'http://127.0.0.1:8001';
 
 export default defineConfig({
   plugins: [svelte()],

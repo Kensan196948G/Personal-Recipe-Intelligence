@@ -31,14 +31,14 @@ pip install fastapi uvicorn pydantic
 
 ```bash
 # 開発サーバー起動
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn backend.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 ### 4. API ドキュメントの確認
 
 ブラウザで以下のURLにアクセス：
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- Swagger UI: http://localhost:8001/docs
+- ReDoc: http://localhost:8001/redoc
 
 ## React フロントエンドへの統合
 
@@ -95,7 +95,7 @@ export default App;
 
 `.env` ファイル:
 ```
-REACT_APP_API_URL=http://localhost:8000
+REACT_APP_API_URL=http://localhost:8001
 ```
 
 API呼び出しの更新:
@@ -360,7 +360,7 @@ export const useWebSocketAdvisor = (userId) => {
 
   useEffect(() => {
     const websocket = new WebSocket(
-      `ws://localhost:8000/api/v1/advisor/ws/${userId}`
+      `ws://localhost:8001/api/v1/advisor/ws/${userId}`
     );
 
     websocket.onmessage = (event) => {
@@ -529,7 +529,7 @@ services:
   api:
     build: .
     ports:
-      - "8000:8000"
+      - "8000:8001"
     volumes:
       - ./data:/app/data
     environment:

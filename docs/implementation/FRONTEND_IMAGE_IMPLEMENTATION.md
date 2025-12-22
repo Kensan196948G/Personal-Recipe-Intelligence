@@ -323,7 +323,7 @@ FRONTEND_IMAGE_IMPLEMENTATION.md      # 本ファイル
 **解決方法**:
 ```bash
 # APIエンドポイント確認
-curl http://localhost:8000/api/v1/images/{image_path}
+curl http://localhost:8001/api/v1/images/{image_path}
 
 # ブラウザコンソールでエラー確認
 console.log(getImageUrl(recipe));

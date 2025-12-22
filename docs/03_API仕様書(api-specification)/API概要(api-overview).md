@@ -8,7 +8,7 @@
 
 ### 2.1 API バージョン
 - 現行バージョン: **v1**
-- ベースURL: `http://localhost:8000/api/v1`
+- ベースURL: `http://localhost:8001/api/v1`
 
 ### 2.2 API スタイル
 - **RESTful API**

@@ -46,7 +46,7 @@ pytest backend/tests/test_review_api.py -v
 
 ```bash
 cd backend
-uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn api.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 #### 2. サンプルデータの作成
@@ -78,16 +78,16 @@ python3 backend/examples/review_example.py
 
 ```bash
 # レビュー投稿
-curl -X POST http://localhost:8000/api/v1/review/recipe/recipe1 \
+curl -X POST http://localhost:8001/api/v1/review/recipe/recipe1 \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer user123" \
   -d '{"rating": 5, "comment": "とても美味しかったです！"}'
 
 # レビュー一覧取得
-curl http://localhost:8000/api/v1/review/recipe/recipe1
+curl http://localhost:8001/api/v1/review/recipe/recipe1
 
 # 評価サマリー取得
-curl http://localhost:8000/api/v1/review/recipe/recipe1/summary
+curl http://localhost:8001/api/v1/review/recipe/recipe1/summary
 ```
 
 ### フロントエンド（React）
@@ -111,7 +111,7 @@ function App() {
 
 ```bash
 # .env または .env.local に追加
-REACT_APP_API_URL=http://localhost:8000
+REACT_APP_API_URL=http://localhost:8001
 ```
 
 #### 3. 起動
@@ -161,7 +161,7 @@ chmod 755 data/reviews
 
 ```bash
 # ポートが使用中か確認
-lsof -i :8000
+lsof -i :8001
 
 # 別のポートで起動
 uvicorn api.main:app --reload --port 8001

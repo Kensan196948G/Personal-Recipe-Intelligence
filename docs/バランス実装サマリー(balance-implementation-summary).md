@@ -243,7 +243,7 @@ python examples/balance_usage_example.py
 ### APIサーバーの起動（予定）
 ```bash
 cd /mnt/Linux-ExHDD/Personal-Recipe-Intelligence
-uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 ## 主な機能

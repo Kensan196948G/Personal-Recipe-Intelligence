@@ -234,7 +234,7 @@ cp .env.example .env
 alembic upgrade head
 
 # 開発サーバー起動
-uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 ### 7.2 requirements.txt
@@ -258,9 +258,9 @@ Pillow>=10.0.0
 
 開発サーバー起動後、以下のURLでアクセス可能：
 
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-- OpenAPI JSON: `http://localhost:8000/openapi.json`
+- Swagger UI: `http://localhost:8001/docs`
+- ReDoc: `http://localhost:8001/redoc`
+- OpenAPI JSON: `http://localhost:8001/openapi.json`
 
 ## 9. 改訂履歴
 

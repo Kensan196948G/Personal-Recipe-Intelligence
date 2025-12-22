@@ -132,8 +132,8 @@ class SpoonacularClient:
         quota_request = headers.get("X-API-Quota-Request")
 
         quota_info = QuotaInfo(
-            quota_left=int(quota_left) if quota_left else None,
-            quota_request=int(quota_request) if quota_request else None,
+            quota_left=int(float(quota_left)) if quota_left else None,
+            quota_request=int(float(quota_request)) if quota_request else None,
         )
 
         # クォータが少ない場合は警告をログ

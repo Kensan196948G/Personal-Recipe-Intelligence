@@ -121,19 +121,19 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://192.168.0.187:8000',
+        target: 'http://192.168.0.187:8001',
         changeOrigin: true
       },
       '/collector': {
-        target: 'http://192.168.0.187:8000',
+        target: 'http://192.168.0.187:8001',
         changeOrigin: true
       },
       '/recipes': {
-        target: 'http://192.168.0.187:8000',
+        target: 'http://192.168.0.187:8001',
         changeOrigin: true
       },
       '/health': {
-        target: 'http://192.168.0.187:8000',
+        target: 'http://192.168.0.187:8001',
         changeOrigin: true
       }
     }

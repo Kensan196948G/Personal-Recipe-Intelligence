@@ -104,7 +104,7 @@ if __name__ == "__main__":
 python backend/main.py
 
 # APIドキュメント確認
-# http://localhost:8000/docs
+# http://localhost:8001/docs
 ```
 
 ## 基本的な使い方
@@ -145,21 +145,21 @@ estimate = service.get_recipe_cost_estimate(["たまねぎ", "にんじん", "�
 
 ```bash
 # 特売情報一覧
-curl "http://localhost:8000/api/v1/sales"
+curl "http://localhost:8001/api/v1/sales"
 
 # カテゴリフィルタ
-curl "http://localhost:8000/api/v1/sales?category=vegetable"
+curl "http://localhost:8001/api/v1/sales?category=vegetable"
 
 # チラシアップロード
-curl -X POST "http://localhost:8000/api/v1/sales/upload" \
+curl -X POST "http://localhost:8001/api/v1/sales/upload" \
   -F "file=@flyer.jpg" \
   -F "store_name=イオン"
 
 # レシピ推薦
-curl "http://localhost:8000/api/v1/sales/recommendations"
+curl "http://localhost:8001/api/v1/sales/recommendations"
 
 # 価格比較
-curl "http://localhost:8000/api/v1/sales/price-compare?product_name=たまねぎ"
+curl "http://localhost:8001/api/v1/sales/price-compare?product_name=たまねぎ"
 ```
 
 ## API エンドポイント
@@ -236,7 +236,7 @@ function App() {
 
 ```bash
 # .env
-REACT_APP_API_URL=http://localhost:8000
+REACT_APP_API_URL=http://localhost:8001
 ```
 
 ## アーキテクチャ

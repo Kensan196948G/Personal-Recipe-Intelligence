@@ -320,8 +320,8 @@ pdf_bytes = report_service.generate_pdf(report_data)
 
 ### cURL（API利用）
 ```bash
-curl -X GET "http://localhost:8000/api/v1/report/weekly?user_id=user_001"
-curl -X GET "http://localhost:8000/api/v1/report/generate/pdf?user_id=user_001&report_type=weekly" -o report.pdf
+curl -X GET "http://localhost:8001/api/v1/report/weekly?user_id=user_001"
+curl -X GET "http://localhost:8001/api/v1/report/generate/pdf?user_id=user_001&report_type=weekly" -o report.pdf
 ```
 
 ### React（UI利用）

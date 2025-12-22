@@ -21,7 +21,7 @@ cd /mnt/Linux-ExHDD/Personal-Recipe-Intelligence
 ./dev.sh
 ```
 
-The API will start at `http://localhost:8000`
+The API will start at `http://localhost:8001`
 
 ## Testing Rate Limits
 
@@ -34,11 +34,11 @@ cd /mnt/Linux-ExHDD/Personal-Recipe-Intelligence
 ### Manual Test
 ```bash
 # Check rate limit status
-curl http://localhost:8000/api/v1/rate-limit-status
+curl http://localhost:8001/api/v1/rate-limit-status
 
 # Test OCR endpoint (5/min limit)
 for i in {1..6}; do
-  curl -X POST http://localhost:8000/api/v1/ocr/extract \
+  curl -X POST http://localhost:8001/api/v1/ocr/extract \
     -H "Content-Type: application/json" \
     -d '{}' \
     -w "\nHTTP Status: %{http_code}\n\n"
@@ -79,22 +79,22 @@ pytest tests/test_rate_limiter.py -v
 
 ### Health Check
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8001/health
 ```
 
 ### Rate Limit Status
 ```bash
-curl http://localhost:8000/api/v1/rate-limit-status | python3 -m json.tool
+curl http://localhost:8001/api/v1/rate-limit-status | python3 -m json.tool
 ```
 
 ### OCR Endpoints (5/min)
 ```bash
 # Upload image for OCR
-curl -X POST http://localhost:8000/api/v1/ocr/upload \
+curl -X POST http://localhost:8001/api/v1/ocr/upload \
   -F "file=@image.jpg"
 
 # Extract text
-curl -X POST http://localhost:8000/api/v1/ocr/extract \
+curl -X POST http://localhost:8001/api/v1/ocr/extract \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
@@ -102,11 +102,11 @@ curl -X POST http://localhost:8000/api/v1/ocr/extract \
 ### Video Endpoints (5/min)
 ```bash
 # Upload video
-curl -X POST http://localhost:8000/api/v1/video/upload \
+curl -X POST http://localhost:8001/api/v1/video/upload \
   -F "file=@video.mp4"
 
 # Process video
-curl -X POST http://localhost:8000/api/v1/video/process \
+curl -X POST http://localhost:8001/api/v1/video/process \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
@@ -114,12 +114,12 @@ curl -X POST http://localhost:8000/api/v1/video/process \
 ### Scraper Endpoints (10/min)
 ```bash
 # Parse URL
-curl -X POST http://localhost:8000/api/v1/scraper/parse-url \
+curl -X POST http://localhost:8001/api/v1/scraper/parse-url \
   -H "Content-Type: application/json" \
   -d '{"url": "https://example.com/recipe"}'
 
 # Extract recipe from URL
-curl -X POST http://localhost:8000/api/v1/scraper/extract-recipe \
+curl -X POST http://localhost:8001/api/v1/scraper/extract-recipe \
   -H "Content-Type: application/json" \
   -d '{"url": "https://example.com/recipe"}'
 ```
@@ -127,13 +127,13 @@ curl -X POST http://localhost:8000/api/v1/scraper/extract-recipe \
 ### Recipe Endpoints (100/min)
 ```bash
 # List recipes
-curl http://localhost:8000/api/v1/recipes
+curl http://localhost:8001/api/v1/recipes
 
 # Get recipe by ID
-curl http://localhost:8000/api/v1/recipes/1
+curl http://localhost:8001/api/v1/recipes/1
 
 # Create recipe
-curl -X POST http://localhost:8000/api/v1/recipes \
+curl -X POST http://localhost:8001/api/v1/recipes \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Test Recipe",
@@ -143,14 +143,14 @@ curl -X POST http://localhost:8000/api/v1/recipes \
   }'
 
 # Update recipe
-curl -X PUT http://localhost:8000/api/v1/recipes/1 \
+curl -X PUT http://localhost:8001/api/v1/recipes/1 \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Updated Recipe"
   }'
 
 # Delete recipe
-curl -X DELETE http://localhost:8000/api/v1/recipes/1
+curl -X DELETE http://localhost:8001/api/v1/recipes/1
 ```
 
 ## Troubleshooting
@@ -168,7 +168,7 @@ Edit `/mnt/Linux-ExHDD/Personal-Recipe-Intelligence/backend/middleware/rate_limi
 
 ## Interactive API Documentation
 
-Visit `http://localhost:8000/api/docs` for Swagger UI with:
+Visit `http://localhost:8001/api/docs` for Swagger UI with:
 - All endpoints documented
 - Try it out functionality
 - Request/response schemas

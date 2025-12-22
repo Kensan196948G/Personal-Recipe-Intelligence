@@ -432,7 +432,7 @@ rm -f data/database.db-shm
 **解決策**:
 ```bash
 tail -f logs/app.log  # ログ確認
-curl -X GET http://localhost:8000/health  # ヘルス確認
+curl -X GET http://localhost:8001/health  # ヘルス確認
 ```
 
 ... (その他)
@@ -502,14 +502,14 @@ update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
    import requests
 
    # レシピ一覧取得
-   response = requests.get('http://localhost:8000/api/v1/recipes')
+   response = requests.get('http://localhost:8001/api/v1/recipes')
    recipes = response.json()
    ```
 
 3. JavaScript での利用例
    ```javascript
    // レシピ一覧取得
-   const response = await fetch('http://localhost:8000/api/v1/recipes');
+   const response = await fetch('http://localhost:8001/api/v1/recipes');
    const recipes = await response.json();
    ```
 
@@ -517,7 +517,7 @@ update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
    ```python
    try:
        response = requests.post(
-           'http://localhost:8000/api/v1/recipes',
+           'http://localhost:8001/api/v1/recipes',
            json={'name': '...'}
        )
        response.raise_for_status()
@@ -531,7 +531,7 @@ update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 
    @retry(stop=stop_after_attempt(3), wait=wait_exponential())
    def fetch_recipe(recipe_id):
-       return requests.get(f'http://localhost:8000/api/v1/recipes/{recipe_id}')
+       return requests.get(f'http://localhost:8001/api/v1/recipes/{recipe_id}')
    ```
 
 6. バッチ処理
@@ -673,10 +673,10 @@ update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
 2. APIパフォーマンス測定
    ```bash
    # 応答時間測定
-   curl -w "@curl-format.txt" http://localhost:8000/api/v1/recipes
+   curl -w "@curl-format.txt" http://localhost:8001/api/v1/recipes
 
    # Apache Bench での負荷テスト
-   ab -n 100 -c 10 http://localhost:8000/api/v1/recipes
+   ab -n 100 -c 10 http://localhost:8001/api/v1/recipes
    ```
 
 3. フロントエンドパフォーマンス

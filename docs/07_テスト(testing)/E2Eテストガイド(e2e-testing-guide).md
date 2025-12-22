@@ -78,7 +78,7 @@ evaluate_script        : JavaScript実行
    chrome --remote-debugging-port=9222
 
 2. バックエンド/フロントエンドを起動
-   - Backend: python -m uvicorn backend.app:app --port 8000
+   - Backend: python -m uvicorn backend.app:app --port 8001
    - Frontend: npm run dev --prefix frontend
 ```
 
@@ -256,7 +256,7 @@ jobs:
       - name: Start backend
         run: |
           pip install -r requirements.txt
-          python -m uvicorn backend.app:app --port 8000 &
+          python -m uvicorn backend.app:app --port 8001 &
           sleep 5
 
       - name: Run E2E tests

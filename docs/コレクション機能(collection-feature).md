@@ -134,7 +134,7 @@ import CollectionManager from './components/CollectionManager.jsx';
 function App() {
   return (
     <CollectionManager
-      apiBaseUrl="http://localhost:8000"
+      apiBaseUrl="http://localhost:8001"
       authToken="your-auth-token"
     />
   );
@@ -145,7 +145,7 @@ function App() {
 
 ```bash
 # コレクション作成
-curl -X POST http://localhost:8000/api/v1/collection \
+curl -X POST http://localhost:8001/api/v1/collection \
   -H "Authorization: Bearer your-token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -156,11 +156,11 @@ curl -X POST http://localhost:8000/api/v1/collection \
   }'
 
 # コレクション一覧取得
-curl -X GET http://localhost:8000/api/v1/collection \
+curl -X GET http://localhost:8001/api/v1/collection \
   -H "Authorization: Bearer your-token"
 
 # レシピ追加
-curl -X POST http://localhost:8000/api/v1/collection/{collection_id}/recipes/{recipe_id} \
+curl -X POST http://localhost:8001/api/v1/collection/{collection_id}/recipes/{recipe_id} \
   -H "Authorization: Bearer your-token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -312,7 +312,7 @@ pip install -r backend/requirements.txt
 
 ```bash
 # FastAPI サーバーが起動しているか確認
-curl http://localhost:8000/api/v1/collection/public
+curl http://localhost:8001/api/v1/collection/public
 
 # ルーターが登録されているか確認（main.py）
 # app.include_router(collection.router)

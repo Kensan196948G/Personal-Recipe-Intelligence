@@ -339,7 +339,7 @@ pytest backend/tests/ -v --cov=backend/services
 ```env
 GOOGLE_CLIENT_ID=your_client_id
 GOOGLE_CLIENT_SECRET=your_client_secret
-GOOGLE_REDIRECT_URI=http://localhost:8000/auth/callback
+GOOGLE_REDIRECT_URI=http://localhost:8001/auth/callback
 ```
 
 ### 実装例（将来の拡張）

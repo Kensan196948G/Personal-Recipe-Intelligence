@@ -81,7 +81,7 @@ FastAPIサーバーを起動：
 
 ```bash
 cd backend
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 ### 7. API動作確認
@@ -90,22 +90,22 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 ```bash
 # フォロー
-curl -X POST http://localhost:8000/api/v1/follow/user_2
+curl -X POST http://localhost:8001/api/v1/follow/user_2
 
 # フォロワー一覧
-curl http://localhost:8000/api/v1/follow/followers
+curl http://localhost:8001/api/v1/follow/followers
 
 # フォロー中一覧
-curl http://localhost:8000/api/v1/follow/following
+curl http://localhost:8001/api/v1/follow/following
 
 # フィード取得
-curl http://localhost:8000/api/v1/follow/feed
+curl http://localhost:8001/api/v1/follow/feed
 
 # おすすめユーザー
-curl http://localhost:8000/api/v1/follow/suggestions
+curl http://localhost:8001/api/v1/follow/suggestions
 
 # フォロー状態確認
-curl http://localhost:8000/api/v1/follow/status/user_2
+curl http://localhost:8001/api/v1/follow/status/user_2
 ```
 
 ## フロントエンド統合
@@ -159,13 +159,13 @@ function App() {
 
 ```bash
 # .env.local
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=http://localhost:8001
 ```
 
 または、コンポーネント内で直接設定：
 
 ```javascript
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 ```
 
 ### 4. 既存ページへの統合
@@ -471,7 +471,7 @@ def follow_user(self, follower_id: str, following_id: str) -> Dict:
 
 ```bash
 # ルーター確認
-curl http://localhost:8000/docs
+curl http://localhost:8001/docs
 ```
 
 ### 問題: フォロー状態が反映されない
@@ -517,14 +517,14 @@ export DATA_DIR=/var/lib/pri/data
 export LOG_LEVEL=INFO
 
 # サービス起動
-uvicorn backend.main:app --host 0.0.0.0 --port 8000 --workers 4
+uvicorn backend.main:app --host 0.0.0.0 --port 8001 --workers 4
 ```
 
 ### Nginx リバースプロキシ設定
 
 ```nginx
 location /api/v1/follow {
-  proxy_pass http://localhost:8000;
+  proxy_pass http://localhost:8001;
   proxy_set_header Host $host;
   proxy_set_header X-Real-IP $remote_addr;
 }

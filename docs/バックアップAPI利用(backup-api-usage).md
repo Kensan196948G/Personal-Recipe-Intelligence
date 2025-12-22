@@ -52,12 +52,12 @@ Personal Recipe Intelligence の SQLite データベースバックアップ機�
 
 ```bash
 # デフォルト名でバックアップ作成
-curl -X POST http://localhost:8000/api/v1/backup/create \
+curl -X POST http://localhost:8001/api/v1/backup/create \
   -H "Content-Type: application/json" \
   -d '{}'
 
 # カスタム名でバックアップ作成
-curl -X POST http://localhost:8000/api/v1/backup/create \
+curl -X POST http://localhost:8001/api/v1/backup/create \
   -H "Content-Type: application/json" \
   -d '{"backup_name": "before_update"}'
 ```
@@ -102,7 +102,7 @@ curl -X POST http://localhost:8000/api/v1/backup/create \
 #### cURL 例
 
 ```bash
-curl -X GET http://localhost:8000/api/v1/backup/list
+curl -X GET http://localhost:8001/api/v1/backup/list
 ```
 
 ---
@@ -136,7 +136,7 @@ curl -X GET http://localhost:8000/api/v1/backup/list
 #### cURL 例
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/backup/restore/backup_20251211_120000.db.gz
+curl -X POST http://localhost:8001/api/v1/backup/restore/backup_20251211_120000.db.gz
 ```
 
 ---
@@ -168,7 +168,7 @@ curl -X POST http://localhost:8000/api/v1/backup/restore/backup_20251211_120000.
 #### cURL 例
 
 ```bash
-curl -X DELETE http://localhost:8000/api/v1/backup/backup_20251211_120000.db.gz
+curl -X DELETE http://localhost:8001/api/v1/backup/backup_20251211_120000.db.gz
 ```
 
 ---
@@ -198,7 +198,7 @@ curl -X DELETE http://localhost:8000/api/v1/backup/backup_20251211_120000.db.gz
 #### cURL 例
 
 ```bash
-curl -X GET http://localhost:8000/api/v1/backup/status
+curl -X GET http://localhost:8001/api/v1/backup/status
 ```
 
 ---

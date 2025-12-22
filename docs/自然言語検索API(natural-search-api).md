@@ -194,20 +194,20 @@ Personal Recipe Intelligence の自然言語検索機能は、日本語の自然
 ### cURL
 ```bash
 # 検索実行
-curl -X POST http://localhost:8000/api/v1/ai/search/ \
+curl -X POST http://localhost:8001/api/v1/ai/search/ \
   -H "Content-Type: application/json" \
   -d '{"query": "辛くない簡単な鶏肉料理", "limit": 10}'
 
 # クエリ解析のみ
-curl -X POST http://localhost:8000/api/v1/ai/search/parse \
+curl -X POST http://localhost:8001/api/v1/ai/search/parse \
   -H "Content-Type: application/json" \
   -d '{"query": "ヘルシーな野菜たっぷりサラダ"}'
 
 # サジェスト取得
-curl http://localhost:8000/api/v1/ai/search/suggestions?q=鶏&limit=5
+curl http://localhost:8001/api/v1/ai/search/suggestions?q=鶏&limit=5
 
 # 履歴取得
-curl http://localhost:8000/api/v1/ai/search/history?limit=20
+curl http://localhost:8001/api/v1/ai/search/history?limit=20
 ```
 
 ### JavaScript (fetch)

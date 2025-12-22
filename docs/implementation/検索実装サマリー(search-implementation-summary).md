@@ -177,7 +177,7 @@ def fuzzy_search(
 ### cURL
 
 ```bash
-curl "http://localhost:8000/api/v1/search/fuzzy?query=カレー&limit=10"
+curl "http://localhost:8001/api/v1/search/fuzzy?query=カレー&limit=10"
 ```
 
 ## テスト実行

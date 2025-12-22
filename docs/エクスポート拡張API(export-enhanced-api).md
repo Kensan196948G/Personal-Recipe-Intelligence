@@ -343,7 +343,7 @@ Personal Recipe Intelligence のデータエクスポート強化機能を提供
 
 ```bash
 # JSON形式でエクスポート
-curl -X POST http://localhost:8000/api/v1/export/recipes \
+curl -X POST http://localhost:8001/api/v1/export/recipes \
   -H "Content-Type: application/json" \
   -d '{
     "recipe_ids": ["recipe-001", "recipe-002"],
@@ -352,7 +352,7 @@ curl -X POST http://localhost:8000/api/v1/export/recipes \
   -o recipes.json
 
 # レシピブック生成
-curl -X POST http://localhost:8000/api/v1/export/recipe-book \
+curl -X POST http://localhost:8001/api/v1/export/recipe-book \
   -H "Content-Type: application/json" \
   -d '{
     "recipe_ids": ["recipe-001", "recipe-002", "recipe-003"],
@@ -361,7 +361,7 @@ curl -X POST http://localhost:8000/api/v1/export/recipe-book \
   -o recipe_book.pdf
 
 # 買い物リスト生成
-curl -X POST http://localhost:8000/api/v1/export/shopping-list \
+curl -X POST http://localhost:8001/api/v1/export/shopping-list \
   -H "Content-Type: application/json" \
   -d '{
     "recipe_ids": ["recipe-001", "recipe-002"],
@@ -370,7 +370,7 @@ curl -X POST http://localhost:8000/api/v1/export/shopping-list \
   -o shopping_list.md
 
 # バックアップ作成
-curl -X POST http://localhost:8000/api/v1/export/backup \
+curl -X POST http://localhost:8001/api/v1/export/backup \
   -H "Content-Type: application/json" \
   -d '{
     "metadata": {

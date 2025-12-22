@@ -484,7 +484,7 @@ async def benchmark_endpoint(url: str, num_requests: int = 100):
     }
 
 # Run benchmark
-results = asyncio.run(benchmark_endpoint("http://localhost:8000/api/v1/recipes/1"))
+results = asyncio.run(benchmark_endpoint("http://localhost:8001/api/v1/recipes/1"))
 print(f"Mean: {results['mean_ms']:.2f}ms")
 print(f"Under 200ms: {results['under_200ms']:.1f}%")
 ```

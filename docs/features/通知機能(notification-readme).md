@@ -91,7 +91,7 @@ uvicorn main:app --reload
 ブラウザで以下を開く：
 
 ```
-http://localhost:8000/examples/notification_frontend_example.html
+http://localhost:8001/examples/notification_frontend_example.html
 ```
 
 ## 使用方法

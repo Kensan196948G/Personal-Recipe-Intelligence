@@ -194,7 +194,7 @@ pytest tests/test_performance_optimization.py -v
 uvicorn backend.main:app --reload
 
 # 3. Test endpoints
-curl http://localhost:8000/api/v1/recipes/?limit=10
+curl http://localhost:8001/api/v1/recipes/?limit=10
 
 # 4. Check query counts
 # Review terminal output for SQL queries

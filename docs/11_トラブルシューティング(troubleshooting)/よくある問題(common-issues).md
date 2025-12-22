@@ -161,7 +161,7 @@ CORS error
 **解決策**
 1. バックエンドの起動確認
    ```bash
-   curl http://localhost:8000/health
+   curl http://localhost:8001/health
    ```
 
 2. CORS設定確認

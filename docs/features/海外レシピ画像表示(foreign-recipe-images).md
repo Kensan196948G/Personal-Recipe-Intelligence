@@ -290,7 +290,7 @@ const placeholderImage = 'data:image/svg+xml,%3Csvg...%3E...%3C/svg%3E';
 
 1. **APIエンドポイント確認**
    ```bash
-   curl http://localhost:8000/api/v1/images/{image_path}
+   curl http://localhost:8001/api/v1/images/{image_path}
    ```
 
 2. **CORS設定確認**

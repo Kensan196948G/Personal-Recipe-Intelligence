@@ -131,7 +131,7 @@ recipe_data = await service.import_recipe(
 
 ```bash
 # レシピ作成（image_urlを指定）
-curl -X POST "http://localhost:8000/api/v1/recipes" \
+curl -X POST "http://localhost:8001/api/v1/recipes" \
   -H "Content-Type: application/json" \
   -d '{
     "title": "Test Recipe",
@@ -141,10 +141,10 @@ curl -X POST "http://localhost:8000/api/v1/recipes" \
   }'
 
 # レシピ取得（image_url, image_pathが含まれる）
-curl "http://localhost:8000/api/v1/recipes/123"
+curl "http://localhost:8001/api/v1/recipes/123"
 
 # 画像ファイル取得
-curl "http://localhost:8000/api/v1/recipes/images/123_abc12345.jpg" > recipe.jpg
+curl "http://localhost:8001/api/v1/recipes/images/123_abc12345.jpg" > recipe.jpg
 ```
 
 ## エラーハンドリング

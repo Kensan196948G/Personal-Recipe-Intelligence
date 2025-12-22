@@ -31,7 +31,7 @@ Personal Recipe Intelligence のレシピQRコード共有機能のAPI仕様書
 
 **使用例**:
 ```bash
-curl -o recipe_123.png "http://localhost:8000/api/v1/qrcode/123?box_size=15&style=rounded"
+curl -o recipe_123.png "http://localhost:8001/api/v1/qrcode/123?box_size=15&style=rounded"
 ```
 
 ---
@@ -58,7 +58,7 @@ curl -o recipe_123.png "http://localhost:8000/api/v1/qrcode/123?box_size=15&styl
 
 **使用例**:
 ```bash
-curl "http://localhost:8000/api/v1/qrcode/123/svg" > recipe_123.svg
+curl "http://localhost:8001/api/v1/qrcode/123/svg" > recipe_123.svg
 ```
 
 ---
@@ -77,7 +77,7 @@ curl "http://localhost:8000/api/v1/qrcode/123/svg" > recipe_123.svg
   "status": "ok",
   "data": {
     "recipe_id": 123,
-    "url": "http://localhost:8000/recipe/123",
+    "url": "http://localhost:8001/recipe/123",
     "qrcode_png_url": "/api/v1/qrcode/123",
     "qrcode_svg_url": "/api/v1/qrcode/123/svg"
   },
@@ -87,7 +87,7 @@ curl "http://localhost:8000/api/v1/qrcode/123/svg" > recipe_123.svg
 
 **使用例**:
 ```bash
-curl "http://localhost:8000/api/v1/qrcode/123/data"
+curl "http://localhost:8001/api/v1/qrcode/123/data"
 ```
 
 ---
@@ -132,7 +132,7 @@ curl "http://localhost:8000/api/v1/qrcode/123/data"
 
 **使用例**:
 ```bash
-curl -X POST "http://localhost:8000/api/v1/qrcode/123/data-embed?format=png" \
+curl -X POST "http://localhost:8001/api/v1/qrcode/123/data-embed?format=png" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "カレーライス",
@@ -215,12 +215,12 @@ curl -X POST "http://localhost:8000/api/v1/qrcode/123/data-embed?format=png" \
 import requests
 
 # PNG取得
-response = requests.get("http://localhost:8000/api/v1/qrcode/123?style=rounded&fill_color=blue")
+response = requests.get("http://localhost:8001/api/v1/qrcode/123?style=rounded&fill_color=blue")
 with open("qrcode.png", "wb") as f:
     f.write(response.content)
 
 # SVG取得
-response = requests.get("http://localhost:8000/api/v1/qrcode/123/svg")
+response = requests.get("http://localhost:8001/api/v1/qrcode/123/svg")
 with open("qrcode.svg", "w") as f:
     f.write(response.text)
 
@@ -232,7 +232,7 @@ recipe_data = {
     "steps": ["炒める", "煮込む"]
 }
 response = requests.post(
-    "http://localhost:8000/api/v1/qrcode/123/data-embed",
+    "http://localhost:8001/api/v1/qrcode/123/data-embed",
     json=recipe_data
 )
 with open("qrcode_data.png", "wb") as f:
@@ -242,7 +242,7 @@ with open("qrcode_data.png", "wb") as f:
 ### JavaScript
 ```javascript
 // PNG取得
-fetch('http://localhost:8000/api/v1/qrcode/123?style=circle')
+fetch('http://localhost:8001/api/v1/qrcode/123?style=circle')
   .then(res => res.blob())
   .then(blob => {
     const url = URL.createObjectURL(blob);
@@ -250,7 +250,7 @@ fetch('http://localhost:8000/api/v1/qrcode/123?style=circle')
   });
 
 // データ取得
-fetch('http://localhost:8000/api/v1/qrcode/123/data')
+fetch('http://localhost:8001/api/v1/qrcode/123/data')
   .then(res => res.json())
   .then(data => console.log(data));
 ```

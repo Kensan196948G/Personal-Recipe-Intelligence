@@ -214,7 +214,7 @@ pytest backend/tests/test_recipe_generator* -v
 
 ### レシピ生成
 ```bash
-curl -X POST http://localhost:8000/api/v1/ai/generate \
+curl -X POST http://localhost:8001/api/v1/ai/generate \
   -H "Content-Type: application/json" \
   -d '{
     "ingredients": ["鶏肉", "玉ねぎ"],
@@ -227,12 +227,12 @@ curl -X POST http://localhost:8000/api/v1/ai/generate \
 
 ### 食材組み合わせ提案
 ```bash
-curl "http://localhost:8000/api/v1/ai/generate/suggestions?main_ingredient=鶏肉&count=5"
+curl "http://localhost:8001/api/v1/ai/generate/suggestions?main_ingredient=鶏肉&count=5"
 ```
 
 ### レシピ改善
 ```bash
-curl -X POST http://localhost:8000/api/v1/ai/generate/improve \
+curl -X POST http://localhost:8001/api/v1/ai/generate/improve \
   -H "Content-Type: application/json" \
   -d '{
     "recipe": {...},

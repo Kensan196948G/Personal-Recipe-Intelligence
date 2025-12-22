@@ -40,7 +40,7 @@ echo "[]" > data/meal_plans.json
 1. **献立計画を作成**
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/calendar/plans \
+curl -X POST http://localhost:8001/api/v1/calendar/plans \
   -H "Content-Type: application/json" \
   -d '{
     "date": "2025-12-15",
@@ -54,25 +54,25 @@ curl -X POST http://localhost:8000/api/v1/calendar/plans \
 2. **献立計画を取得**
 
 ```bash
-curl http://localhost:8000/api/v1/calendar/plans?start_date=2025-12-15&end_date=2025-12-21
+curl http://localhost:8001/api/v1/calendar/plans?start_date=2025-12-15&end_date=2025-12-21
 ```
 
 3. **買い物リストを取得**
 
 ```bash
-curl "http://localhost:8000/api/v1/calendar/shopping-list?start_date=2025-12-15&end_date=2025-12-21"
+curl "http://localhost:8001/api/v1/calendar/shopping-list?start_date=2025-12-15&end_date=2025-12-21"
 ```
 
 4. **栄養バランスを取得**
 
 ```bash
-curl "http://localhost:8000/api/v1/calendar/nutrition?start_date=2025-12-15&end_date=2025-12-21"
+curl "http://localhost:8001/api/v1/calendar/nutrition?start_date=2025-12-15&end_date=2025-12-21"
 ```
 
 5. **iCal ファイルをダウンロード**
 
 ```bash
-curl "http://localhost:8000/api/v1/calendar/export/ical" -o meal_calendar.ics
+curl "http://localhost:8001/api/v1/calendar/export/ical" -o meal_calendar.ics
 ```
 
 ### フロントエンドの使用
