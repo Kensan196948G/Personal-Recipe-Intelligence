@@ -163,14 +163,14 @@ markdown_content = report_service.generate_markdown_report(report_data)
 
 ```bash
 # 週次レポート取得
-curl -X GET "http://localhost:8000/api/v1/report/weekly?user_id=user_001&week_offset=0"
+curl -X GET "http://localhost:8001/api/v1/report/weekly?user_id=user_001&week_offset=0"
 
 # PDF ダウンロード
-curl -X GET "http://localhost:8000/api/v1/report/generate/pdf?user_id=user_001&report_type=weekly&week_offset=0" \
+curl -X GET "http://localhost:8001/api/v1/report/generate/pdf?user_id=user_001&report_type=weekly&week_offset=0" \
   -o report.pdf
 
 # カスタムレポート生成
-curl -X POST "http://localhost:8000/api/v1/report/custom" \
+curl -X POST "http://localhost:8001/api/v1/report/custom" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "user_001",
@@ -179,7 +179,7 @@ curl -X POST "http://localhost:8000/api/v1/report/custom" \
   }'
 
 # レポート履歴取得
-curl -X GET "http://localhost:8000/api/v1/report/history?user_id=user_001&limit=10"
+curl -X GET "http://localhost:8001/api/v1/report/history?user_id=user_001&limit=10"
 ```
 
 ### React コンポーネント利用

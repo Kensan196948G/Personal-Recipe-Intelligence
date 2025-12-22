@@ -11,7 +11,7 @@ FRONTEND_DIR="${PROJECT_DIR}/frontend"
 LOG_DIR="${PROJECT_DIR}/logs"
 
 # Port configuration
-BACKEND_PORT=8000
+BACKEND_PORT=8001
 FRONTEND_PORT=5174
 
 # Colors for output

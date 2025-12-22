@@ -388,7 +388,7 @@ import requests
 
 # 食事記録
 response = requests.post(
-  "http://localhost:8000/api/v1/meal-history/record",
+  "http://localhost:8001/api/v1/meal-history/record",
   json={
     "user_id": "user123",
     "recipe_id": "recipe456",
@@ -408,7 +408,7 @@ print(response.json())
 
 # 日別データ取得
 response = requests.get(
-  "http://localhost:8000/api/v1/meal-history/daily/2025-12-10",
+  "http://localhost:8001/api/v1/meal-history/daily/2025-12-10",
   params={"user_id": "user123"}
 )
 print(response.json())

@@ -262,7 +262,7 @@ async def log_slow_queries(request: Request, call_next):
 ### 1. Load Testing
 ```bash
 # Test list endpoint with 100 concurrent requests
-ab -n 1000 -c 100 http://localhost:8000/api/v1/recipes/
+ab -n 1000 -c 100 http://localhost:8001/api/v1/recipes/
 
 # Before: ~950ms average
 # After:  ~85ms average

@@ -291,7 +291,7 @@ cat パフォーマンス統合(performance-integration).md
 # See パフォーマンス統合(performance-integration).md Step 1
 
 # 5. Test
-curl -i http://localhost:8000/api/v1/recipes/1
+curl -i http://localhost:8001/api/v1/recipes/1
 ```
 
 ---
@@ -387,10 +387,10 @@ result = await run_cpu_bound(expensive_function, arg1, arg2)
 python scripts/performance_audit.py
 
 # Load test API
-ab -n 100 -c 10 http://localhost:8000/api/v1/recipes/1
+ab -n 100 -c 10 http://localhost:8001/api/v1/recipes/1
 
 # Check metrics endpoint
-curl http://localhost:8000/api/v1/metrics
+curl http://localhost:8001/api/v1/metrics
 ```
 
 ---

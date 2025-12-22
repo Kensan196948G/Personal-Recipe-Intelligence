@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- バックエンドAPIポートを8000から8001に変更（他プロジェクトとの競合回避）
+- ルートフォルダの整理（不要ファイル削除、ドキュメント移動）
+- 全ドキュメントのポート参照を8001に更新
+
+### Fixed
+- Spoonacular APIのクォータ情報取得時のint()変換エラーを修正
+  - APIヘッダーが浮動小数点数を返す場合に対応
+
+### Moved
+- `DOCUMENTATION_ANALYSIS_SUMMARY.md` → `docs/`
+- `FRONTEND_IMAGE_IMPLEMENTATION.md` → `docs/implementation/`
+- `IMPLEMENTATION_SUMMARY_IMAGES.md` → `docs/implementation/`
+- `database.db` → `data/db/`
+- `test_results.log` → `logs/`
+
+### Removed
+- `--help` (誤作成ファイル)
+- `.coverage`, `coverage.xml` (ビルド生成物)
+
+## [0.2.1] - 2025-12-23
+
 ### Added
 - Initial project structure
 - CLAUDE.md development rules

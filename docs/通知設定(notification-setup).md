@@ -154,7 +154,7 @@ cd backend
 uvicorn main:app --reload
 ```
 
-APIドキュメント: http://localhost:8000/docs
+APIドキュメント: http://localhost:8001/docs
 
 ## フロントエンドの統合
 

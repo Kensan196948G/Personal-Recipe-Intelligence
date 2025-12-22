@@ -161,17 +161,17 @@ JSON形式でファイル保存:
 
 ### パーソナライズ推薦取得
 ```bash
-curl -X GET "http://localhost:8000/api/v1/ai/recommend?user_id=user_001&limit=10"
+curl -X GET "http://localhost:8001/api/v1/ai/recommend?user_id=user_001&limit=10"
 ```
 
 ### 類似レシピ取得
 ```bash
-curl -X GET "http://localhost:8000/api/v1/ai/recommend/similar/recipe_001?limit=5"
+curl -X GET "http://localhost:8001/api/v1/ai/recommend/similar/recipe_001?limit=5"
 ```
 
 ### フィードバック送信
 ```bash
-curl -X POST "http://localhost:8000/api/v1/ai/feedback" \
+curl -X POST "http://localhost:8001/api/v1/ai/feedback" \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "user_001",
@@ -182,7 +182,7 @@ curl -X POST "http://localhost:8000/api/v1/ai/feedback" \
 
 ### ユーザー嗜好取得
 ```bash
-curl -X GET "http://localhost:8000/api/v1/ai/preferences?user_id=user_001"
+curl -X GET "http://localhost:8001/api/v1/ai/preferences?user_id=user_001"
 ```
 
 ## テスト実行方法

@@ -145,23 +145,23 @@
   uvicorn backend.main:app --reload
 
   # In another terminal
-  curl http://localhost:8000/api/v1/recipes/?limit=10
+  curl http://localhost:8001/api/v1/recipes/?limit=10
   ```
 
 - [ ] Test pagination
   ```bash
-  curl http://localhost:8000/api/v1/recipes/?skip=0&limit=10
-  curl http://localhost:8000/api/v1/recipes/?skip=10&limit=10
+  curl http://localhost:8001/api/v1/recipes/?skip=0&limit=10
+  curl http://localhost:8001/api/v1/recipes/?skip=10&limit=10
   ```
 
 - [ ] Test tag filtering
   ```bash
-  curl http://localhost:8000/api/v1/recipes/?tags=japanese,quick
+  curl http://localhost:8001/api/v1/recipes/?tags=japanese,quick
   ```
 
 - [ ] Test search
   ```bash
-  curl http://localhost:8000/api/v1/recipes/search/?q=curry
+  curl http://localhost:8001/api/v1/recipes/search/?q=curry
   ```
 
 ## Phase 4: Database Setup (Day 3)
@@ -263,17 +263,17 @@
 ### Response Time Verification
 - [ ] Measure list endpoint
   ```bash
-  time curl http://localhost:8000/api/v1/recipes/?limit=50
+  time curl http://localhost:8001/api/v1/recipes/?limit=50
   ```
 
 - [ ] Measure search endpoint
   ```bash
-  time curl http://localhost:8000/api/v1/recipes/search/?q=test
+  time curl http://localhost:8001/api/v1/recipes/search/?q=test
   ```
 
 - [ ] Measure single recipe endpoint
   ```bash
-  time curl http://localhost:8000/api/v1/recipes/1
+  time curl http://localhost:8001/api/v1/recipes/1
   ```
 
 - [ ] Verify all responses are under 200ms
@@ -286,7 +286,7 @@
 
 - [ ] Run load test
   ```bash
-  ab -n 1000 -c 10 http://localhost:8000/api/v1/recipes/?limit=50
+  ab -n 1000 -c 10 http://localhost:8001/api/v1/recipes/?limit=50
   ```
 
 - [ ] Verify average response time

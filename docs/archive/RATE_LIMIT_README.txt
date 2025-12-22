@@ -103,7 +103,7 @@ Automated Test:
 
 Manual Test (OCR endpoint):
   for i in {1..6}; do
-    curl -X POST http://localhost:8000/api/v1/ocr/extract \
+    curl -X POST http://localhost:8001/api/v1/ocr/extract \
       -H "Content-Type: application/json" -d '{}' \
       -w "\nStatus: %{http_code}\n"
   done
@@ -133,13 +133,13 @@ MONITORING
 ================================================================================
 
 Check Status:
-  curl http://localhost:8000/api/v1/rate-limit-status | python3 -m json.tool
+  curl http://localhost:8001/api/v1/rate-limit-status | python3 -m json.tool
 
 Watch Logs:
   tail -f /mnt/Linux-ExHDD/Personal-Recipe-Intelligence/logs/api.log
 
 API Documentation:
-  http://localhost:8000/api/docs
+  http://localhost:8001/api/docs
 
 ================================================================================
 CONFIGURATION

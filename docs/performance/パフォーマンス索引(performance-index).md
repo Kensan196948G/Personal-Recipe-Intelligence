@@ -331,18 +331,18 @@ python scripts/performance_audit.py
 
 ### Test API Response Time
 ```bash
-curl -i http://localhost:8000/api/v1/recipes/1
+curl -i http://localhost:8001/api/v1/recipes/1
 # Check X-Response-Time header
 ```
 
 ### Load Test
 ```bash
-ab -n 100 -c 10 http://localhost:8000/api/v1/recipes/1
+ab -n 100 -c 10 http://localhost:8001/api/v1/recipes/1
 ```
 
 ### Check Metrics
 ```bash
-curl http://localhost:8000/api/v1/metrics | jq
+curl http://localhost:8001/api/v1/metrics | jq
 ```
 
 ---

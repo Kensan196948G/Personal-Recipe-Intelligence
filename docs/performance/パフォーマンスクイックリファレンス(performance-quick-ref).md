@@ -44,13 +44,13 @@ python scripts/performance_audit.py
 python scripts/performance_audit.py > audit_report.txt
 
 # Test API response time
-curl -i http://localhost:8000/api/v1/recipes/1
+curl -i http://localhost:8001/api/v1/recipes/1
 
 # Load test (requires apache2-utils)
-ab -n 100 -c 10 http://localhost:8000/api/v1/recipes/1
+ab -n 100 -c 10 http://localhost:8001/api/v1/recipes/1
 
 # Check metrics
-curl http://localhost:8000/api/v1/metrics | jq
+curl http://localhost:8001/api/v1/metrics | jq
 
 # Install dependencies
 pip install aiohttp aiofiles psutil
@@ -310,16 +310,16 @@ with MemoryMonitor.track_memory("operation name"):
 ### Response Time Test
 ```bash
 # Check header
-curl -i http://localhost:8000/api/v1/recipes/1 | grep X-Response-Time
+curl -i http://localhost:8001/api/v1/recipes/1 | grep X-Response-Time
 
 # Benchmark
-time curl http://localhost:8000/api/v1/recipes/1
+time curl http://localhost:8001/api/v1/recipes/1
 ```
 
 ### Load Test
 ```bash
 # 100 requests, 10 concurrent
-ab -n 100 -c 10 http://localhost:8000/api/v1/recipes/1
+ab -n 100 -c 10 http://localhost:8001/api/v1/recipes/1
 
 # Check: Time per request < 200ms
 ```
@@ -327,10 +327,10 @@ ab -n 100 -c 10 http://localhost:8000/api/v1/recipes/1
 ### Cache Test
 ```bash
 # First request (miss)
-time curl http://localhost:8000/api/v1/recipes/1
+time curl http://localhost:8001/api/v1/recipes/1
 
 # Second request (hit) - should be faster
-time curl http://localhost:8000/api/v1/recipes/1
+time curl http://localhost:8001/api/v1/recipes/1
 ```
 
 ---
@@ -415,7 +415,7 @@ from backend.database_optimized import OptimizedDatabase
 python scripts/performance_audit.py | grep "TOTAL ISSUES"
 
 # Test response
-curl -w "@-" -o /dev/null -s http://localhost:8000/api/v1/recipes/1 <<< "time_total: %{time_total}s\n"
+curl -w "@-" -o /dev/null -s http://localhost:8001/api/v1/recipes/1 <<< "time_total: %{time_total}s\n"
 
 # Check cache
 python -c "from backend.cache import recipe_cache; print(recipe_cache.get_stats())"

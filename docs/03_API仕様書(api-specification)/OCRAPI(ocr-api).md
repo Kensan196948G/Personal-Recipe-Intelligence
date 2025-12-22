@@ -33,7 +33,7 @@
 #### cURL例
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/ocr" \
+curl -X POST "http://localhost:8001/api/v1/ocr" \
   -F "image=@recipe.jpg" \
   -F 'options={"auto_save": true}'
 ```

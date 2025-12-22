@@ -290,7 +290,7 @@ After integration, verify:
 
 ```bash
 # Single request
-curl -i http://localhost:8000/api/v1/recipes/1
+curl -i http://localhost:8001/api/v1/recipes/1
 
 # Check X-Response-Time header
 # Should be < 200ms
@@ -303,7 +303,7 @@ curl -i http://localhost:8000/api/v1/recipes/1
 sudo apt-get install apache2-utils
 
 # Test with 100 requests, 10 concurrent
-ab -n 100 -c 10 http://localhost:8000/api/v1/recipes/1
+ab -n 100 -c 10 http://localhost:8001/api/v1/recipes/1
 
 # Check results:
 # - Time per request should be < 200ms
@@ -314,13 +314,13 @@ ab -n 100 -c 10 http://localhost:8000/api/v1/recipes/1
 
 ```bash
 # First request (cache miss)
-time curl http://localhost:8000/api/v1/recipes/1
+time curl http://localhost:8001/api/v1/recipes/1
 
 # Second request (cache hit) - should be much faster
-time curl http://localhost:8000/api/v1/recipes/1
+time curl http://localhost:8001/api/v1/recipes/1
 
 # Check cache stats
-curl http://localhost:8000/api/v1/metrics | jq '.cache'
+curl http://localhost:8001/api/v1/metrics | jq '.cache'
 ```
 
 ### Test 4: Memory During OCR

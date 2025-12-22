@@ -233,7 +233,7 @@ pytest backend/tests/test_voice_assistant_service.py \
 ```bash
 # バックエンド起動
 cd backend
-uvicorn main:app --reload --port 8000
+uvicorn main:app --reload --port 8001
 
 # フロントエンド起動
 cd frontend
@@ -268,7 +268,7 @@ http://localhost:3000/voice-demo
 
 ```bash
 # 汎用コマンド
-curl -X POST http://localhost:8000/api/v1/voice/generic \
+curl -X POST http://localhost:8001/api/v1/voice/generic \
   -H "Content-Type: application/json" \
   -d '{
     "session_id": "my-session",
@@ -277,10 +277,10 @@ curl -X POST http://localhost:8000/api/v1/voice/generic \
   }'
 
 # インテント一覧
-curl http://localhost:8000/api/v1/voice/intents | jq
+curl http://localhost:8001/api/v1/voice/intents | jq
 
 # セッション一覧
-curl http://localhost:8000/api/v1/voice/sessions | jq
+curl http://localhost:8001/api/v1/voice/sessions | jq
 ```
 
 ## 今後の拡張予定

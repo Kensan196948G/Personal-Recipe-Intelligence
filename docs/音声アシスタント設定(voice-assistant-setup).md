@@ -24,7 +24,7 @@ mkdir -p data/voice
 
 ```bash
 cd backend
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 ### 4. フロントエンド起動
@@ -59,17 +59,17 @@ pytest tests/test_voice_assistant_service.py --cov=services.voice_assistant_serv
 
 ```bash
 # Alexa リクエストテスト
-curl -X POST http://localhost:8000/api/v1/voice/alexa \
+curl -X POST http://localhost:8001/api/v1/voice/alexa \
   -H "Content-Type: application/json" \
   -d @backend/tests/fixtures/alexa_request.json
 
 # Google リクエストテスト
-curl -X POST http://localhost:8000/api/v1/voice/google \
+curl -X POST http://localhost:8001/api/v1/voice/google \
   -H "Content-Type: application/json" \
   -d @backend/tests/fixtures/google_request.json
 
 # 汎用コマンドテスト
-curl -X POST http://localhost:8000/api/v1/voice/generic \
+curl -X POST http://localhost:8001/api/v1/voice/generic \
   -H "Content-Type: application/json" \
   -d '{
     "session_id": "test-session",
@@ -83,19 +83,19 @@ curl -X POST http://localhost:8000/api/v1/voice/generic \
 ### ヘルスチェック
 
 ```bash
-curl http://localhost:8000/api/v1/voice/health
+curl http://localhost:8001/api/v1/voice/health
 ```
 
 ### 対応インテント一覧
 
 ```bash
-curl http://localhost:8000/api/v1/voice/intents | jq
+curl http://localhost:8001/api/v1/voice/intents | jq
 ```
 
 ### セッション一覧
 
 ```bash
-curl http://localhost:8000/api/v1/voice/sessions | jq
+curl http://localhost:8001/api/v1/voice/sessions | jq
 ```
 
 ## ブラウザ音声認識テスト
@@ -182,7 +182,7 @@ python -m uvicorn main:app --reload
 
 ```bash
 curl -w "@curl-format.txt" -o /dev/null -s \
-  http://localhost:8000/api/v1/voice/generic \
+  http://localhost:8001/api/v1/voice/generic \
   -H "Content-Type: application/json" \
   -d '{"session_id": "test", "command": "カレーのレシピ"}'
 ```
@@ -219,7 +219,7 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
 
     location /api/v1/voice/ {
-        proxy_pass http://localhost:8000;
+        proxy_pass http://localhost:8001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -243,7 +243,7 @@ VOICE_MAX_SESSIONS=1000
 
 ```bash
 # 毎日午前3時に実行
-0 3 * * * curl -X POST http://localhost:8000/api/v1/voice/sessions/cleanup
+0 3 * * * curl -X POST http://localhost:8001/api/v1/voice/sessions/cleanup
 ```
 
 ### ログローテーション

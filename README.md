@@ -95,6 +95,14 @@ personal-recipe-intelligence/
 ./dev.sh
 ```
 
+起動後、以下のURLでアクセスできます：
+
+| サービス | URL |
+|---------|-----|
+| WebUI | http://localhost:5174 |
+| Backend API | http://localhost:8001 |
+| API Docs (Swagger) | http://localhost:8001/docs |
+
 ### テスト実行
 
 ```bash

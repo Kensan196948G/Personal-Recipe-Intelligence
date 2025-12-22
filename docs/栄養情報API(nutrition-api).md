@@ -292,7 +292,7 @@ GET /api/v1/nutrition/search?q=鶏
 import requests
 
 # 栄養計算
-url = "http://localhost:8000/api/v1/nutrition/calculate"
+url = "http://localhost:8001/api/v1/nutrition/calculate"
 data = {
     "ingredients": [
         {"name": "白米", "amount": "150g"},
@@ -313,7 +313,7 @@ print(f"タンパク質: {result['data']['per_serving']['protein']} g")
 
 ```bash
 # 栄養計算
-curl -X POST "http://localhost:8000/api/v1/nutrition/calculate" \
+curl -X POST "http://localhost:8001/api/v1/nutrition/calculate" \
   -H "Content-Type: application/json" \
   -d '{
     "ingredients": [
@@ -324,13 +324,13 @@ curl -X POST "http://localhost:8000/api/v1/nutrition/calculate" \
   }'
 
 # 材料情報取得
-curl "http://localhost:8000/api/v1/nutrition/ingredient/鶏もも肉"
+curl "http://localhost:8001/api/v1/nutrition/ingredient/鶏もも肉"
 
 # 材料検索
-curl "http://localhost:8000/api/v1/nutrition/search?q=鶏"
+curl "http://localhost:8001/api/v1/nutrition/search?q=鶏"
 
 # 全材料リスト
-curl "http://localhost:8000/api/v1/nutrition/ingredients"
+curl "http://localhost:8001/api/v1/nutrition/ingredients"
 ```
 
 ---

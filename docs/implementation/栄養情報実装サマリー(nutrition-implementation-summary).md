@@ -266,7 +266,7 @@ python backend/main_nutrition_example.py
 ### 方法2: uvicorn で起動
 
 ```bash
-uvicorn backend.main_nutrition_example:app --reload --host 0.0.0.0 --port 8000
+uvicorn backend.main_nutrition_example:app --reload --host 0.0.0.0 --port 8001
 ```
 
 ### 方法3: 既存のFastAPIアプリに統合
@@ -288,7 +288,7 @@ app.include_router(nutrition.router)
 ```python
 import requests
 
-url = "http://localhost:8000/api/v1/nutrition/calculate"
+url = "http://localhost:8001/api/v1/nutrition/calculate"
 data = {
     "ingredients": [
         {"name": "白米", "amount": "150g"},
@@ -305,7 +305,7 @@ print(f"カロリー: {result['data']['per_serving']['calories']} kcal")
 ### curl
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/nutrition/calculate" \
+curl -X POST "http://localhost:8001/api/v1/nutrition/calculate" \
   -H "Content-Type: application/json" \
   -d '{
     "ingredients": [
@@ -416,18 +416,18 @@ pytest backend/tests/test_nutrition_service.py -v
 python backend/examples/nutrition_example.py
 
 # API確認（ブラウザ）
-# http://localhost:8000/docs
+# http://localhost:8001/docs
 
 # 栄養計算（curl）
-curl -X POST "http://localhost:8000/api/v1/nutrition/calculate" \
+curl -X POST "http://localhost:8001/api/v1/nutrition/calculate" \
   -H "Content-Type: application/json" \
   -d '{"ingredients":[{"name":"白米","amount":"150g"}],"servings":1}'
 
 # 材料検索
-curl "http://localhost:8000/api/v1/nutrition/search?q=鶏"
+curl "http://localhost:8001/api/v1/nutrition/search?q=鶏"
 
 # 全材料リスト
-curl "http://localhost:8000/api/v1/nutrition/ingredients"
+curl "http://localhost:8001/api/v1/nutrition/ingredients"
 ```
 
 ---
@@ -463,7 +463,7 @@ Personal Recipe Intelligence プロジェクトに完全機能の栄養計算機
 python backend/main_nutrition_example.py
 
 # 2. ブラウザで確認
-# http://localhost:8000/docs
+# http://localhost:8001/docs
 
 # 3. サンプル実行
 python backend/examples/nutrition_example.py

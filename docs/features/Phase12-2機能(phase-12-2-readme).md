@@ -69,7 +69,7 @@ python -m api.main
 
 #### Base64画像で認識
 ```bash
-curl -X POST "http://localhost:8000/api/v1/ai/image/recognize" \
+curl -X POST "http://localhost:8001/api/v1/ai/image/recognize" \
   -H "Content-Type: application/json" \
   -d '{
     "image_base64": "BASE64_ENCODED_IMAGE_DATA",
@@ -79,7 +79,7 @@ curl -X POST "http://localhost:8000/api/v1/ai/image/recognize" \
 
 #### ファイルアップロード
 ```bash
-curl -X POST "http://localhost:8000/api/v1/ai/image/recognize-file" \
+curl -X POST "http://localhost:8001/api/v1/ai/image/recognize-file" \
   -F "file=@image.jpg" \
   -F "max_results=5"
 ```

@@ -18,7 +18,7 @@ cat .env
 # 3. バックエンド起動
 cd backend
 source venv/bin/activate
-uvicorn api.main:app --host 0.0.0.0 --port 8000 &
+uvicorn api.main:app --host 0.0.0.0 --port 8001 &
 
 # 4. フロントエンド起動
 cd ../frontend
@@ -131,7 +131,7 @@ tar -xzf data/backups/daily/2024-12-11/images.tar.gz -C data/
 
 ```bash
 # APIヘルスチェック
-curl http://localhost:8000/health
+curl http://localhost:8001/health
 
 # レスポンス例
 {"status": "ok"}
@@ -205,7 +205,7 @@ cd frontend && rm -rf node_modules/.cache
 
 3. **ネットワーク確認**
    ```bash
-   curl -v http://localhost:8000/health
+   curl -v http://localhost:8001/health
    ```
 
 4. **ディスク確認**

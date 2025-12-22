@@ -169,19 +169,19 @@ for item in sale_items:
 
 ```bash
 # すべての特売情報
-curl "http://localhost:8000/api/v1/sales"
+curl "http://localhost:8001/api/v1/sales"
 
 # 野菜カテゴリのみ
-curl "http://localhost:8000/api/v1/sales?category=vegetable"
+curl "http://localhost:8001/api/v1/sales?category=vegetable"
 
 # 30%以上割引のみ
-curl "http://localhost:8000/api/v1/sales?min_discount=30"
+curl "http://localhost:8001/api/v1/sales?min_discount=30"
 ```
 
 #### 2. チラシアップロード
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/sales/upload" \
+curl -X POST "http://localhost:8001/api/v1/sales/upload" \
   -F "file=@flyer.jpg" \
   -F "store_name=イオン" \
   -F "valid_days=3"
@@ -190,13 +190,13 @@ curl -X POST "http://localhost:8000/api/v1/sales/upload" \
 #### 3. レシピ推薦
 
 ```bash
-curl "http://localhost:8000/api/v1/sales/recommendations?max_results=5"
+curl "http://localhost:8001/api/v1/sales/recommendations?max_results=5"
 ```
 
 #### 4. 価格比較
 
 ```bash
-curl "http://localhost:8000/api/v1/sales/price-compare?product_name=たまねぎ"
+curl "http://localhost:8001/api/v1/sales/price-compare?product_name=たまねぎ"
 ```
 
 ### フロントエンド（React）での使用

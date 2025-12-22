@@ -249,19 +249,19 @@ def advanced_search(
 
 ```bash
 # あいまい検索
-curl "http://localhost:8000/api/v1/search/fuzzy?query=カレー&limit=10"
+curl "http://localhost:8001/api/v1/search/fuzzy?query=カレー&limit=10"
 
 # 材料検索 (OR)
-curl "http://localhost:8000/api/v1/search/ingredients?ingredients=玉ねぎ&ingredients=にんじん&match_all=false"
+curl "http://localhost:8001/api/v1/search/ingredients?ingredients=玉ねぎ&ingredients=にんじん&match_all=false"
 
 # 材料検索 (AND)
-curl "http://localhost:8000/api/v1/search/ingredients?ingredients=玉ねぎ&ingredients=にんじん&match_all=true"
+curl "http://localhost:8001/api/v1/search/ingredients?ingredients=玉ねぎ&ingredients=にんじん&match_all=true"
 
 # 複合検索
-curl "http://localhost:8000/api/v1/search/combined?title=カレー&ingredients=じゃがいも"
+curl "http://localhost:8001/api/v1/search/combined?title=カレー&ingredients=じゃがいも"
 
 # 高度な検索
-curl "http://localhost:8000/api/v1/search/advanced?query=カレー&ingredients=じゃがいも&tags=簡単"
+curl "http://localhost:8001/api/v1/search/advanced?query=カレー&ingredients=じゃがいも&tags=簡単"
 ```
 
 ### JavaScript (fetch)

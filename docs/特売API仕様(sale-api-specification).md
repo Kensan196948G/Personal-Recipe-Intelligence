@@ -297,28 +297,28 @@ Personal Recipe Intelligence の特売情報連携機能のAPI仕様書です。
 
 #### 特売一覧取得
 ```bash
-curl "http://localhost:8000/api/v1/sales?category=vegetable&min_discount=20"
+curl "http://localhost:8001/api/v1/sales?category=vegetable&min_discount=20"
 ```
 
 #### チラシアップロード
 ```bash
-curl -X POST "http://localhost:8000/api/v1/sales/upload?store_name=イオン&valid_days=3" \
+curl -X POST "http://localhost:8001/api/v1/sales/upload?store_name=イオン&valid_days=3" \
   -F "file=@flyer.jpg"
 ```
 
 #### レシピ推薦
 ```bash
-curl "http://localhost:8000/api/v1/sales/recommendations?max_results=5"
+curl "http://localhost:8001/api/v1/sales/recommendations?max_results=5"
 ```
 
 #### 価格比較
 ```bash
-curl "http://localhost:8000/api/v1/sales/price-compare?product_name=たまねぎ"
+curl "http://localhost:8001/api/v1/sales/price-compare?product_name=たまねぎ"
 ```
 
 #### 材料費見積もり
 ```bash
-curl -X POST "http://localhost:8000/api/v1/sales/cost-estimate" \
+curl -X POST "http://localhost:8001/api/v1/sales/cost-estimate" \
   -H "Content-Type: application/json" \
   -d '{"ingredients": ["たまねぎ", "にんじん", "豚肉"]}'
 ```

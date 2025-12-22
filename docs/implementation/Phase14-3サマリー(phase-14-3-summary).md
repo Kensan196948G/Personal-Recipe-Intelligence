@@ -252,7 +252,7 @@ public_api._api_key_service = api_key_service
 
 ```bash
 cd backend
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 ---
@@ -260,7 +260,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ### 4. 最初のAPIキーを作成
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/public/keys \
+curl -X POST http://localhost:8001/api/v1/public/keys \
   -H "Content-Type: application/json" \
   -d '{
     "name": "My First Key",
@@ -305,10 +305,10 @@ curl -X POST http://localhost:8000/api/v1/public/keys \
 export API_KEY="xYz123AbC456DeF..."
 
 # レシピ一覧を取得
-curl -H "X-API-Key: $API_KEY" http://localhost:8000/api/v1/recipes
+curl -H "X-API-Key: $API_KEY" http://localhost:8001/api/v1/recipes
 
 # または Bearer 形式
-curl -H "Authorization: Bearer $API_KEY" http://localhost:8000/api/v1/recipes
+curl -H "Authorization: Bearer $API_KEY" http://localhost:8001/api/v1/recipes
 ```
 
 ---
@@ -321,7 +321,7 @@ curl -H "Authorization: Bearer $API_KEY" http://localhost:8000/api/v1/recipes
 import requests
 
 API_KEY = "your_api_key_here"
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8001"
 
 headers = {"X-API-Key": API_KEY}
 
@@ -338,7 +338,7 @@ print(response.json())
 
 ```javascript
 const API_KEY = 'your_api_key_here';
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'http://localhost:8001';
 
 async function getRecipes() {
   const response = await fetch(`${BASE_URL}/api/v1/recipes`, {
@@ -368,10 +368,10 @@ getRecipes();
 `docs/api-key-integration-example.md` - FastAPI統合、各種言語での使用例、エラーハンドリング
 
 ### API仕様
-`http://localhost:8000/docs` - FastAPI自動生成のSwagger UI
+`http://localhost:8001/docs` - FastAPI自動生成のSwagger UI
 
 ### 公開API仕様
-`http://localhost:8000/api/v1/public/docs` - カスタムドキュメント
+`http://localhost:8001/api/v1/public/docs` - カスタムドキュメント
 
 ---
 
@@ -517,7 +517,7 @@ Phase 14-3 の実装により、Personal Recipe Intelligence は以下を達成�
 - **セットアップ**: `docs/API_KEY_SETUP.md`
 - **統合例**: `docs/api-key-integration-example.md`
 - **テスト**: `./test-api-keys.sh`
-- **API仕様**: `http://localhost:8000/docs`
+- **API仕様**: `http://localhost:8001/docs`
 
 ---
 

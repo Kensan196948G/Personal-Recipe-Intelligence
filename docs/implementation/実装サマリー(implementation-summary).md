@@ -162,7 +162,7 @@ python examples/auto_tagger_demo.py
 
 # API統合例（サーバー起動）
 python examples/api_integration_example.py
-# => http://localhost:8000/docs でAPI確認可能
+# => http://localhost:8001/docs でAPI確認可能
 ```
 
 ## CLAUDE.md 準拠状況

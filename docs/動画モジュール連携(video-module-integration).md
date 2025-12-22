@@ -50,10 +50,10 @@ cp .env.example .env
 cd /mnt/Linux-ExHDD/Personal-Recipe-Intelligence
 
 # 開発モード（リロード有効）
-uvicorn backend.main_video_example:app --reload --host 0.0.0.0 --port 8000
+uvicorn backend.main_video_example:app --reload --host 0.0.0.0 --port 8001
 
 # 本番モード
-uvicorn backend.main_video_example:app --host 0.0.0.0 --port 8000 --workers 4
+uvicorn backend.main_video_example:app --host 0.0.0.0 --port 8001 --workers 4
 ```
 
 ### 方法2: Pythonスクリプトとして起動
@@ -68,10 +68,10 @@ python backend/main_video_example.py
 
 ```bash
 # ヘルスチェック
-curl http://localhost:8000/health
+curl http://localhost:8001/health
 
 # APIドキュメント
-# ブラウザで http://localhost:8000/docs を開く
+# ブラウザで http://localhost:8001/docs を開く
 ```
 
 ---
@@ -92,7 +92,7 @@ python backend/video/example_usage.py "https://www.youtube.com/watch?v=VIDEO_ID"
 #### リクエスト
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/video/extract \
+curl -X POST http://localhost:8001/api/v1/video/extract \
   -H "Content-Type: application/json" \
   -d '{
     "url": "https://www.youtube.com/watch?v=VIDEO_ID",

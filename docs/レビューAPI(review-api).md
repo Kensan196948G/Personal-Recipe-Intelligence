@@ -336,7 +336,7 @@ import requests
 
 # レビュー投稿
 response = requests.post(
-    'http://localhost:8000/api/v1/review/recipe/recipe1',
+    'http://localhost:8001/api/v1/review/recipe/recipe1',
     json={'rating': 5, 'comment': 'とても美味しかったです！'},
     headers={'Authorization': 'Bearer user123'}
 )
@@ -346,7 +346,7 @@ print(f"Review ID: {review['id']}")
 
 # レビュー一覧取得
 response = requests.get(
-    'http://localhost:8000/api/v1/review/recipe/recipe1',
+    'http://localhost:8001/api/v1/review/recipe/recipe1',
     params={'sort_by': 'rating'}
 )
 

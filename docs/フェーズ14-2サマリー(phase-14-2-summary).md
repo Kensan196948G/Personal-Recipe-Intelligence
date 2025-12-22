@@ -253,11 +253,11 @@ python -m pytest tests/test_admin_service.py -v
 export ADMIN_TOKEN="your_admin_api_key"
 
 # システム統計取得
-curl -X GET "http://localhost:8000/api/v1/admin/stats" \
+curl -X GET "http://localhost:8001/api/v1/admin/stats" \
   -H "Authorization: Bearer ${ADMIN_TOKEN}"
 
 # 設定更新
-curl -X PUT "http://localhost:8000/api/v1/admin/settings" \
+curl -X PUT "http://localhost:8001/api/v1/admin/settings" \
   -H "Authorization: Bearer ${ADMIN_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{"maintenance_mode": false}'

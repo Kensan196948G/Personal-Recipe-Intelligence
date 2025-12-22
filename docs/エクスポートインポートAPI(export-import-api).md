@@ -73,10 +73,10 @@ JSON形式でのレシピデータのエクスポート・インポート機能�
 
 ```bash
 # 通常のエクスポート
-curl -X GET "http://localhost:8000/api/v1/export/recipes"
+curl -X GET "http://localhost:8001/api/v1/export/recipes"
 
 # ファイルダウンロード
-curl -X GET "http://localhost:8000/api/v1/export/recipes?download=true" \
+curl -X GET "http://localhost:8001/api/v1/export/recipes?download=true" \
   -o recipes_export.json
 ```
 
@@ -116,10 +116,10 @@ curl -X GET "http://localhost:8000/api/v1/export/recipes?download=true" \
 
 ```bash
 # レシピID 42をエクスポート
-curl -X GET "http://localhost:8000/api/v1/export/recipes/42"
+curl -X GET "http://localhost:8001/api/v1/export/recipes/42"
 
 # ファイルとしてダウンロード
-curl -X GET "http://localhost:8000/api/v1/export/recipes/42?download=true" \
+curl -X GET "http://localhost:8001/api/v1/export/recipes/42?download=true" \
   -o recipe_42.json
 ```
 
@@ -156,12 +156,12 @@ curl -X GET "http://localhost:8000/api/v1/export/recipes/42?download=true" \
 
 ```bash
 # 複数レシピをエクスポート
-curl -X POST "http://localhost:8000/api/v1/export/recipes/batch" \
+curl -X POST "http://localhost:8001/api/v1/export/recipes/batch" \
   -H "Content-Type: application/json" \
   -d '{"recipe_ids": [1, 5, 10, 15]}'
 
 # ファイルとしてダウンロード
-curl -X POST "http://localhost:8000/api/v1/export/recipes/batch?download=true" \
+curl -X POST "http://localhost:8001/api/v1/export/recipes/batch?download=true" \
   -H "Content-Type: application/json" \
   -d '{"recipe_ids": [1, 5, 10, 15]}' \
   -o selected_recipes.json
@@ -223,7 +223,7 @@ curl -X POST "http://localhost:8000/api/v1/export/recipes/batch?download=true" \
 
 ```bash
 # バリデーション実行
-curl -X POST "http://localhost:8000/api/v1/import/validate" \
+curl -X POST "http://localhost:8001/api/v1/import/validate" \
   -H "Content-Type: application/json" \
   -d @recipes_to_import.json
 ```
@@ -290,7 +290,7 @@ curl -X POST "http://localhost:8000/api/v1/import/validate" \
 
 ```bash
 # 重複をスキップしてインポート
-curl -X POST "http://localhost:8000/api/v1/import/recipes" \
+curl -X POST "http://localhost:8001/api/v1/import/recipes" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {...},
@@ -299,7 +299,7 @@ curl -X POST "http://localhost:8000/api/v1/import/recipes" \
   }'
 
 # 重複を上書き
-curl -X POST "http://localhost:8000/api/v1/import/recipes" \
+curl -X POST "http://localhost:8001/api/v1/import/recipes" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {...},
@@ -339,11 +339,11 @@ curl -X POST "http://localhost:8000/api/v1/import/recipes" \
 
 ```bash
 # ファイルからインポート
-curl -X POST "http://localhost:8000/api/v1/import/recipes/file" \
+curl -X POST "http://localhost:8001/api/v1/import/recipes/file" \
   -F "file=@recipes_export.json"
 
 # パラメータ付きでインポート
-curl -X POST "http://localhost:8000/api/v1/import/recipes/file?skip_duplicates=false&overwrite_duplicates=true" \
+curl -X POST "http://localhost:8001/api/v1/import/recipes/file?skip_duplicates=false&overwrite_duplicates=true" \
   -F "file=@recipes_export.json"
 ```
 

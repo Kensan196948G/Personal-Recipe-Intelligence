@@ -436,7 +436,7 @@ Personal Recipe Intelligence のレシピ共有機能API仕様書
 
 ```bash
 # 共有リンク作成
-curl -X POST http://localhost:8000/api/v1/sharing/create-link \
+curl -X POST http://localhost:8001/api/v1/sharing/create-link \
   -H "Content-Type: application/json" \
   -d '{
     "recipe_id": "recipe_001",
@@ -456,19 +456,19 @@ curl -X POST http://localhost:8000/api/v1/sharing/create-link \
 ### 2. 共有リンクでレシピにアクセス
 
 ```bash
-curl http://localhost:8000/api/v1/sharing/link/550e8400-e29b-41d4-a716-446655440000
+curl http://localhost:8001/api/v1/sharing/link/550e8400-e29b-41d4-a716-446655440000
 ```
 
 ### 3. 自分の共有リスト確認
 
 ```bash
-curl http://localhost:8000/api/v1/sharing/my-shares?owner_id=user_001
+curl http://localhost:8001/api/v1/sharing/my-shares?owner_id=user_001
 ```
 
 ### 4. 共有解除
 
 ```bash
-curl -X DELETE http://localhost:8000/api/v1/sharing/550e8400-e29b-41d4-a716-446655440000?user_id=user_001
+curl -X DELETE http://localhost:8001/api/v1/sharing/550e8400-e29b-41d4-a716-446655440000?user_id=user_001
 ```
 
 ---

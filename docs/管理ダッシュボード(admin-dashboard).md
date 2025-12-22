@@ -206,15 +206,15 @@ Authorization: Bearer {ADMIN_API_KEY}
 export ADMIN_TOKEN="your_admin_api_key"
 
 # システム統計
-curl -X GET "http://localhost:8000/api/v1/admin/stats" \
+curl -X GET "http://localhost:8001/api/v1/admin/stats" \
   -H "Authorization: Bearer ${ADMIN_TOKEN}"
 
 # レシピ統計（30日間）
-curl -X GET "http://localhost:8000/api/v1/admin/stats/recipes?days=30" \
+curl -X GET "http://localhost:8001/api/v1/admin/stats/recipes?days=30" \
   -H "Authorization: Bearer ${ADMIN_TOKEN}"
 
 # 設定更新
-curl -X PUT "http://localhost:8000/api/v1/admin/settings" \
+curl -X PUT "http://localhost:8001/api/v1/admin/settings" \
   -H "Authorization: Bearer ${ADMIN_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
@@ -223,7 +223,7 @@ curl -X PUT "http://localhost:8000/api/v1/admin/settings" \
   }'
 
 # ヘルスチェック
-curl -X GET "http://localhost:8000/api/v1/admin/health" \
+curl -X GET "http://localhost:8001/api/v1/admin/health" \
   -H "Authorization: Bearer ${ADMIN_TOKEN}"
 ```
 

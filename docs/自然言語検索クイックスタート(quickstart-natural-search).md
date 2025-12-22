@@ -43,7 +43,7 @@ chmod +x scripts/*.sh
 
 ```bash
 cd backend
-uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn api.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 別のターミナルウィンドウで実行してください。
@@ -70,17 +70,17 @@ uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 
 ```bash
 # 基本検索
-curl -X POST http://localhost:8000/api/v1/ai/search/ \
+curl -X POST http://localhost:8001/api/v1/ai/search/ \
   -H "Content-Type: application/json" \
   -d '{"query": "鶏肉", "limit": 5}'
 
 # 否定検索
-curl -X POST http://localhost:8000/api/v1/ai/search/ \
+curl -X POST http://localhost:8001/api/v1/ai/search/ \
   -H "Content-Type: application/json" \
   -d '{"query": "辛くない料理", "limit": 5}'
 
 # 複合検索
-curl -X POST http://localhost:8000/api/v1/ai/search/ \
+curl -X POST http://localhost:8001/api/v1/ai/search/ \
   -H "Content-Type: application/json" \
   -d '{"query": "辛くない簡単な鶏肉料理", "limit": 5}'
 ```
@@ -88,7 +88,7 @@ curl -X POST http://localhost:8000/api/v1/ai/search/ \
 ### クエリ解析のみ
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/ai/search/parse \
+curl -X POST http://localhost:8001/api/v1/ai/search/parse \
   -H "Content-Type: application/json" \
   -d '{"query": "ヘルシーな野菜たっぷりサラダ"}'
 ```
@@ -96,7 +96,7 @@ curl -X POST http://localhost:8000/api/v1/ai/search/parse \
 ### サジェスト取得
 
 ```bash
-curl "http://localhost:8000/api/v1/ai/search/suggestions?q=鶏&limit=5"
+curl "http://localhost:8001/api/v1/ai/search/suggestions?q=鶏&limit=5"
 ```
 
 ## 検索クエリの例
@@ -240,7 +240,7 @@ curl "http://localhost:8000/api/v1/ai/search/suggestions?q=鶏&limit=5"
 
 ```bash
 # ポートが使用中でないか確認
-lsof -i :8000
+lsof -i :8001
 
 # 別のポートで起動
 uvicorn api.main:app --reload --port 8001

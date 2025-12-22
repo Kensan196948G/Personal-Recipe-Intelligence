@@ -408,12 +408,12 @@ pytest tests/test_voice_assistant_service.py -v
 
 ```bash
 # Alexa リクエストシミュレーション
-curl -X POST http://localhost:8000/api/v1/voice/alexa \
+curl -X POST http://localhost:8001/api/v1/voice/alexa \
   -H "Content-Type: application/json" \
   -d @tests/fixtures/alexa_request.json
 
 # Google リクエストシミュレーション
-curl -X POST http://localhost:8000/api/v1/voice/google \
+curl -X POST http://localhost:8001/api/v1/voice/google \
   -H "Content-Type: application/json" \
   -d @tests/fixtures/google_request.json
 ```

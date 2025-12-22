@@ -69,7 +69,7 @@ pip install fastapi pydantic
 
 ```bash
 # backend ディレクトリで
-uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn api.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 ### 3. フロントエンドの起動
@@ -104,7 +104,7 @@ app.include_router(natural_search.router)
 #### 検索実行
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/ai/search/ \
+curl -X POST http://localhost:8001/api/v1/ai/search/ \
   -H "Content-Type: application/json" \
   -d '{"query": "辛くない簡単な鶏肉料理", "limit": 20}'
 ```
@@ -112,7 +112,7 @@ curl -X POST http://localhost:8000/api/v1/ai/search/ \
 #### クエリ解析のみ
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/ai/search/parse \
+curl -X POST http://localhost:8001/api/v1/ai/search/parse \
   -H "Content-Type: application/json" \
   -d '{"query": "ヘルシーな野菜たっぷりサラダ"}'
 ```
@@ -120,7 +120,7 @@ curl -X POST http://localhost:8000/api/v1/ai/search/parse \
 #### サジェスト取得
 
 ```bash
-curl http://localhost:8000/api/v1/ai/search/suggestions?q=鶏&limit=5
+curl http://localhost:8001/api/v1/ai/search/suggestions?q=鶏&limit=5
 ```
 
 ## 検索クエリの例

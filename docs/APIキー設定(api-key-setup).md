@@ -109,7 +109,7 @@ pytest backend/tests/test_api_key*.py -v
 
 ```bash
 cd backend
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8001
 ```
 
 ### 6. フロントエンドの統合
@@ -136,7 +136,7 @@ function App() {
 ### 1. 最初のAPIキーを作成
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/public/keys \
+curl -X POST http://localhost:8001/api/v1/public/keys \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Admin Key",
@@ -160,13 +160,13 @@ curl -X POST http://localhost:8000/api/v1/public/keys \
 export API_KEY="<生成されたAPIキー>"
 
 # レシピ一覧を取得
-curl -H "X-API-Key: $API_KEY" http://localhost:8000/api/v1/recipes
+curl -H "X-API-Key: $API_KEY" http://localhost:8001/api/v1/recipes
 ```
 
 ### 3. 使用量を確認
 
 ```bash
-curl http://localhost:8000/api/v1/public/usage
+curl http://localhost:8001/api/v1/public/usage
 ```
 
 ---
@@ -252,7 +252,7 @@ sudo timedatectl set-ntp true
 **解決策**:
 - ヘッダー名を確認: `X-API-Key` または `Authorization: Bearer <key>`
 - キーに余分な空白や改行がないか確認
-- キーが有効か確認: `curl http://localhost:8000/api/v1/public/keys`
+- キーが有効か確認: `curl http://localhost:8001/api/v1/public/keys`
 
 ---
 
@@ -261,7 +261,7 @@ sudo timedatectl set-ntp true
 **原因**: 必要なスコープがない
 
 **解決策**:
-- キーのスコープを確認: `curl http://localhost:8000/api/v1/public/keys/<key_id>`
+- キーのスコープを確認: `curl http://localhost:8001/api/v1/public/keys/<key_id>`
 - 必要なスコープで新しいキーを発行
 
 ---

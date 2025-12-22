@@ -56,7 +56,7 @@ async def health_check():
 
 ```bash
 # cURLでAPIキーを発行
-curl -X POST http://localhost:8000/api/v1/public/keys \
+curl -X POST http://localhost:8001/api/v1/public/keys \
   -H "Content-Type: application/json" \
   -d '{
     "name": "My Application",
@@ -107,14 +107,14 @@ curl -X POST http://localhost:8000/api/v1/public/keys \
 #### X-API-Keyヘッダーを使用
 
 ```bash
-curl -X GET http://localhost:8000/api/v1/recipes \
+curl -X GET http://localhost:8001/api/v1/recipes \
   -H "X-API-Key: xYz123AbC..."
 ```
 
 #### Authorizationヘッダー（Bearer形式）を使用
 
 ```bash
-curl -X GET http://localhost:8000/api/v1/recipes \
+curl -X GET http://localhost:8001/api/v1/recipes \
   -H "Authorization: Bearer xYz123AbC..."
 ```
 
@@ -127,7 +127,7 @@ import requests
 
 # APIキーを設定
 API_KEY = "xYz123AbC..."
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8001"
 
 # ヘッダーを設定
 headers = {
@@ -169,7 +169,7 @@ else:
 ```javascript
 // APIキーを設定
 const API_KEY = 'xYz123AbC...';
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'http://localhost:8001';
 
 // レシピ一覧を取得
 async function getRecipes() {
@@ -236,7 +236,7 @@ createRecipe({
 
 ```bash
 # 特定のAPIキーの使用量を確認
-curl -X GET http://localhost:8000/api/v1/public/usage/abc123
+curl -X GET http://localhost:8001/api/v1/public/usage/abc123
 ```
 
 レスポンス:
@@ -271,7 +271,7 @@ curl -X GET http://localhost:8000/api/v1/public/usage/abc123
 ### 6. APIキー一覧の取得
 
 ```bash
-curl -X GET http://localhost:8000/api/v1/public/keys
+curl -X GET http://localhost:8001/api/v1/public/keys
 ```
 
 ---
@@ -279,7 +279,7 @@ curl -X GET http://localhost:8000/api/v1/public/keys
 ### 7. APIキーの削除
 
 ```bash
-curl -X DELETE http://localhost:8000/api/v1/public/keys/abc123
+curl -X DELETE http://localhost:8001/api/v1/public/keys/abc123
 ```
 
 ---
@@ -288,7 +288,7 @@ curl -X DELETE http://localhost:8000/api/v1/public/keys/abc123
 
 ```bash
 # 古いキーを無効化し、新しいキーを発行
-curl -X POST http://localhost:8000/api/v1/public/keys/abc123/rotate
+curl -X POST http://localhost:8001/api/v1/public/keys/abc123/rotate
 ```
 
 ---
@@ -319,7 +319,7 @@ server {
   ssl_certificate_key /path/to/key.pem;
 
   location / {
-    proxy_pass http://localhost:8000;
+    proxy_pass http://localhost:8001;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
   }
@@ -355,7 +355,7 @@ server {
 
 ```bash
 # 月次でローテーション
-curl -X POST http://localhost:8000/api/v1/public/keys/abc123/rotate
+curl -X POST http://localhost:8001/api/v1/public/keys/abc123/rotate
 ```
 
 ### 6. 監査ログの確認
@@ -363,7 +363,7 @@ curl -X POST http://localhost:8000/api/v1/public/keys/abc123/rotate
 使用量統計を定期的に確認し、異常なアクセスがないかチェックしてください。
 
 ```bash
-curl -X GET http://localhost:8000/api/v1/public/usage
+curl -X GET http://localhost:8001/api/v1/public/usage
 ```
 
 ---
@@ -424,4 +424,4 @@ Personal Recipe Intelligence API は、安全で柔軟なAPIキー認証シス�
 - **レート制限**: 悪用を防止
 - **使用量トラッキング**: 詳細な統計情報
 
-詳細は [API Documentation](http://localhost:8000/docs) を参照してください。
+詳細は [API Documentation](http://localhost:8001/docs) を参照してください。

@@ -29,7 +29,7 @@ python backend/main_nutrition_example.py
 または
 
 ```bash
-uvicorn backend.main_nutrition_example:app --reload --host 0.0.0.0 --port 8000
+uvicorn backend.main_nutrition_example:app --reload --host 0.0.0.0 --port 8001
 ```
 
 起動すると以下のメッセージが表示されます:
@@ -42,9 +42,9 @@ Personal Recipe Intelligence - 栄養計算API
 起動中...
 
 アクセス先:
-  - API: http://localhost:8000
-  - Swagger UI: http://localhost:8000/docs
-  - ReDoc: http://localhost:8000/redoc
+  - API: http://localhost:8001
+  - Swagger UI: http://localhost:8001/docs
+  - ReDoc: http://localhost:8001/redoc
 
 停止: Ctrl+C
 ============================================================
@@ -56,7 +56,7 @@ Personal Recipe Intelligence - 栄養計算API
 
 ### 方法1: ブラウザで試す（推奨）
 
-1. ブラウザで開く: `http://localhost:8000/docs`
+1. ブラウザで開く: `http://localhost:8001/docs`
 2. **POST /api/v1/nutrition/calculate** をクリック
 3. 「Try it out」ボタンをクリック
 4. 以下のJSONを入力:
@@ -79,7 +79,7 @@ Personal Recipe Intelligence - 栄養計算API
 
 ```bash
 # 栄養計算
-curl -X POST "http://localhost:8000/api/v1/nutrition/calculate" \
+curl -X POST "http://localhost:8001/api/v1/nutrition/calculate" \
   -H "Content-Type: application/json" \
   -d '{
     "ingredients": [
@@ -90,10 +90,10 @@ curl -X POST "http://localhost:8000/api/v1/nutrition/calculate" \
   }'
 
 # 材料情報取得
-curl "http://localhost:8000/api/v1/nutrition/ingredient/鶏もも肉"
+curl "http://localhost:8001/api/v1/nutrition/ingredient/鶏もも肉"
 
 # 材料検索
-curl "http://localhost:8000/api/v1/nutrition/search?q=鶏"
+curl "http://localhost:8001/api/v1/nutrition/search?q=鶏"
 ```
 
 ### 方法3: Pythonで試す
@@ -102,7 +102,7 @@ curl "http://localhost:8000/api/v1/nutrition/search?q=鶏"
 import requests
 
 # 栄養計算
-url = "http://localhost:8000/api/v1/nutrition/calculate"
+url = "http://localhost:8001/api/v1/nutrition/calculate"
 data = {
     "ingredients": [
         {"name": "白米", "amount": "150g"},
@@ -291,8 +291,8 @@ pip install --upgrade fastapi uvicorn pydantic
 
 ### 材料が見つからない
 
-1. 全材料リストで確認: `curl http://localhost:8000/api/v1/nutrition/ingredients`
-2. 検索機能を使用: `curl "http://localhost:8000/api/v1/nutrition/search?q=材料名"`
+1. 全材料リストで確認: `curl http://localhost:8001/api/v1/nutrition/ingredients`
+2. 検索機能を使用: `curl "http://localhost:8001/api/v1/nutrition/search?q=材料名"`
 3. 正確な材料名を使用（例: "玉ねぎ" または "たまねぎ"）
 
 ### ポート8000が使用中
@@ -315,7 +315,7 @@ uvicorn backend.main_nutrition_example:app --port 8001
 
 ## サポート
 
-- API仕様: `http://localhost:8000/docs`
+- API仕様: `http://localhost:8001/docs`
 - 詳細ドキュメント: `/docs/nutrition_api.md`
 - READMEファイル: `/backend/README_NUTRITION.md`
 - サンプルコード: `/backend/examples/nutrition_example.py`

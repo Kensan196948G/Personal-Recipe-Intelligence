@@ -79,7 +79,7 @@ When rate limit is exceeded, API returns:
 import requests
 import time
 
-API_BASE = "http://localhost:8000"
+API_BASE = "http://localhost:8001"
 
 # OCR endpoint (5/min limit)
 for i in range(6):
@@ -99,7 +99,7 @@ for i in range(6):
 ### JavaScript Client
 
 ```javascript
-const API_BASE = "http://localhost:8000";
+const API_BASE = "http://localhost:8001";
 
 async function makeRequest() {
   try {
@@ -132,7 +132,7 @@ pytest tests/test_rate_limiter.py -v
 pytest tests/test_rate_limiter.py::TestRateLimiting -v
 
 # Check rate limit status
-curl http://localhost:8000/api/v1/rate-limit-status
+curl http://localhost:8001/api/v1/rate-limit-status
 ```
 
 ## Configuration
@@ -171,7 +171,7 @@ Available strategies:
 ### Check Current Status
 
 ```bash
-curl http://localhost:8000/api/v1/rate-limit-status
+curl http://localhost:8001/api/v1/rate-limit-status
 ```
 
 Response:
