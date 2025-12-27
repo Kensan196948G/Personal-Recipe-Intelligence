@@ -125,8 +125,8 @@
   .sidebar {
     width: 240px;
     min-height: 100vh;
-    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-    color: #fff;
+    background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+    color: #2c3e50;
     display: flex;
     flex-direction: column;
     transition: width 0.3s ease;
@@ -134,6 +134,7 @@
     left: 0;
     top: 0;
     z-index: 100;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
   }
 
   .sidebar--collapsed {
@@ -145,7 +146,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .logo {
@@ -171,15 +172,15 @@
     padding: 0.5rem;
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(0, 0, 0, 0.5);
     cursor: pointer;
     border-radius: 6px;
     transition: all 0.2s;
   }
 
   .collapse-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: rgba(0, 0, 0, 0.05);
+    color: #2c3e50;
   }
 
   .sidebar-nav {
@@ -205,7 +206,7 @@
     background: transparent;
     border: none;
     border-radius: 8px;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(0, 0, 0, 0.7);
     cursor: pointer;
     font-size: 0.9rem;
     text-align: left;
@@ -213,8 +214,8 @@
   }
 
   .nav-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: rgba(0, 0, 0, 0.05);
+    color: #2c3e50;
   }
 
   .nav-item--active {
@@ -235,7 +236,7 @@
 
   .sidebar-section {
     padding: 0 0.5rem 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
     margin-top: auto;
   }
 
@@ -246,15 +247,16 @@
   .section-title {
     font-size: 0.75rem;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(0, 0, 0, 0.5);
     letter-spacing: 0.5px;
+    font-weight: 600;
   }
 
   .tags-loading,
   .tags-empty {
     padding: 0.5rem 1rem;
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(0, 0, 0, 0.5);
   }
 
   .tags-list {
@@ -272,7 +274,7 @@
     background: transparent;
     border: none;
     border-radius: 6px;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(0, 0, 0, 0.7);
     cursor: pointer;
     font-size: 0.85rem;
     text-align: left;
@@ -280,8 +282,8 @@
   }
 
   .tag-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: rgba(0, 0, 0, 0.05);
+    color: #2c3e50;
   }
 
   .tag-icon {
@@ -297,17 +299,17 @@
   .tags-more {
     padding: 0.5rem 1rem;
     font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(0, 0, 0, 0.4);
   }
 
   .sidebar-footer {
     padding: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .version {
     font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(0, 0, 0, 0.4);
     text-align: center;
   }
 
