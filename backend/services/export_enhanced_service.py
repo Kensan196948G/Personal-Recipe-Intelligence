@@ -40,6 +40,144 @@ class ExportEnhancedService:
         "pdf": {"name": "PDF", "mime": "application/pdf", "ext": ".pdf"},
     }
 
+    # カテゴリー別アイコンマッピング
+    CATEGORY_ICONS = {
+        "和食": "🍱",
+        "洋食": "🍝",
+        "中華": "🥟",
+        "イタリアン": "🇮🇹",
+        "フレンチ": "🇫🇷",
+        "メキシカン": "🌮",
+        "韓国料理": "🇰🇷",
+        "タイ料理": "🇹🇭",
+        "インド料理": "🇮🇳",
+        "メインディッシュ": "🍖",
+        "スープ": "🍲",
+        "サラダ": "🥗",
+        "デザート": "🍰",
+        "パスタ": "🍝",
+        "カレー": "🍛",
+        "丼": "🍚",
+        "麺": "🍜",
+        "パン": "🍞",
+        "ごはん": "🍚",
+        "default": "🍽️"
+    }
+
+    # 材料別アイコンマッピング（日本語・英語対応、100種類以上）
+    INGREDIENT_ICONS = {
+        # 肉類（日本語）
+        "肉": "🥩", "牛肉": "🥩", "豚肉": "🥓", "鶏肉": "🍗", "挽き肉": "🍖",
+        "合挽き肉": "🍖", "牛豚合挽き肉": "🍖", "ひき肉": "🍖",
+        "ハム": "🥓", "ベーコン": "🥓", "ソーセージ": "🌭",
+        "鴨": "🦆", "ラム": "🍖", "羊肉": "🍖",
+        # 肉類（英語）
+        "beef": "🥩", "pork": "🥓", "chicken": "🍗", "meat": "🥩",
+        "ground": "🍖", "ham": "🥓", "bacon": "🥓", "sausage": "🌭",
+        # 魚介類（日本語）
+        "魚": "🐟", "鮭": "🐟", "サーモン": "🐟", "マグロ": "🐟", "サバ": "🐟",
+        "エビ": "🦐", "海老": "🦐", "イカ": "🦑", "タコ": "🐙",
+        "貝": "🦪", "カニ": "🦀", "蟹": "🦀", "ホタテ": "🦪",
+        # 魚介類（英語）
+        "fish": "🐟", "salmon": "🐟", "tuna": "🐟", "shrimp": "🦐",
+        "squid": "🦑", "octopus": "🐙", "crab": "🦀", "shellfish": "🦪",
+        # 野菜（日本語）
+        "野菜": "🥬", "玉ねぎ": "🧅", "玉葱": "🧅", "タマネギ": "🧅",
+        "トマト": "🍅", "ミニトマト": "🍅", "プチトマト": "🍅",
+        "人参": "🥕", "にんじん": "🥕", "ニンジン": "🥕", "キャロット": "🥕",
+        "じゃがいも": "🥔", "ジャガイモ": "🥔", "馬鈴薯": "🥔",
+        "ブロッコリー": "🥦", "きゅうり": "🥒", "胡瓜": "🥒",
+        "なす": "🍆", "茄子": "🍆", "ナス": "🍆",
+        "レタス": "🥬", "キャベツ": "🥬", "ほうれん草": "🥬", "白菜": "🥬",
+        "ピーマン": "🫑", "パプリカ": "🫑", "唐辛子": "🌶️",
+        "大根": "🥬", "かぶ": "🥬", "ごぼう": "🥬", "れんこん": "🥬",
+        "ネギ": "🧅", "長ネギ": "🧅", "葱": "🧅", "ニラ": "🥬",
+        "わかめ": "🥬", "海藻": "🥬", "昆布": "🥬", "のり": "🥬",
+        # 野菜（英語）
+        "onion": "🧅", "tomato": "🍅", "carrot": "🥕", "potato": "🥔",
+        "broccoli": "🥦", "cucumber": "🥒", "eggplant": "🍆",
+        "lettuce": "🥬", "cabbage": "🥬", "spinach": "🥬",
+        "pepper": "🫑", "bell pepper": "🫑", "chili": "🌶️",
+        # きのこ・豆類
+        "きのこ": "🍄", "しめじ": "🍄", "えのき": "🍄", "舞茸": "🍄", "椎茸": "🍄",
+        "豆": "🫘", "枝豆": "🫛", "大豆": "🫘", "小豆": "🫘",
+        "豆腐": "🧊", "厚揚げ": "🧊", "油揚げ": "🧊", "納豆": "🫘",
+        "mushroom": "🍄", "bean": "🫘", "tofu": "🧊",
+        # 卵・乳製品
+        "卵": "🥚", "たまご": "🥚", "玉子": "🥚", "egg": "🥚",
+        "チーズ": "🧀", "cheese": "🧀", "バター": "🧈", "butter": "🧈",
+        "牛乳": "🥛", "ミルク": "🥛", "milk": "🥛",
+        "ヨーグルト": "🥛", "yogurt": "🥛", "生クリーム": "🥛", "cream": "🥛",
+        # 穀物・麺・米
+        "米": "🌾", "ご飯": "🍚", "白米": "🍚", "玄米": "🍚", "rice": "🍚",
+        "パン": "🍞", "食パン": "🍞", "bread": "🍞", "パン粉": "🍞",
+        "パスタ": "🍝", "スパゲッティ": "🍝", "pasta": "🍝", "spaghetti": "🍝",
+        "麺": "🍜", "うどん": "🍜", "そば": "🍜", "ラーメン": "🍜",
+        "noodle": "🍜", "udon": "🍜", "soba": "🍜", "ramen": "🍜",
+        "小麦粉": "🌾", "flour": "🌾", "片栗粉": "🌾",
+        # 調味料・香辛料
+        "塩": "🧂", "砂糖": "🧂", "salt": "🧂", "sugar": "🧂",
+        "醤油": "🫙", "しょうゆ": "🫙", "soy sauce": "🫙",
+        "味噌": "🫙", "みそ": "🫙", "miso": "🫙",
+        "油": "🫙", "サラダ油": "🫙", "ごま油": "🫙", "オリーブオイル": "🫒", "olive oil": "🫒",
+        "酢": "🫙", "vinegar": "🫙", "みりん": "🫙", "酒": "🫙", "sake": "🫙",
+        "ケチャップ": "🍅", "ketchup": "🍅", "マヨネーズ": "🥚", "mayonnaise": "🥚",
+        "ソース": "🫙", "sauce": "🫙", "ドレッシング": "🫙", "dressing": "🫙",
+        "だし": "🍲", "出汁": "🍲", "コンソメ": "🍲", "ブイヨン": "🍲", "stock": "🍲",
+        "カレールー": "🍛", "curry": "🍛",
+        # ハーブ・スパイス
+        "ニンニク": "🧄", "にんにく": "🧄", "garlic": "🧄",
+        "生姜": "🫚", "しょうが": "🫚", "ショウガ": "🫚", "ginger": "🫚",
+        "バジル": "🌿", "basil": "🌿", "パセリ": "🌿", "parsley": "🌿",
+        "ローズマリー": "🌿", "rosemary": "🌿", "タイム": "🌿", "thyme": "🌿",
+        "コショウ": "🧂", "胡椒": "🧂", "pepper": "🧂",
+        "唐辛子": "🌶️", "チリ": "🌶️", "chili": "🌶️",
+        # 果物
+        "レモン": "🍋", "lemon": "🍋", "ライム": "🍋", "lime": "🍋",
+        "りんご": "🍎", "apple": "🍎", "バナナ": "🍌", "banana": "🍌",
+        "オレンジ": "🍊", "orange": "🍊", "桃": "🍑", "peach": "🍑",
+        "いちご": "🍓", "strawberry": "🍓", "ブルーベリー": "🫐", "blueberry": "🫐",
+        # その他
+        "水": "💧", "water": "💧", "氷": "🧊", "ice": "🧊",
+        "ワイン": "🍷", "wine": "🍷", "ビール": "🍺", "beer": "🍺",
+        "ナッツ": "🥜", "nuts": "🥜", "アーモンド": "🥜", "almond": "🥜",
+        "はちみつ": "🍯", "蜂蜜": "🍯", "honey": "🍯",
+        "チョコレート": "🍫", "chocolate": "🍫",
+        "default": "🔸"
+    }
+
+    # タグ別アイコンマッピング（拡充版）
+    TAG_ICONS = {
+        # ジャンル
+        "和食": "🍱", "洋食": "🍝", "中華": "🥟", "イタリアン": "🇮🇹",
+        "フレンチ": "🇫🇷", "メキシカン": "🌮", "韓国料理": "🇰🇷",
+        "タイ料理": "🇹🇭", "インド料理": "🇮🇳", "アジアン": "🥢",
+        # 難易度・特徴
+        "簡単": "⭐", "時短": "⚡", "人気": "❤️", "定番": "👍",
+        "本格": "👨‍🍳", "プロ": "👨‍🍳", "初心者": "🔰",
+        # 健康・ダイエット
+        "ヘルシー": "🌱", "低カロリー": "💪", "高タンパク": "💪",
+        "ベジタリアン": "🥗", "ビーガン": "🌿", "グルテンフリー": "🌾",
+        # 料理種別
+        "メイン": "🍖", "主菜": "🍖", "副菜": "🥗", "おかず": "🍱",
+        "汁物": "🍲", "スープ": "🍲", "サラダ": "🥗",
+        "デザート": "🍰", "スイーツ": "🧁", "お菓子": "🍪",
+        # 調理方法
+        "焼く": "🔥", "煮る": "🍲", "炒める": "🍳", "揚げる": "🍤",
+        "蒸す": "♨️", "茹でる": "💧", "グリル": "🔥", "オーブン": "🔥",
+        # 食材分類
+        "肉料理": "🥩", "魚料理": "🐟", "野菜料理": "🥬", "卵料理": "🥚",
+        "豆腐料理": "🧊", "麺料理": "🍜", "ご飯": "🍚", "パン": "🍞",
+        # 季節・イベント
+        "春": "🌸", "夏": "☀️", "秋": "🍂", "冬": "❄️",
+        "クリスマス": "🎄", "正月": "🎍", "ハロウィン": "🎃",
+        # その他
+        "作り置き": "📦", "お弁当": "🍱", "おつまみ": "🍻",
+        "朝食": "🌅", "昼食": "☀️", "夕食": "🌙", "夜食": "🌙",
+        "子供向け": "👶", "大人向け": "👨", "パーティー": "🎉",
+        "default": "🏷️"
+    }
+
     def __init__(self, data_dir: str = "data"):
         """
         初期化
@@ -55,6 +193,33 @@ class ExportEnhancedService:
 
         # 日本語フォント登録（Noto Sans JP または IPAゴシック）
         self._register_japanese_font()
+
+    def _get_category_icon(self, category: Optional[str]) -> str:
+        """カテゴリーに応じたアイコンを取得"""
+        if not category:
+            return self.CATEGORY_ICONS["default"]
+        return self.CATEGORY_ICONS.get(category, self.CATEGORY_ICONS["default"])
+
+    def _get_ingredient_icon(self, ingredient_name: str) -> str:
+        """材料名に応じたアイコンを取得（長いキーワード優先）"""
+        if not ingredient_name:
+            return self.INGREDIENT_ICONS["default"]
+
+        # 長いキーワードから優先的にマッチング（より具体的な材料名を優先）
+        sorted_keywords = sorted(
+            self.INGREDIENT_ICONS.items(), key=lambda x: len(x[0]), reverse=True
+        )
+
+        for keyword, icon in sorted_keywords:
+            if keyword != "default" and keyword in ingredient_name:
+                return icon
+        return self.INGREDIENT_ICONS["default"]
+
+    def _get_tag_icon(self, tag_name: str) -> str:
+        """タグに応じたアイコンを取得"""
+        if not tag_name:
+            return self.TAG_ICONS["default"]
+        return self.TAG_ICONS.get(tag_name, self.TAG_ICONS["default"])
 
     def _register_japanese_font(self) -> None:
         """日本語フォントを登録"""
@@ -255,64 +420,167 @@ class ExportEnhancedService:
     def _export_markdown(
         self, recipes: List[Dict[str, Any]], options: Dict[str, Any]
     ) -> bytes:
-        """Markdown形式でエクスポート"""
-        md_lines = [
-            "# レシピ集",
-            "",
-            f"エクスポート日時: {datetime.now().strftime('%Y年%m月%d日 %H:%M:%S')}",
-            "",
-            f"レシピ数: {len(recipes)}件",
-            "",
-            "---",
-            "",
-        ]
+        """Markdown形式でエクスポート（アイコン多用・色付き対応）"""
+        # カラースタイル有効化オプション
+        use_colors = options.get("use_colors", True)
+        use_icons = options.get("use_icons", True)
 
-        for recipe in recipes:
-            md_lines.append(f"## {recipe.get('title', '無題')}")
+        if use_colors:
+            md_lines = [
+                "# 🍳 レシピ集",
+                "",
+                f"<div style='color: #666; font-size: 0.9em;'>📅 エクスポート日時: {datetime.now().strftime('%Y年%m月%d日 %H:%M:%S')}</div>",
+                "",
+                f"<div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 10px 20px; border-radius: 8px; display: inline-block;'>",
+                f"📊 レシピ数: <strong>{len(recipes)}件</strong>",
+                "</div>",
+                "",
+                "---",
+                "",
+            ]
+        else:
+            md_lines = [
+                "# 🍳 レシピ集",
+                "",
+                f"📅 **エクスポート日時**: {datetime.now().strftime('%Y年%m月%d日 %H:%M:%S')}",
+                "",
+                f"📊 **レシピ数**: {len(recipes)}件",
+                "",
+                "---",
+                "",
+            ]
+
+        for idx, recipe in enumerate(recipes, 1):
+            # レシピタイトル（カテゴリーに応じたアイコン）
+            title = recipe.get('title', '無題')
+            category = recipe.get('category')
+            category_icon = self._get_category_icon(category) if use_icons else ''
+
+            if use_colors:
+                md_lines.append(f"## <span style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700;'>{category_icon} {title}</span>")
+            else:
+                md_lines.append(f"## {category_icon + ' ' if category_icon else ''}{title}")
             md_lines.append("")
 
             if recipe.get("description"):
-                md_lines.append(recipe.get("description", ""))
+                if use_colors:
+                    md_lines.append(f"<div style='color: #555; font-style: italic; border-left: 4px solid #667eea; padding-left: 16px; margin: 16px 0;'>")
+                    md_lines.append(f"💭 {recipe.get('description', '')}")
+                    md_lines.append("</div>")
+                else:
+                    md_lines.append(f"> 💭 {recipe.get('description', '')}")
                 md_lines.append("")
 
-            # メタ情報
-            meta_info = []
+            # メタ情報（カラフルなバッジ風）
+            meta_items = []
             if recipe.get("cooking_time_minutes"):
-                meta_info.append(f"調理時間: {recipe.get('cooking_time_minutes')}分")
+                time_val = recipe.get('cooking_time_minutes')
+                if use_colors:
+                    meta_items.append(f"<span style='background-color: #FF6B6B; color: white; padding: 4px 12px; border-radius: 16px; font-size: 0.9em;'>⏰ {time_val}分</span>")
+                else:
+                    meta_items.append(f"⏰ 調理時間: {time_val}分")
+
             if recipe.get("servings"):
-                meta_info.append(f"人数: {recipe.get('servings')}人分")
+                serving_val = recipe.get('servings')
+                if use_colors:
+                    meta_items.append(f"<span style='background-color: #4ECDC4; color: white; padding: 4px 12px; border-radius: 16px; font-size: 0.9em;'>👨‍🍳 {serving_val}人分</span>")
+                else:
+                    meta_items.append(f"👨‍🍳 人数: {serving_val}人分")
+
             if recipe.get("category"):
-                meta_info.append(f"カテゴリー: {recipe.get('category')}")
+                cat_val = recipe.get('category')
+                cat_icon = self._get_category_icon(cat_val) if use_icons else '📂'
+                if use_colors:
+                    meta_items.append(f"<span style='background-color: #95E1D3; color: #2d3436; padding: 4px 12px; border-radius: 16px; font-size: 0.9em;'>{cat_icon} {cat_val}</span>")
+                else:
+                    meta_items.append(f"{cat_icon} カテゴリー: {cat_val}")
 
-            if meta_info:
-                md_lines.append(" | ".join(meta_info))
+            if meta_items:
+                md_lines.append(" ".join(meta_items))
                 md_lines.append("")
 
-            # タグ
+            # タグ（カラフルなタグ風・タグ別アイコン）
             if recipe.get("tags"):
-                tags_str = " ".join([f"`{tag}`" for tag in recipe.get("tags", [])])
-                md_lines.append(f"タグ: {tags_str}")
+                md_lines.append("### 🏷️ タグ")
+                md_lines.append("")
+                if use_colors:
+                    tags_html = []
+                    tag_colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DFE6E9"]
+                    for i, tag in enumerate(recipe.get("tags", [])):
+                        color = tag_colors[i % len(tag_colors)]
+                        tag_icon = self._get_tag_icon(tag) if use_icons else ''
+                        tags_html.append(f"<span style='background-color: {color}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; margin-right: 6px;'>{tag_icon} {tag}</span>")
+                    md_lines.append(" ".join(tags_html))
+                else:
+                    tags_with_icons = []
+                    for tag in recipe.get("tags", []):
+                        tag_icon = self._get_tag_icon(tag) if use_icons else ''
+                        tags_with_icons.append(f"{tag_icon} `{tag}`" if tag_icon else f"`{tag}`")
+                    md_lines.append(" ".join(tags_with_icons))
                 md_lines.append("")
 
-            # 材料
-            md_lines.append("### 材料")
+            # 材料（アイコン付き・色分け）
+            if use_colors:
+                md_lines.append("### <span style='color: #FF6B6B;'>🥕 材料</span>")
+            else:
+                md_lines.append("### 🥕 材料")
             md_lines.append("")
+
+            if use_colors:
+                md_lines.append("<div style='background-color: #FFF9E6; border: 1px solid #FFE066; border-radius: 8px; padding: 16px;'>")
+
             for ing in recipe.get("ingredients", []):
                 amount = ing.get("amount", "")
                 unit = ing.get("unit", "")
                 name = ing.get("name", "")
-                md_lines.append(f"- {name} {amount} {unit}".strip())
+                ing_icon = self._get_ingredient_icon(name) if use_icons else '🔸'
+                if use_colors:
+                    md_lines.append(f"- {ing_icon} <span style='color: #2d3436; font-weight: 600;'>{name}</span> <span style='color: #636e72;'>{amount} {unit}</span>".strip())
+                else:
+                    md_lines.append(f"- {ing_icon} {name} {amount} {unit}".strip())
+
+            if use_colors:
+                md_lines.append("</div>")
             md_lines.append("")
 
-            # 手順
-            md_lines.append("### 手順")
-            md_lines.append("")
-            for idx, step in enumerate(recipe.get("steps", []), 1):
-                md_lines.append(f"{idx}. {step}")
+            # 手順（番号付き・アイコン強調）
+            if use_colors:
+                md_lines.append("### <span style='color: #4ECDC4;'>📝 手順</span>")
+            else:
+                md_lines.append("### 📝 手順")
             md_lines.append("")
 
-            md_lines.append("---")
+            if use_colors:
+                md_lines.append("<div style='background-color: #E8F5FF; border: 1px solid #74B9FF; border-radius: 8px; padding: 16px;'>")
+
+            for step_idx, step in enumerate(recipe.get("steps", []), 1):
+                if use_colors:
+                    md_lines.append(f"<div style='margin-bottom: 12px;'>")
+                    md_lines.append(f"<span style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 50%; font-weight: bold; margin-right: 8px;'>{step_idx}</span>")
+                    md_lines.append(f"<span style='color: #2d3436;'>{step}</span>")
+                    md_lines.append("</div>")
+                else:
+                    md_lines.append(f"{step_idx}. ▶️ {step}")
+
+            if use_colors:
+                md_lines.append("</div>")
             md_lines.append("")
+
+            # 区切り線
+            if use_colors:
+                md_lines.append("<hr style='border: none; height: 2px; background: linear-gradient(to right, #667eea, #764ba2); margin: 32px 0;' />")
+            else:
+                md_lines.append("---")
+            md_lines.append("")
+
+        # フッター
+        if use_colors:
+            md_lines.extend([
+                "",
+                "<div style='text-align: center; color: #95a5a6; font-size: 0.85em; margin-top: 32px;'>",
+                "✨ Powered by Personal Recipe Intelligence ✨",
+                "</div>",
+            ])
 
         markdown_content = "\n".join(md_lines)
         return markdown_content.encode("utf-8")

@@ -18,6 +18,7 @@ from backend.api.routers import (
 )
 from backend.api.routers.csv_import import router as csv_import_router
 from backend.api.routers.collector import router as collector_router
+from backend.api.routers.export_enhanced import router as export_enhanced_router
 
 app = FastAPI(
     title="Personal Recipe Intelligence API",
@@ -55,6 +56,7 @@ app.include_router(cache_router)
 app.include_router(csv_import_router)
 app.include_router(collector_router)
 app.include_router(shopping_list_router)
+app.include_router(export_enhanced_router)
 
 
 @app.get("/")

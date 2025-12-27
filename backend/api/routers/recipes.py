@@ -478,40 +478,104 @@ async def get_recipe_image(filename: str):
 # ===========================================
 # Markdown Export
 # ===========================================
-def _recipe_to_markdown(recipe) -> str:
-    """レシピをMarkdown形式に変換"""
+def _recipe_to_markdown(recipe, use_icons: bool = True) -> str:
+    """レシピをMarkdown形式に変換（アイコン対応）"""
+    # アイコンマッピング（日本語・英語対応）
+    INGREDIENT_ICONS = {
+        # 日本語
+        "豆腐": "🧊", "わかめ": "🥬", "味噌": "🫙", "だし": "🍲",
+        "ご飯": "🍚", "卵": "🥚", "たまご": "🥚", "玉子": "🥚",
+        "鶏肉": "🍗", "玉ねぎ": "🧅", "たまねぎ": "🧅", "タマネギ": "🧅",
+        "ケチャップ": "🍅", "豚肉": "🥓", "にんじん": "🥕", "人参": "🥕",
+        "じゃがいも": "🥔", "カレールー": "🍛", "牛肉": "🥩", "合挽き肉": "🍖",
+        "パン粉": "🍞", "塩": "🧂", "醤油": "🫙", "ニンニク": "🧄", "生姜": "🫚",
+        "バジル": "🌿", "パスタ": "🍝", "トマト": "🍅",
+        # 英語・カタカナ
+        "chicken": "🍗", "チキン": "🍗", "beef": "🥩", "ビーフ": "🥩",
+        "pork": "🥓", "ポーク": "🥓", "meat": "🥩", "ミート": "🥩",
+        "egg": "🥚", "onion": "🧅", "オニオン": "🧅",
+        "tomato": "🍅", "carrot": "🥕", "キャロット": "🥕",
+        "potato": "🥔", "ポテト": "🥔",
+        "garlic": "🧄", "ガーリック": "🧄",
+        "ginger": "🫚", "ジンジャー": "🫚",
+        "basil": "🌿", "バジル": "🌿",
+        "pasta": "🍝", "olive oil": "🫒", "オリーブオイル": "🫒",
+        "oil": "🫙", "オイル": "🫙", "salt": "🧂", "ソルト": "🧂",
+        "pepper": "🧂", "ペッパー": "🧂", "sugar": "🧂", "シュガー": "🧂",
+        "flour": "🌾", "小麦粉": "🌾", "フラワー": "🌾",
+        "butter": "🧈", "バター": "🧈",
+        "cheese": "🧀", "チーズ": "🧀", "チェダーチーズ": "🧀",
+        "milk": "🥛", "ミルク": "🥛", "cream": "🥛", "クリーム": "🥛",
+        "vinegar": "🫙", "ビネガー": "🫙",
+        "honey": "🍯", "はちみつ": "🍯", "ハチミツ": "🍯",
+        "avocado": "🥑", "アボカド": "🥑",
+        "mango": "🥭", "マンゴー": "🥭",
+        "lemon": "🍋", "レモン": "🍋", "lime": "🍋", "ライム": "🍋",
+        "mushroom": "🍄", "マッシュルーム": "🍄",
+        "corn": "🌽", "コーン": "🌽", "とうもろこし": "🌽",
+        "tofu": "🧊", "rice": "🍚", "ライス": "🍚",
+        "bread": "🍞", "ブレッド": "🍞",
+        "water": "💧", "ウォーター": "💧",
+        "wine": "🍷", "ワイン": "🍷", "beer": "🍺", "ビール": "🍺",
+    }
+    TAG_ICONS = {
+        # 日本語
+        "和食": "🍱", "洋食": "🍝", "中華": "🥟", "簡単": "⭐",
+        "時短": "⚡", "人気": "❤️", "メイン": "🍖", "汁物": "🍲", "定番": "👍",
+        # 英語
+        "lunch": "🍱", "dinner": "🍽️", "main course": "🍖", "main dish": "🍖",
+        "dessert": "🍰", "breakfast": "🌅", "salad": "🥗", "soup": "🍲",
+    }
+
+    def get_ing_icon(name):
+        for key, icon in sorted(INGREDIENT_ICONS.items(), key=lambda x: len(x[0]), reverse=True):
+            if key in name:
+                return icon
+        return "🔸"
+
+    def get_tag_icon(name):
+        return TAG_ICONS.get(name, "🏷️")
+
     lines = []
 
-    # タイトル
-    lines.append(f"# {recipe.title}")
+    # タイトル（アイコン付き）
+    lines.append(f"# 🍽️ {recipe.title}")
     lines.append("")
 
     # メタ情報
     if recipe.description:
-        lines.append(f"> {recipe.description}")
+        lines.append(f"> 💭 {recipe.description}")
         lines.append("")
 
-    # 基本情報テーブル
-    lines.append("| 項目 | 値 |")
-    lines.append("|------|-----|")
+    # 基本情報（アイコン付き）
+    meta_items = []
+    total_time = (recipe.prep_time_minutes or 0) + (recipe.cook_time_minutes or 0)
+    if total_time > 0:
+        meta_items.append(f"⏰ **{total_time}分**")
     if recipe.servings:
-        lines.append(f"| 人前 | {recipe.servings}人前 |")
-    if recipe.prep_time_minutes:
-        lines.append(f"| 準備時間 | {recipe.prep_time_minutes}分 |")
-    if recipe.cook_time_minutes:
-        lines.append(f"| 調理時間 | {recipe.cook_time_minutes}分 |")
-    lines.append(f"| ソース | {recipe.source_type} |")
-    lines.append("")
+        meta_items.append(f"👨‍🍳 **{recipe.servings}人分**")
+    if recipe.source_type:
+        source_icons = {"manual": "✍️", "spoonacular": "🌍", "web": "🌐", "ocr": "📷"}
+        icon = source_icons.get(recipe.source_type, "📄")
+        meta_items.append(f"{icon} **{recipe.source_type}**")
 
-    # タグ
+    if meta_items:
+        lines.append(" | ".join(meta_items))
+        lines.append("")
+
+    # タグ（アイコン付き）
     if recipe.tags:
         tag_names = [rt.tag.name for rt in recipe.tags if rt.tag]
         if tag_names:
-            lines.append(f"**タグ**: {', '.join(tag_names)}")
+            if use_icons:
+                tag_items = [f"{get_tag_icon(tag)} `{tag}`" for tag in tag_names]
+                lines.append(f"**タグ**: {' '.join(tag_items)}")
+            else:
+                lines.append(f"**タグ**: {', '.join(tag_names)}")
             lines.append("")
 
-    # 材料
-    lines.append("## 材料")
+    # 材料（アイコン付き）
+    lines.append("### 🥕 材料")
     lines.append("")
     if recipe.ingredients:
         for ing in sorted(recipe.ingredients, key=lambda x: x.order):
@@ -521,17 +585,26 @@ def _recipe_to_markdown(recipe) -> str:
             if ing.unit:
                 amount_str += ing.unit
             note_str = f" ({ing.note})" if ing.note else ""
-            lines.append(f"- {ing.name} {amount_str}{note_str}")
+
+            if use_icons:
+                icon = get_ing_icon(ing.name)
+                lines.append(f"- **{icon} {ing.name}** - {amount_str}{note_str}".strip())
+            else:
+                lines.append(f"- {ing.name} {amount_str}{note_str}")
     else:
         lines.append("_材料が登録されていません_")
     lines.append("")
 
-    # 手順
-    lines.append("## 手順")
+    # 手順（番号絵文字付き）
+    lines.append("### 📝 手順")
     lines.append("")
     if recipe.steps:
+        step_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
         for i, step in enumerate(sorted(recipe.steps, key=lambda x: x.order), 1):
-            lines.append(f"{i}. {step.description}")
+            if use_icons and i <= len(step_emojis):
+                lines.append(f"{step_emojis[i-1]} {step.description}")
+            else:
+                lines.append(f"{i}. {step.description}")
     else:
         lines.append("_手順が登録されていません_")
     lines.append("")

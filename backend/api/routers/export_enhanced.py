@@ -6,6 +6,7 @@
 
 import asyncio
 import json
+import sqlite3
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -406,3 +407,212 @@ async def list_backups():
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list backups: {str(e)}")
+
+
+def _load_recipes_from_database(
+    recipe_ids: Optional[List[int]] = None, limit: Optional[int] = None
+) -> List[Dict[str, Any]]:
+    """
+    データベースからレシピを読み込み
+
+    Args:
+        recipe_ids: レシピIDリスト（Noneの場合は全レシピ）
+        limit: 取得件数制限
+
+    Returns:
+        レシピデータのリスト
+    """
+    conn = sqlite3.connect("data/db/database.db")
+    cursor = conn.cursor()
+
+    # レシピ基本情報取得
+    if recipe_ids:
+        placeholders = ",".join(["?" for _ in recipe_ids])
+        query = f"SELECT id, title, description, servings, prep_time_minutes, cook_time_minutes, source_type FROM recipe WHERE id IN ({placeholders}) ORDER BY id DESC"
+        cursor.execute(query, recipe_ids)
+    else:
+        query = "SELECT id, title, description, servings, prep_time_minutes, cook_time_minutes, source_type FROM recipe ORDER BY id DESC"
+        if limit:
+            query += f" LIMIT {limit}"
+        cursor.execute(query)
+
+    recipes_raw = cursor.fetchall()
+    recipes = []
+
+    for r in recipes_raw:
+        recipe_id, title, desc, servings, prep_time, cook_time, source = r
+
+        # 材料取得
+        cursor.execute(
+            "SELECT name, amount, unit FROM ingredient WHERE recipe_id = ?", (recipe_id,)
+        )
+        ingredients = [
+            {"name": i[0], "amount": str(i[1]) if i[1] else "", "unit": i[2] or ""}
+            for i in cursor.fetchall()
+        ]
+
+        # 手順取得
+        cursor.execute(
+            'SELECT description FROM step WHERE recipe_id = ? ORDER BY "order"',
+            (recipe_id,),
+        )
+        steps = [s[0] for s in cursor.fetchall()]
+
+        # タグ取得
+        cursor.execute(
+            """
+            SELECT t.name FROM tag t
+            JOIN recipetag rt ON t.id = rt.tag_id
+            WHERE rt.recipe_id = ?
+        """,
+            (recipe_id,),
+        )
+        tags = [t[0] for t in cursor.fetchall()]
+
+        recipes.append(
+            {
+                "id": recipe_id,
+                "title": title,
+                "description": desc,
+                "servings": servings,
+                "cooking_time_minutes": (prep_time or 0) + (cook_time or 0)
+                if (prep_time or cook_time)
+                else None,
+                "source_type": source,
+                "ingredients": ingredients,
+                "steps": steps,
+                "tags": tags,
+            }
+        )
+
+    conn.close()
+    return recipes
+
+
+@router.get("/recipes-markdown")
+async def export_all_recipes_markdown(
+    limit: Optional[int] = None,
+    use_colors: bool = True,
+    use_icons: bool = True,
+):
+    """
+    全レシピをMarkdown形式でエクスポート（データベース版）
+
+    Args:
+        limit: 取得件数制限（指定なしで全件）
+        use_colors: 色付きHTML使用
+        use_icons: アイコン使用
+
+    Returns:
+        Markdownファイル
+    """
+    try:
+        # データベースからレシピ取得
+        recipes = await asyncio.to_thread(_load_recipes_from_database, None, limit)
+
+        if not recipes:
+            raise HTTPException(status_code=404, detail="No recipes found")
+
+        # Markdownエクスポート
+        options = {"use_colors": use_colors, "use_icons": use_icons}
+        data = export_service.export_recipes(
+            recipes=recipes, format_type="markdown", options=options
+        )
+
+        # ファイル名生成
+        from datetime import datetime
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"recipes_{timestamp}.md"
+
+        return Response(
+            content=data,
+            media_type="text/markdown; charset=utf-8",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"',
+            },
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Export failed: {str(e)}"
+        )
+
+
+@router.get("/recipes-html")
+async def export_all_recipes_html(
+    limit: Optional[int] = None,
+    use_colors: bool = True,
+    use_icons: bool = True,
+):
+    """
+    全レシピをHTML形式でエクスポート（絵文字完全対応）
+
+    Args:
+        limit: 取得件数制限
+        use_colors: 色付き使用
+        use_icons: アイコン使用
+
+    Returns:
+        HTMLファイル
+    """
+    try:
+        # データベースからレシピ取得
+        recipes = await asyncio.to_thread(_load_recipes_from_database, None, limit)
+
+        if not recipes:
+            raise HTTPException(status_code=404, detail="No recipes found")
+
+        # Markdownエクスポート
+        options = {"use_colors": use_colors, "use_icons": use_icons}
+        md_data = export_service.export_recipes(
+            recipes=recipes, format_type="markdown", options=options
+        )
+
+        # HTMLラッパー
+        md_content = md_data.decode("utf-8")
+        html_template = f"""<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>レシピ集</title>
+    <style>
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Segoe UI Emoji',
+                         'Segoe UI Symbol', 'Noto Color Emoji', 'Hiragino Sans', sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background: #f5f5f5;
+            line-height: 1.8;
+        }}
+        h1 {{ color: #333; font-size: 2.5em; margin-bottom: 30px; }}
+        h2 {{ color: #444; margin-top: 50px; font-size: 2em; border-left: 5px solid #764ba2; padding-left: 15px; }}
+        h3 {{ color: #555; font-size: 1.5em; margin-top: 30px; }}
+        code {{ background: #f0f0f0; padding: 3px 8px; border-radius: 4px; }}
+        ul {{ padding-left: 20px; }}
+        li {{ margin: 10px 0; font-size: 1.1em; }}
+    </style>
+</head>
+<body>
+{md_content}
+</body>
+</html>"""
+
+        # ファイル名生成
+        from datetime import datetime
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"recipes_{timestamp}.html"
+
+        return Response(
+            content=html_template.encode("utf-8"),
+            media_type="text/html; charset=utf-8",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"',
+            },
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")

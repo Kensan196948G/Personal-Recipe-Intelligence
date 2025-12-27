@@ -80,6 +80,47 @@
     dispatch('collector');
   }
 
+  async function handleExportMarkdown() {
+    try {
+      // 色なし・アイコン必須
+      const response = await fetch('/api/v1/export/recipes-markdown?use_colors=false&use_icons=true');
+      if (!response.ok) throw new Error('Export failed');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `recipes_${new Date().toISOString().slice(0,10)}.md`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (e) {
+      console.error('Export failed:', e);
+      alert('エクスポートに失敗しました');
+    }
+  }
+
+  async function handleExportHTML() {
+    try {
+      const response = await fetch('/api/v1/export/recipes-html?use_colors=true&use_icons=true');
+      if (!response.ok) throw new Error('Export failed');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `recipes_${new Date().toISOString().slice(0,10)}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (e) {
+      console.error('Export failed:', e);
+      alert('エクスポートに失敗しました');
+    }
+  }
+
   function setViewMode(mode) {
     viewMode = mode;
   }
@@ -187,6 +228,22 @@
       </div>
 
       <div class="action-buttons">
+        <button class="btn-export-html" on:click={handleExportHTML} title="色付きHTML形式でエクスポート">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          HTML
+        </button>
+        <button class="btn-export-md" on:click={handleExportMarkdown} title="アイコン付きMarkdown形式でエクスポート">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          MD
+        </button>
         <button class="btn-collector" on:click={handleCollector}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
             <circle cx="12" cy="12" r="10"/>
@@ -474,6 +531,40 @@
 
   .btn-collector:hover {
     background: #218838;
+  }
+
+  .btn-export-html {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(17, 153, 142, 0.3);
+  }
+
+  .btn-export-html:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(17, 153, 142, 0.4);
+  }
+
+  .btn-export-md {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  }
+
+  .btn-export-md:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
   }
 
   .loading {
