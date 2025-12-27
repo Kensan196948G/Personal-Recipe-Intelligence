@@ -422,7 +422,15 @@ def _load_recipes_from_database(
     Returns:
         レシピデータのリスト
     """
-    conn = sqlite3.connect("data/db/database.db")
+    # 環境変数またはデフォルト設定からDBパスを取得
+    import os
+    db_path = os.getenv("DATABASE_URL", "sqlite:///./data/pri.db")
+    # SQLite接続用にsqlite:///プレフィックスを削除
+    db_path = db_path.replace("sqlite:///", "").replace("sqlite://", "")
+    if db_path.startswith("./"):
+        db_path = db_path[2:]
+
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
     # レシピ基本情報取得
